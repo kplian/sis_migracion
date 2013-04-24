@@ -1,0 +1,71 @@
+CREATE OR REPLACE FUNCTION migracion.f_trans_tproveedor (
+  v_operacion varchar,
+  v_id_gestion integer,
+  v_id_empresa integer,
+  v_id_moneda_base integer,
+  v_gestion numeric,
+  v_estado_ges_gral varchar
+)
+RETURNS boolean AS
+$body$
+DECLARE
+ 
+g_registros record;
+v_consulta varchar;
+v_res_cone  varchar;
+v_cadena_cnx varchar;
+v_cadena_con varchar;
+resp boolean;
+
+BEGIN
+
+
+          --funcion para obtener cadena de conexion
+          v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+      
+          --cadena pata la llamada a la funcion de insercion
+      
+         --previamente se tranforman los datos
+    
+          v_consulta = 'select param.f_on_trig_tgestion ('''||v_operacion::varchar||''','||COALESCE(v_id_gestion::varchar,'NULL')||',
+                                                    '||COALESCE(v_gestion::varchar,'NULL')||',
+                                                    '||COALESCE(''''||v_estado_ges_gral::varchar||'''','NULL')||',--v_estado
+                                                    NULL,
+                                                     '||COALESCE(v_id_empresa::varchar,'NULL')||',
+  													 NULL)';
+       
+ 
+  
+          resp =  sss.f_probar_con_dblink(v_cadena_cnx);
+            
+            IF(not resp) THEN
+            
+             	--modificar bandera de fallo  
+                 raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+                 
+             ELSE
+             
+             
+                 PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+                  raise notice '%',v_cadena_con;
+              
+                 
+             
+                raise notice 'PASA al final de la funcion';
+                
+                
+                v_res_cone=(select dblink_disconnect());
+            
+            END IF;
+            
+                   
+            
+            
+            RETURN TRUE;
+
+END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

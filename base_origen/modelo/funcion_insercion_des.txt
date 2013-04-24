@@ -1,0 +1,94 @@
+CREATE OR REPLACE FUNCTION param.f_on_trig_tgestion (
+  v_operacion varchar,
+  v_id_gestion integer,
+  v_gestion integer,
+  v_estado varchar,
+  v_id_moneda_base integer,
+  v_id_empresa integer,
+  v_id_usuario_reg integer
+)
+RETURNS text AS
+$body$
+/*
+Function:  Para migracion de la tabla param.tgestion
+Fecha Creacion:  12/01/2013
+Autor: RAC
+
+
+
+*/
+
+DECLARE
+
+BEGIN
+
+    if(v_operacion = 'INSERT') THEN
+
+          INSERT INTO 
+            param.tgestion
+          (
+            id_gestion,
+            id_usuario_reg,
+            id_usuario_mod,
+            fecha_reg,
+            fecha_mod,
+            estado_reg,
+            --id_gestion,
+            gestion,
+            estado,
+            id_moneda_base,
+            id_empresa
+          ) 
+          VALUES (
+            v_id_gestion,
+            v_id_usuario_reg,
+            NULL,
+            now(),
+            NULL,
+            'activo',
+           -- v_id_gestion,
+            v_gestion,
+            v_estado,
+            v_id_moneda_base,
+            v_id_empresa
+          );
+   
+       ELSEIF  v_operacion = 'UPDATE' THEN
+               UPDATE 
+                  param.tgestion  
+                SET 
+                  
+                 -- id_usuario_mod = :id_usuario_mod,
+                 -- fecha_reg = :fecha_reg,
+                 -- fecha_mod = :fecha_mod,
+                 -- estado_reg = :estado_reg,
+                  gestion = v_gestion,
+                  estado = v_estado,
+                  id_moneda_base = v_id_moneda_base,
+                  id_empresa = v_id_empresa
+                 
+                WHERE 
+                  id_gestion = v_id_gestion;
+       
+       ELSEIF  v_operacion = 'DELETE' THEN
+       
+         DELETE FROM 
+              param.tgestion 
+            WHERE 
+              id_gestion = v_id_gestion;
+       
+       END IF;  
+  
+ return 'true';
+
+-- statements;
+--EXCEPTION
+--WHEN exception_name THEN
+--  statements;
+END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

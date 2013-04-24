@@ -1,0 +1,4 @@
+CREATE TRIGGER tr_tgestion
+  AFTER INSERT OR UPDATE OR DELETE 
+  ON param.tpm_gestion FOR EACH ROW 
+  EXECUTE PROCEDURE public.f_tri_tgestion_ime('sincronizado');
