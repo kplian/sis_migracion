@@ -1,4 +1,1 @@
-
-DROP SCHEMA IF EXISTS migra CASCADE;
-
-CREATE SCHEMA migra AUTHORIZATION postgres;
+migra
