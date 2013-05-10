@@ -1,4 +1,4 @@
-﻿CREATE OR REPLACE FUNCTION migracion.f_trans_tpm_institucion_tinstitucion (
+CREATE OR REPLACE FUNCTION migracion.f_trans_tpm_institucion_tinstitucion (
   v_operacion varchar,
   p_id_institucion integer,
   p_id_persona integer,
@@ -21,7 +21,8 @@
   p_observaciones text,
   p_pag_web varchar,
   p_telefono1 varchar,
-  p_telefono2 varchar
+  p_telefono2 varchar,
+  p_codigo varchar
 )
 RETURNS varchar [] AS
 $body$
@@ -61,7 +62,6 @@ DECLARE
 			v_pag_web varchar;
 			v_telefono1 varchar;
 			v_telefono2 varchar;
-            v_nombre_largo varchar;
 BEGIN
 			
 			
@@ -73,10 +73,9 @@ BEGIN
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
 			
-			v_nombre_largo := substr(split_part(ltrim(p_nombre),' ',1),0,11)||substr(split_part(ltrim(p_nombre),' ',2),0,5)||substr(split_part(ltrim(p_nombre),' ',3),0,4)||substr(split_part(ltrim(p_nombre),' ',4),0,4)||substr(split_part(ltrim(p_nombre),' ',5),0,4);
-            
-			v_codigo=convert(v_nombre_largo::varchar, 'LATIN1', 'UTF8');
-			v_id_institucion=p_id_institucion::int4;
+			
+            v_codigo=convert(p_codigo::varchar,'LATIN1','UTF8');
+            v_id_institucion=p_id_institucion::int4;
 			v_id_persona=p_id_persona::int4;
 			v_cargo_representante=convert(NULL::varchar, 'LATIN1', 'UTF8');
 			v_casilla=convert(p_casilla::varchar, 'LATIN1', 'UTF8');

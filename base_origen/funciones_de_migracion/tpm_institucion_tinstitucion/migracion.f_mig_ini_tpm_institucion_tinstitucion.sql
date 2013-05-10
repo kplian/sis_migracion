@@ -1,4 +1,4 @@
-﻿CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion (
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion (
 )
 RETURNS boolean AS
 $body$
@@ -57,7 +57,8 @@ $body$
 						observaciones,
 						pag_web,
 						telefono1,
-						telefono2
+						telefono2,
+                        codigo
 FROM 
 						          PARAM.tpm_institucion) LOOP
 						        
@@ -86,6 +87,7 @@ FROM
 					,g_registros.pag_web
 					,g_registros.telefono1
 					,g_registros.telefono2
+                    ,g_registros.codigo
 					);	
 					
 					
