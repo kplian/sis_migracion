@@ -1,8 +1,18 @@
 CREATE OR REPLACE FUNCTION migracion.f_trans_tkp_historico_asignacion_tuo_funcionario (
-			  v_operacion varchar,p_id_historico_asignacion int4,p_id_empleado int4,p_id_unidad_organizacional int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_estado varchar,p_fecha_asignacion date,p_fecha_finalizacion date,p_fecha_registro date,p_fecha_ultima_mod timestamp)
-			RETURNS varchar [] AS
-			$BODY$
-
+  v_operacion varchar,
+  p_id_historico_asignacion integer,
+  p_id_empleado integer,
+  p_id_unidad_organizacional integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_estado varchar,
+  p_fecha_asignacion date,
+  p_fecha_finalizacion date,
+  p_fecha_registro date,
+  p_fecha_ultima_mod timestamp
+)
+RETURNS varchar [] AS
+$body$
 DECLARE
 			 
 			g_registros record;
@@ -36,6 +46,8 @@ BEGIN
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
 
+			           
+			v_id_uo_funcionario=p_id_historico_asignacion::int4;
 			v_id_funcionario=p_id_empleado::int4;
 			v_id_uo=p_id_unidad_organizacional::int4;
 			v_estado_reg=convert(p_estado::varchar, 'LATIN1', 'UTF8');
@@ -44,8 +56,8 @@ BEGIN
 			v_fecha_mod=p_fecha_ultima_mod::timestamp;
 			v_fecha_reg=p_fecha_registro::timestamp;
 			v_id_usuario_mod=p_id_usuario_mod::int4;
-            v_id_usuario_reg=p_id_usuario_reg::int4;
-            
+			v_id_usuario_reg=p_id_usuario_reg::int4;
+ 
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
 			        
@@ -85,9 +97,8 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
-			$BODY$
-
+$body$
 LANGUAGE 'plpgsql'
-			VOLATILE
-			CALLED ON NULL INPUT
-			SECURITY INVOKER;
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;
