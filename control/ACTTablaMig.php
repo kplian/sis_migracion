@@ -99,7 +99,7 @@ class ACTTablaMig extends ACTbase{
 		///////////////////////////////////
 		//Prepara consulta columnas origen
 		///////////////////////////////////
-		$this->objParam = new CTParametro('{}',null,null);
+		$this->objParam = new CTParametro('{}',null,null,null);
 		$this->objParam->addParametroConsulta('ordenacion','checks desc, columna asc');
 		$this->objParam->addParametroConsulta('dir_ordenacion','');
 		$this->objParam->addParametroConsulta('puntero','0');
@@ -117,7 +117,7 @@ class ACTTablaMig extends ACTbase{
 		///////////////////////////////////
 		//Prepara consulta columnas destino
 		///////////////////////////////////
-		$this->objParam = new CTParametro('{}',null,null);
+		$this->objParam = new CTParametro('{}',null,null,null);
 		$this->objParam->addParametroConsulta('ordenacion','checks desc, columna asc');
 		$this->objParam->addParametroConsulta('dir_ordenacion','');
 		$this->objParam->addParametroConsulta('puntero','0');
