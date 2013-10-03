@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_cuenta_tcuenta (
   v_operacion varchar,
   p_id_cuenta integer,
@@ -25,7 +27,7 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_cuenta_tcuenta (
   p_nro_cuenta varchar,
   p_obs varchar,
   p_plantilla varchar,
-  p_sw_auxiliar integer,
+  p_sw_auxiliar varchar,
   p_sw_oec integer,
   p_sw_sigma varchar,
   p_sw_sistema_actualizacion varchar,

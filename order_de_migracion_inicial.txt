@@ -1,0 +1,69 @@
+--sincronizar
+SELECT * FROM migracion.f_sincronizacion();
+
+
+--MIGRACIN DEGESTION
+SELECT * FROM migracion.f_mig_ini_tpm_gestion_tgestion();
+SELECT * FROM migracion.f_mig_ini_tpm_periodo_tperiodo();
+
+--MIGRACION DE DATOS BASICOS
+
+SELECT * FROM migracion.f_mig_ini_tsg_persona_tpersona();
+SELECT * FROM migracion.f_mig_ini_tpm_institucion_tinstitucion();
+SELECT * FROM migracion.f_mig_ini_tsg_usuario_tusuario();
+SELECT * FROM migracion.f_mig_ini_tad_proveedor_tproveedor();
+
+SELECT * FROM migracion.f_mig_ini_tpm_empresa_tempresa();
+SELECT * FROM migracion.f_mig_ini_tsg_lugar_tlugar();
+
+
+--MIGRACION DE MONEA
+SELECT * FROM migracion.f_mig_ini_tpm_moneda_tmoneda();
+SELECT * FROM migracion.f_mig_ini_tpm_tipo_cambio_ttipo_cambio();
+
+--MIGRACION DE EP
+
+SELECT * FROM migracion.f_mig_ini_tpm_financiador_tfinanciador();
+SELECT * FROM migracion.f_mig_ini_tpm_regional_tregional();
+SELECT * FROM migracion.f_mig_ini_tpm_programa_tprograma();
+SELECT * FROM migracion.f_mig_ini_tpm_proyecto_tproyecto();
+SELECT * FROM migracion.f_mig_ini_tpm_actividad_tactividad();
+SELECT * FROM migracion.f_mig_ini_tpm_programa_proyecto_actividad_tprograma_proyecto_ac();
+SELECT * FROM migracion.f_mig_ini_tpm_fina_regi_prog_proy_acti_tep();
+
+
+SELECT * FROM migracion.f_mig_ini_tsg_asignacion_estructura_tgrupo();
+SELECT * FROM migracion.f_mig_ini_tsg_asignacion_estructura_tpm_frppa_tgrupo_ep();
+
+SELECT * FROM migracion.f_mig_ini_tsg_usuario_asignacion_tusuario_grupo_ep();
+
+
+
+
+SELECT * FROM migracion.f_mig_ini_tct_plantilla_tplantilla();
+
+--RECURSOS HUMANOS
+
+SELECT * FROM migracion.f_mig_ini_tkp_empleado_tfuncionario();
+SELECT * FROM migracion.f_mig_ini_tkp_unidad_organizacional_tuo();
+SELECT * FROM migracion.f_mig_ini_tkp_estructura_organizacional_testructura_uo();
+SELECT * FROM migracion.f_mig_ini_tkp_historico_asignacion_tuo_funcionario();
+
+
+
+--MIGRACION DE PRESUPUESTOS
+
+SELECT * FROM migracion.f_mig_ini_tpr_presupuesto_tcentro_costo()
+
+SELECT * FROM migracion.f_mig_ini_tct_cuenta_tcuenta();
+SELECT * FROM migracion.f_mig_ini_tct_auxiliar_tauxiliar();
+SELECT * FROM migracion.f_mig_ini_tpr_partida_tpartida();
+
+SELECT * FROM migracion.f_mig_ini_tct_orden_trabajo_torden_trabajo();
+
+
+
+
+
+SELECT * FROM migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_ingas();
+SELECT * FROM migracion.f_mig_ini_tpr_concepto_cta_tconcepto_cta();
