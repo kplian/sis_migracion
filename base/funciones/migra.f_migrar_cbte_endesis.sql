@@ -6,7 +6,7 @@ $body$
 /*
 Autor: RCM
 Fecha: 24/09/2013
-Descripción: Migrar el comprobante generado en PXP a ENDESIS utilizando dblink
+Descripción: Migrar el comprobante generado en PXP a ENDESIS utilizando dblink entre las bases de datos
 */
 DECLARE
 
