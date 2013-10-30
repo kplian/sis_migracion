@@ -136,8 +136,8 @@ BEGIN
                 '||COALESCE(('array['|| array_to_string(va_id_cuenta, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['|| array_to_string(va_id_auxiliar, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['|| array_to_string(va_id_centro_costo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_partida, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_partida_ejecucion, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
+                '||COALESCE(('array['|| array_to_string(va_id_partida, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
+                '||COALESCE(('array['|| pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','))||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['''|| array_to_string(va_glosa, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
                 '||COALESCE(('array['|| array_to_string(va_importe_debe, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',
                 '||COALESCE(('array['|| array_to_string(va_importe_haber, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',
@@ -147,6 +147,8 @@ BEGIN
                 ''''||coalesce(v_rec.codigo_clase_cbte,'') ||''','||'
                 '||COALESCE(('array['|| array_to_string(va_id_uo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['|| array_to_string(va_id_ep, ',')||']::integer[]')::varchar,'NULL::integer[]')||') ';
+                
+                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>FASS: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
 
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
