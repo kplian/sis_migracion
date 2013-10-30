@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_ingas (
 )
 RETURNS boolean AS
@@ -44,8 +46,11 @@ $body$
 						desc_ingas,
 						fecha_reg,
 						id_usr_reg,
-						sw_tesoro
-FROM 
+						sw_tesoro,
+                        almacenable,
+                        tipo,
+                        activo_fijo
+                        FROM 
 						          PRESTO.tpr_concepto_ingas) LOOP
 						        
 						        -- inserta en el destino
@@ -60,6 +65,9 @@ FROM
 					,g_registros.fecha_reg
 					,g_registros.id_usr_reg
 					,g_registros.sw_tesoro
+                    ,g_registros.activo_fijo
+                    ,g_registros.tipo
+                    ,g_registros.almacenable
 					);	
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];

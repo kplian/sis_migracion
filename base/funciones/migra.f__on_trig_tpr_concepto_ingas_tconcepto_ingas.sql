@@ -14,7 +14,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_concepto_ingas_tconcepto_ingas (
   p_id_usuario_reg integer,
   p_sw_tesoro integer,
   p_tipo varchar,
-  p_id_partida integer
+  p_id_partida integer,
+  p_activo_fijo varchar,
+  p_almacenable varchar
 )
 RETURNS text AS
 $body$
@@ -42,7 +44,9 @@ $body$
 						id_usuario_mod,
 						id_usuario_reg,
 						sw_tes,
-						tipo)
+						tipo,
+                        activo_fijo,
+                        almacenable)
 				VALUES (
 						p_id_concepto_ingas,
 						p_desc_ingas,
@@ -53,7 +57,9 @@ $body$
 						p_id_usuario_mod,
 						p_id_usuario_reg,
 						p_sw_tesoro,
-						p_tipo);
+						p_tipo,
+                        p_activo_fijo,
+                        p_almacenable);
 				--insercion a la tabla tconcepto_partida                        
                 INSERT INTO pre.tconcepto_partida(
                         id_concepto_partida,
@@ -82,6 +88,8 @@ $body$
                    ,id_usuario_reg=p_id_usuario_reg
                    ,sw_tes=p_sw_tesoro
                    ,tipo=p_tipo
+                   ,activo_fijo=p_activo_fijo
+                   ,almacenable=p_almacenable
                    WHERE id_concepto_ingas=p_id_concepto_ingas;
                          
 				--actualizacion de la tabla tconcepto_partida
