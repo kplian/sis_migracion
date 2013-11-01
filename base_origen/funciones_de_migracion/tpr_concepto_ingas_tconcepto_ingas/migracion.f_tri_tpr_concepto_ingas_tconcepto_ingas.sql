@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migracion.f_tri_tpr_concepto_ingas_tconcepto_ingas (
 )
 RETURNS trigger AS
@@ -15,10 +17,10 @@ DECLARE
 		   IF(TG_OP = 'INSERT' or  TG_OP ='UPDATE' ) THEN
 		   
 			 v_consulta =  'SELECT migracion.f_trans_tpr_concepto_ingas_tconcepto_ingas (
-                  '''||TG_OP::varchar||''','||COALESCE(NEW.id_concepto_ingas::varchar,'NULL')||','||COALESCE(NEW.id_item::varchar,'NULL')||','||COALESCE(NEW.id_oec::varchar,'NULL')||','||COALESCE(NEW.id_partida::varchar,'NULL')||','||COALESCE(NEW.id_servicio::varchar,'NULL')||','||COALESCE(''''||NEW.desc_ingas::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_reg::varchar||'''','NULL')||','||COALESCE(NEW.id_usr_reg::varchar,'NULL')||','||COALESCE(NEW.sw_tesoro::varchar,'NULL')||') as res';				  
+                  '''||TG_OP::varchar||''','||COALESCE(NEW.id_concepto_ingas::varchar,'NULL')||','||COALESCE(NEW.id_item::varchar,'NULL')||','||COALESCE(NEW.id_oec::varchar,'NULL')||','||COALESCE(NEW.id_partida::varchar,'NULL')||','||COALESCE(NEW.id_servicio::varchar,'NULL')||','||COALESCE(''''||NEW.desc_ingas::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_reg::varchar||'''','NULL')||','||COALESCE(NEW.id_usr_reg::varchar,'NULL')||','||COALESCE(NEW.sw_tesoro::varchar,'NULL')||','||COALESCE(''''||NEW.activo_fijo::varchar||'''','NULL')||','||COALESCE(''''||NEW.tipo::varchar||'''','NULL')||','||COALESCE(''''||NEW.almacenable::varchar||'''','NULL')||') as res';				  
 		  ELSE 
 		      v_consulta =  ' SELECT migracion.f_trans_tpr_concepto_ingas_tconcepto_ingas (
-		              '''||TG_OP::varchar||''','||OLD.id_concepto_ingas||',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) as res';
+		              '''||TG_OP::varchar||''','||OLD.id_concepto_ingas||',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) as res';
 		       
 		   END IF;
 		   --------------------------------------
