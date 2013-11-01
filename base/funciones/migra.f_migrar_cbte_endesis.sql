@@ -94,7 +94,6 @@ BEGIN
                   inner join param.tcentro_costo cco
                   on cco.id_centro_costo = tra.id_centro_costo
                   where tra.id_int_comprobante = p_id_int_comprobante) loop
-                  
     	va_id_int_transaccion[v_cont]=v_dat.id_int_transaccion;
         va_id_cuenta[v_cont]=v_dat.id_cuenta;
         va_id_auxiliar[v_cont]=v_dat.id_auxiliar;
@@ -111,6 +110,10 @@ BEGIN
         va_id_ep[v_cont]=v_dat.id_ep;
         v_cont = v_cont + 1;
    	end loop;
+    
+    if v_cont = 1 then
+    	raise exception 'No se ha podido generar el comprobante. Comuníquese con el administrador';
+    end if;
     
     --Forma la llamada para enviar los datos del comprobante al servidor destino
     v_sql:='select migracion.f_migrar_cbte_pxp('||
@@ -148,7 +151,7 @@ BEGIN
                 '||COALESCE(('array['|| array_to_string(va_id_uo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['|| array_to_string(va_id_ep, ',')||']::integer[]')::varchar,'NULL::integer[]')||') ';
                 
-                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>FASS: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
+                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
 
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
