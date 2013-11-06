@@ -191,7 +191,8 @@ BEGIN
             nro_cbte_siscon, 
             origen, 
             id_moneda, 
-            tipo_cambio
+            tipo_cambio,
+            id_int_comprobante
             ) values(
             v_id_comprobante, 
             v_id_parametro, 
@@ -212,7 +213,8 @@ BEGIN
             NULL, 
             v_origen, 
             v_rec.id_moneda, 
-            v_rec.tipo_cambio
+            v_rec.tipo_cambio,
+            v_rec.id_int_comprobante
             );
         end if;
         
