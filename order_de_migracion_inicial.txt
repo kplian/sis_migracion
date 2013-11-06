@@ -56,6 +56,13 @@ SELECT * FROM migracion.f_mig_ini_tkp_historico_asignacion_tuo_funcionario();
 SELECT * FROM migracion.f_mig_ini_tpr_presupuesto_tcentro_costo()
 
 SELECT * FROM migracion.f_mig_ini_tct_cuenta_tcuenta();
+
+
+SELECT * FROM migracion.f_mig_ini_tct_cuenta_auxiliar_tcuenta_auxiliar();
+
+
+SELECT * FROM migracion.f_mig_ini_tct_cuenta_ids_tcuenta_ids();
+
 SELECT * FROM migracion.f_mig_ini_tct_auxiliar_tauxiliar();
 SELECT * FROM migracion.f_mig_ini_tpr_partida_tpartida();
 
@@ -66,4 +73,12 @@ SELECT * FROM migracion.f_mig_ini_tct_orden_trabajo_torden_trabajo();
 
 
 SELECT * FROM migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_ingas();
+
 SELECT * FROM migracion.f_mig_ini_tpr_concepto_cta_tconcepto_cta();
+
+
+
+
+-- relacion cuenta partica
+
+SELECT * FROM migracion.f_mig_ini_tpr_partida_cuenta_tcuenta_partida();
