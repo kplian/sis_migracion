@@ -28,58 +28,132 @@ $body$
 						*/
 						
 						DECLARE
+                        
+                        
+                        v_id_concepto_ingas integer;
+                        v_desc_ingas varchar;
+                        v_tipo varchar;
+                        
+                  /*
+                  
+                  0)  isnerta en ENDESIS
+                  
+                     verifiquemos que el nombre del concepto no este repetido
+                     
+                     0.1)  si el concepto existe,  solo insertamoas la nueva relacion con la partida presupuestaria
+                     
+                     0.2) si el concepto no existe insertamos nuevo concepto y partida
+                     
+                     
+                     
+                  
+                  1) si es MODIFICACION
+                  
+                     TODO BLOQUEAR LA MODIFICACION
+                      
+ 				 2)  si es eliminacion 
+                   
+                    2.1)  BUSCAMOS AL DESCRIPCION Y ELIMINAMOS LA RELACION CON LA APRTIDA  
+                    
+                  
+                  */      
+                        
 						
 						BEGIN
+                        
+                        
+                         select 
+                               p.tipo
+                              into
+                               v_tipo
+                              from 
+                              pre.tpartida p  
+                              where p.id_partida = p_id_partida;
+                              
+                          v_desc_ingas =   trim(upper(p_desc_ingas));
+                              
+                        SELECT 
+                          ci.id_concepto_ingas
+                        into
+                          v_id_concepto_ingas
+                        FROM param.tconcepto_ingas ci
+                        WHERE  ci.desc_ingas = v_desc_ingas;    
 						
 						    if(v_operacion = 'INSERT') THEN
-						
-						          INSERT INTO 
-						            param.tconcepto_ingas (
-						id_concepto_ingas,
-						desc_ingas,
-						estado_reg,
-						fecha_mod,
-						fecha_reg,
-						id_oec,
-						id_usuario_mod,
-						id_usuario_reg,
-						sw_tes,
-						tipo,
-                        activo_fijo,
-                        almacenable)
-				VALUES (
-						p_id_concepto_ingas,
-						p_desc_ingas,
-						p_estado_reg,
-						p_fecha_mod,
-						p_fecha_reg,
-						p_id_oec,
-						p_id_usuario_mod,
-						p_id_usuario_reg,
-						p_sw_tesoro,
-						p_tipo,
-                        p_activo_fijo,
-                        p_almacenable);
-				--insercion a la tabla tconcepto_partida                        
-                INSERT INTO pre.tconcepto_partida(
-                        id_concepto_partida,
-                        id_concepto_ingas,                        
-                        id_partida,
-                        fecha_reg,
-                        id_usuario_reg)
-                VALUES(
-                        p_id_concepto_ingas,
-                        p_id_concepto_ingas,
-                        p_id_partida,
-                        p_fecha_reg,
-                        p_id_usuario_reg);
+                            
+                            
+                             
+                            
+                            
+                              v_desc_ingas =   trim(upper(p_desc_ingas));
+                              
+                              SELECT 
+                                ci.id_concepto_ingas
+                              into
+                                v_id_concepto_ingas
+                              FROM param.tconcepto_ingas ci
+                              WHERE  ci.desc_ingas = v_desc_ingas;
+                              
+                              
+                              if(v_id_concepto_ingas is NULL)THEN
+  						
+                                   INSERT INTO 
+                                          param.tconcepto_ingas (
+                                          id_concepto_ingas,
+                                          desc_ingas,
+                                          estado_reg,
+                                          fecha_mod,
+                                          fecha_reg,
+                                          id_oec,
+                                          id_usuario_mod,
+                                          id_usuario_reg,
+                                          sw_tes,
+                                          tipo,
+                                          activo_fijo,
+                                          almacenable,
+                                          movimiento)
+                                  VALUES (
+                                          p_id_concepto_ingas,
+                                          v_desc_ingas,
+                                          p_estado_reg,
+                                          p_fecha_mod,
+                                          p_fecha_reg,
+                                          p_id_oec,
+                                          p_id_usuario_mod,
+                                          p_id_usuario_reg,
+                                          p_sw_tesoro,
+                                          p_tipo,
+                                          p_activo_fijo,
+                                          p_almacenable,
+                                          v_tipo) RETURNING id_concepto_ingas into v_id_concepto_ingas;
+                                    
+                                                    
+                             
+                             END IF;     
+                                    
+                            --insercion a la tabla tconcepto_partida                        
+                            INSERT INTO pre.tconcepto_partida(
+                                  
+                                    id_concepto_ingas,                        
+                                    id_partida,
+                                    fecha_reg,
+                                    id_usuario_reg)
+                            VALUES(
+                                   
+                                    v_id_concepto_ingas,
+                                    p_id_partida,
+                                    p_fecha_reg,
+                                    p_id_usuario_reg);
 						       
 		ELSEIF  v_operacion = 'UPDATE' THEN
+        
+                      v_desc_ingas =   trim(upper(p_desc_ingas));
                   
         
                     UPDATE 
                       param.tconcepto_ingas  
-                    SET						 desc_ingas=p_desc_ingas
+                    SET						 
+                    desc_ingas=v_desc_ingas
                    ,estado_reg=p_estado_reg
                    ,fecha_mod=p_fecha_mod
                    ,fecha_reg=p_fecha_reg
@@ -89,7 +163,8 @@ $body$
                    ,sw_tes=p_sw_tesoro
                    ,tipo=p_tipo
                    ,activo_fijo=p_activo_fijo
-                   ,almacenable=p_almacenable
+                   ,almacenable=p_almacenable,
+                    movimiento = v_tipo
                    WHERE id_concepto_ingas=p_id_concepto_ingas;
                          
 				--actualizacion de la tabla tconcepto_partida
@@ -102,13 +177,13 @@ $body$
                   ELSE   
                   
                        INSERT INTO pre.tconcepto_partida(
-                            id_concepto_partida,
+                          
                             id_concepto_ingas,                        
                             id_partida,
                             fecha_reg,
                             id_usuario_reg)
                        VALUES(
-                            p_id_concepto_ingas,
+                          
                             p_id_concepto_ingas,
                             p_id_partida,
                             p_fecha_reg,
@@ -126,15 +201,21 @@ $body$
                            
                                  DELETE FROM 
 						              pre.tconcepto_partida
-                                  WHERE id_concepto_ingas=p_id_concepto_ingas;
+                                  WHERE 
+                                        id_concepto_ingas=v_id_concepto_ingas
+                                  AND  id_partida = p_id_partida;
                                
 						       
-						         DELETE FROM 
-						              param.tconcepto_ingas
-                                  WHERE id_concepto_ingas=p_id_concepto_ingas;
+                                IF (not exists(select 1 from pre.tconcepto_partida  cp where cp.id_concepto_ingas = v_id_concepto_ingas)) THEN
+                           
+                                   DELETE FROM 
+                                        param.tconcepto_ingas
+                                    WHERE id_concepto_ingas=v_id_concepto_ingas;
+                                  
+                                END IF;  
 
 						       
-						       END IF;  
+						  END IF;  
 						  
 						 return 'true';
 						
