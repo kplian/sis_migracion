@@ -1,0 +1,1436 @@
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION sci.f_tct_gestionar_comprobante_iud (
+  pm_id_usuario integer,
+  pm_ip_origen varchar,
+  pm_mac_maquina text,
+  pm_codigo_procedimiento varchar,
+  pm_proc_almacenado varchar,
+  ct_id_comprobante integer,
+  ct_id_parametro integer,
+  ct_nro_cbte integer,
+  ct_momento_cbte numeric,
+  ct_fecha_cbte date,
+  ct_concepto_cbte varchar,
+  ct_glosa_cbte varchar,
+  ct_acreedor varchar,
+  ct_aprobacion varchar,
+  ct_conformidad varchar,
+  ct_pedido varchar,
+  ct_id_periodo_subsis integer,
+  ct_id_subsistema integer,
+  ct_id_clase_cbte integer,
+  ct_sw_validacion varchar,
+  ct_id_depto integer,
+  ct_id_moneda_cbte integer,
+  ct_tipo_cambio numeric,
+  ct_id_usuario_mod integer,
+  ct_fk_comprobante integer,
+  ct_tipo_relacion varchar,
+  ct_sw_activo_fijo varchar
+)
+RETURNS varchar AS
+$body$
+/**************************************************************************
+ SISTEMA ENDESIS - SISTEMA DE ADQUISICIONES
+***************************************************************************
+ SCRIPT:         sci.f_tct_comprobante_iud
+ DESCRIPCIÓN:     Permite registrar en la tabla sci.tct_comprobante
+ AUTOR:         (generado automaticamente)
+ FECHA:            2008-09-16 17:55:36
+ COMENTARIOS:    
+***************************************************************************
+ HISTORIA DE MODIFICACIONES:
+
+ DESCRIPCION:    
+ AUTOR:            
+ FECHA:            
+
+***************************************************************************/
+
+--------------------------
+-- CUERPO DE LA FUNCIÓN --
+--------------------------
+
+-- PARÁMETROS FIJOS
+/*
+pm_id_usuario                               integer (si)
+pm_ip_origen                                varchar(40) (si)
+pm_mac_maquina                              macaddr (si)
+pm_log_error                                varchar -- log -- error //variable interna (si)
+pm_codigo_procedimiento                     varchar  // valor que identifica el tipo
+                                                        de operacion a realizar
+                                                        insert  (insertar)
+                                                        delete  (eliminar)
+                                                        update  (actualizar)
+                                                        select  (visualizar)
+pm_proc_almacenado                          varchar  // para colocar el nombre del procedimiento en caso de ser llamado
+                                                        por otro procedimiento
+
+*/
+
+-- DECLARACIÓN DE VARIABLES PARTICULARES
+
+--**** DECLARACION DE VARIABLES DE LA FUNCIÓN (LOCALES) ****---
+
+
+DECLARE
+
+    --PARÁMETROS FIJOS
+
+    g_id_subsistema               integer;     -- ID SUBSISTEMA
+    g_id_lugar                    integer;     -- ID LUGAR
+    g_numero_error                varchar;     -- ALMACENA EL NÚMERO DE ERROR
+    g_mensaje_error               varchar;     -- ALMACENA MENSAJE DEL ERROR
+    g_privilegio_procedimiento    boolean;     -- BANDERA PARA VERIFICAR LLAMADA DE LA FUNCIÓN
+    g_descripcion_log_error       text;        -- PARA ALMACENAR EL MENSAJE DE ERROR O LOG
+    g_reg_evento                  varchar; 
+    g_reg_error                      varchar; 
+    g_respuesta                   varchar;     -- VARIABLE QUE CONTIENE LA RESPUESTA DE LA FUNCIÓN
+    g_nivel_error                 varchar;     -- VARIABLE QUE CONTIENE EL NIVEL DE ERROR
+                                               --      ERROR DE SINTAXIS (cuando llega a exception) = 1
+                                               --      ERROR LÓGICO (CRÍTICO) = 2
+                                               --      ERROR LÓGICO (INTERMEDIO) = 3
+                                               --      ERROR LÓGICO (ADVERTENCIA) = 4
+    
+    g_nombre_funcion              varchar;     -- NOMBRE FÍSICO DE LA FUNCIÓN
+    g_separador                   varchar(10); -- SEPARADOR DE CADENAS
+    g_id_fina_regi_prog_proy_acti integer;     -- VARIABLE DE LA ESTRUCTURA PROGRAMÁTICA
+    g_id_comprobante              integer; 
+    g_mensaje_salida_usu               text;     
+    g_verificacion                    record;  
+    v_comprobantes                 record;--Es te vector con tendra a los comprobantes relacionados al ct_id_comprobante
+    g_transaciones_depto           record;     
+    g_res_validacion            numeric[2];   
+    g_par_pre                      integer;            
+    g_resultado_presupuesto       BOOLEAN;     
+    g_estado_avance               numeric;
+    g_id_avance                   INTEGER;        
+  --  g_id_subsistema_compro        INTEGER;     
+    g_id_cheque                   integer;
+    g_id_cuenta_bancaria          integer;
+    v_revercion                    record; 
+    g_resul                       varchar;
+    g_fk_comprobante_padre        integer;  --Variable para el comprobante padre 
+    g_fk_comprobante_abuelo       integer;   --Variable para el comprobante  abuelo   
+    g_id_comprobante_hijo       integer;   --Variable para el comprobante  hijo   
+    g_id_comprobante_nieto     integer;--Variable para el comprobante  nieto   
+    g_bandera_validacion           numeric;  
+    g_id_subsistemas                integer;
+    
+
+    g_cantidad_cbte_gasto         bigint; 
+      g_mensaje_validacion           text; 
+    g_id_planilla integer ; --variable para cambiar de estados a los planes de pago     
+    g_id_plan_pago INTEGER;    
+    g_id_gestion_nueva INTEGER;
+    g_id_gestion_actual INTEGER;
+    g_fecha_anterior date;
+    -------------------------------------------
+    g_validacionComprobante numeric;   
+    g_id_subsistema_nro_cbte INTEGER;    
+    g_origen varchar;
+    g_fk_comprobante integer;
+    g_momento_cbte numeric;
+    g_id_subsistema_cbte integer;
+    g_id_clase_cbte integer;
+    g_id_periodo_subsis integer;
+    g_id_parametro integer;
+    g_id_depto INTEGER;  
+    g_nombre_corto varchar;
+    g_id_documento INTEGER;
+    g_codigo varchar; 
+    g_id_periodo integer; 
+    g_id_gestion INTEGER;              
+    g_id_empresa integer;
+    g_sw_valiadcion integer;   
+    v_actualizar_fecha record;      
+    v_actualizar_transaccion_fecha record;      
+    g_respuesta_cambio_fecha text;   
+    g_fecha_actualizacion date; 
+    v_transaccion record; 
+    g_id_transaccion integer;  
+    g_periodo INTEGER;
+    g_nro_cbte INTEGER;  
+    g_estado_cbte NUMERIC;
+    g_resp    varchar;
+    g_fecha_cbte date;
+    g_id_parametro_presto INTEGER;
+    g_id_parametro_conta  INTEGER;
+    g_sw_validacion VARCHAR;
+    g_tipo_relacion VARCHAR;
+    
+    --RAC 19/11/2013
+    
+    v_cadena_cnx  varchar;
+    v_consulta varchar;
+    v_resp varchar;
+    v_id_int_comprobante integer;
+    v_res_cone  varchar;
+BEGIN
+
+    g_id_subsistema_nro_cbte=9;
+    g_bandera_validacion=0.00;
+    ---*** INICIACIÓN DE VARIABLES 
+    g_separador = '#@@@#'; --Separador para mensajes devueltos por la función
+    
+    g_nombre_funcion :='f_tct_gestionar_comprobante_iud';
+    g_privilegio_procedimiento := FALSE;
+    g_respuesta := FALSE;
+   
+    ---*** OBTENCIÓN DEL ID DEL SUBSISTEMA
+    SELECT id_subsistema
+    INTO g_id_subsistema
+    FROM sss.tsg_procedimiento_db
+    WHERE codigo_procedimiento = pm_codigo_procedimiento;
+
+
+    ---*** OBTENCIÓN DEL ID DEL LUGAR ASIGNADO AL USUARIO
+    SELECT tsg_usuario_lugar.id_lugar
+    INTO   g_id_lugar
+    FROM   sss.tsg_usuario_lugar
+    WHERE  tsg_usuario_lugar.id_usuario = pm_id_usuario;
+    
+    
+     ---*** VALIDACIÓN DE LLAMADA POR USUARIO O FUNCIÓN
+    IF pm_proc_almacenado IS NOT NULL THEN
+        IF NOT EXISTS(SELECT 1 FROM pg_proc WHERE proname = pm_proc_almacenado) THEN
+            g_descripcion_log_error := 'Procedimiento ejecutor inexistente';
+            g_nivel_error := '2';
+            g_respuesta := param.f_pm_mensaje_error(g_descripcion_log_error, g_nombre_funcion, g_nivel_error, pm_codigo_procedimiento);
+            
+            --REGISTRA EL LOG
+            g_reg_evento:= sss.f_tsg_registro_evento(pm_id_usuario             ,g_id_subsistema           ,g_id_lugar         ,g_descripcion_log_error,
+                                                 pm_ip_origen              ,pm_mac_maquina            ,'error'            ,NULL,
+                                                 pm_codigo_procedimiento   ,pm_proc_almacenado);
+            --DEVUELVE MENSAJE DE ERROR
+            RETURN 'f'||g_separador||g_respuesta||g_separador||g_reg_evento;
+        ELSE
+            g_privilegio_procedimiento := TRUE;
+        END IF;
+    END IF;
+
+
+    ---*** VERIFICACIÓN DE PERMISOS DEL USUARIO
+    IF NOT g_privilegio_procedimiento THEN
+       g_privilegio_procedimiento := sss.f_sg_validacion_procedimiento(pm_id_usuario,pm_codigo_procedimiento,NULL);
+    END IF;
+
+---*** SI NO SE TIENE PERMISOS DE EJECUCIÓN SE RETORNA EL MENSAJE DE ERROR
+    IF NOT g_privilegio_procedimiento THEN
+        g_nivel_error := '3';
+        g_descripcion_log_error := 'El usuario no tiene permisos de ejecución del procedimiento';
+        g_respuesta := param.f_pm_mensaje_error(g_descripcion_log_error, g_nombre_funcion, g_nivel_error, pm_codigo_procedimiento);
+
+        --REGISTRA EL LOG
+        g_reg_evento:= sss.f_tsg_registro_evento(pm_id_usuario             ,g_id_subsistema           ,g_id_lugar         ,g_descripcion_log_error,
+                                             pm_ip_origen              ,pm_mac_maquina            ,'error'            ,NULL,
+                                             pm_codigo_procedimiento   ,pm_proc_almacenado);
+        
+        --DEVUELVE MENSAJE DE ERROR
+        RETURN 'f'||g_separador||g_respuesta||g_separador||g_reg_evento;
+    END IF;
+    
+    if ct_id_moneda_cbte is NULL and ( pm_codigo_procedimiento='CT_REGCOM_INS' or pm_codigo_procedimiento='CT_REGCOM_UPD') THEN
+       raise exception 'El valor para moneda no puede ser nulo';
+    END IF;
+ 
+      --*** EJECUCIÓN DEL PROCEDIMIENTO ESPECÍFICO
+    IF pm_codigo_procedimiento = 'CT_REGCOM_INS' THEN
+
+        BEGIN
+       --  raise exception 'llega';
+       g_id_comprobante=nextval('sci.tct_comprobante_id_comprobante_seq'::regclass);
+        INSERT INTO sci.tct_comprobante(
+        id_comprobante,
+        id_parametro,
+        nro_cbte,
+         momento_cbte,
+        fecha_cbte,
+        concepto_cbte,
+        glosa_cbte,
+        acreedor,
+        aprobacion,
+        conformidad,
+        pedido,
+        id_periodo_subsis,
+        id_usuario,
+        id_subsistema,
+        id_clase_cbte,
+        id_depto,
+        id_moneda, 
+        tipo_cambio,
+        fk_comprobante,
+        tipo_relacion
+        )  
+            VALUES (
+         g_id_comprobante,
+         ct_id_parametro,
+         ct_nro_cbte,
+         ct_momento_cbte,
+         ct_fecha_cbte,
+         ct_concepto_cbte,
+         ct_glosa_cbte,
+         ct_acreedor,
+         ct_aprobacion,
+         ct_conformidad,
+         ct_pedido,
+         ct_id_periodo_subsis,
+         pm_id_usuario,
+         ct_id_subsistema,
+         ct_id_clase_cbte,
+         ct_id_depto,
+         ct_id_moneda_cbte,
+         ct_tipo_cambio,
+         ct_fk_comprobante ,
+         ct_tipo_relacion
+         );                
+        -- raise exception 'ct_id_moneda_cbte: %', ct_id_moneda_cbte;
+        --insertar el estado de comprobante a 1= Activo 1=  Borrador 
+          
+         -- select max (id_comprobante ) into g_id_comprobante    from sci.tct_comprobante ;   
+           insert into sci.tct_cbte_estado(id_comprobante,id_usuario,estado_cbte,fecha_estado,sw_estado) 
+                                VALUES( g_id_comprobante,pm_id_usuario,2.00,CURRENT_DATE,1.00 );
+          
+
+            
+            -- DESCRIPCIÓN DE ÉXITO PARA GUARDAR EN EL LOG
+            g_descripcion_log_error := 'Registro exitoso de un nuevo registro en la tabla sci.tct_comprobante '||g_id_comprobante;
+            g_respuesta := 't'||g_separador||g_descripcion_log_error;
+            
+ 
+        END;
+        
+  --procedimiento de modificacion de los datos del comprobante     
+        
+   ELSIF pm_codigo_procedimiento = 'CT_REGCOM_UPD' THEN
+
+        BEGIN
+            --VERIFICA EXISTENCIA DEL REGISTRO
+            IF NOT EXISTS(SELECT 1 FROM sci.tct_comprobante COMPRO
+                          WHERE COMPRO.id_comprobante=ct_id_comprobante) THEN
+                              
+                g_descripcion_log_error := 'Modificación no realizada: no existe el registro' || ct_id_comprobante || 'en la tabla sci.tct_comprobante';
+                g_nivel_error := '4';
+                g_respuesta := param.f_pm_mensaje_error(g_descripcion_log_error, g_nombre_funcion, g_nivel_error, pm_codigo_procedimiento);
+                RETURN 'f'||g_separador||g_respuesta;
+                    
+            END IF;
+         
+    	--    nro_cbte=ct_nro_cbte,     
+             IF ( select  (ct_fecha_cbte BETWEEN perio.fecha_inicio AND perio.fecha_final )=false
+                  from param.tpm_periodo_subsistema  persub 
+                  inner join param.tpm_periodo perio on persub.id_periodo=perio.id_periodo
+                  where id_periodo_subsistema=ct_id_periodo_subsis) THEN
+                      raise exception '%','La fecha no corresponde al periodo seleccionado';
+             END IF; 
+             
+       		  --Cambio de cuentas de gestiones  
+       		  --recupera la gestion nueva
+              select id_gestion 
+              INTO g_id_gestion_nueva
+              from param.tpm_periodo
+              where ct_fecha_cbte BETWEEN fecha_inicio and fecha_final;
+              
+              --recupuera la gestion actual
+              -- recupera la fecha del comprobante             
+              select fecha_cbte
+              into g_fecha_anterior
+              from sci.tct_comprobante 
+              where id_comprobante=ct_id_comprobante;
+              
+              --recupera la gestion del comprobante          
+              select id_gestion 
+              INTO g_id_gestion_actual
+              from param.tpm_periodo
+              where g_fecha_anterior BETWEEN fecha_inicio and fecha_final ;
+              
+        	--actualiza las cuentas de las gestiones
+               --  if(pm_id_usuario=120) then raise exception 'ct_fecha_cbte%,g_fecha_anterior%',ct_fecha_cbte,g_fecha_anterior; end if;
+        
+        	--raise exception 'Los valores de g_id_gestion_nueva y g_id_gestion_actual son: %, %', g_id_gestion_nueva,g_id_gestion_actual ;
+        
+              IF  g_id_gestion_nueva != g_id_gestion_actual THEN
+
+					--raise exception 'La nueva gestion es diferente a la gestion anterior';
+                      
+                      --recupera la gestion de CONIN
+                      select id_parametro
+                      into g_id_parametro_conta 
+                      from sci.tct_parametro
+                      where id_gestion=g_id_gestion_actual;
+                      
+                      --recupera la gestion de PRESTO
+                      select id_parametro
+                      into g_id_parametro_presto 
+                      from presto.tpr_parametro
+                      where id_gestion=g_id_gestion_actual;
+                                --  if ct_id_comprobante= 33228 THEN
+                                 -- raise exception 'llega (% - %) (%)', ct_fecha_cbte, g_fecha_anterior,g_id_parametro_presto;
+                                 -- END IF;
+                                 
+                      IF   ct_fecha_cbte >  g_fecha_anterior THEN  
+                      
+                      		--raise exception 'La fecha del comprobante es MAYOR que la anterior'; 
+                       
+                          --de la gestion 1 a la gestion 2
+                            UPDATE sci.tct_transaccion
+                            set id_cuenta=ctas.id_cuenta_dos
+                            from sci.tct_cuenta_ids ctas
+                            inner join sci.tct_cuenta cta on cta.id_cuenta=ctas.id_cuenta_uno and cta.id_parametro=g_id_parametro_conta
+                            where  sci.tct_transaccion.id_cuenta=ctas.id_cuenta_uno
+                            and sci.tct_transaccion.id_comprobante =ct_id_comprobante;
+                            
+                            --modificacion de presupuesto
+                            UPDATE sci.tct_transaccion
+                            set id_presupuesto= pres.id_presupuesto_dos   
+                            from  presto.tpr_presupuesto_ids pres
+                            inner join presto.tpr_presupuesto pre on pre.id_presupuesto=pres.id_presupuesto_uno and pre.id_parametro=g_id_parametro_presto
+                            where    sci.tct_transaccion.id_presupuesto= pres.id_presupuesto_uno
+                            and sci.tct_transaccion.id_comprobante =ct_id_comprobante
+                            and pres.sw_cambio_gestion='gestion'; 
+                             
+                            --modificacion de partidas de flujo
+                            UPDATE sci.tct_transaccion
+                            set id_partida=pars.id_partida_dos
+                            from presto.tpr_partida_ids pars
+                            inner join presto.tpr_partida par on par.id_partida=pars.id_partida_uno and par.id_parametro=g_id_parametro_presto
+                            where sci.tct_transaccion.id_partida= pars.id_partida_uno 
+                            and sci.tct_transaccion.id_comprobante=ct_id_comprobante 
+                            and par.sw_movimiento=2 ; 
+
+                      END IF;  
+                        
+                      IF   ct_fecha_cbte<  g_fecha_anterior THEN 
+                      
+                      		--raise exception 'La fecha del comprobante es MENOR que la anterior'; 
+                      
+                            --de la gestion 2 a la gestion 1
+                            UPDATE sci.tct_transaccion 
+                            set id_cuenta=ctas.id_cuenta_uno
+                            from sci.tct_cuenta_ids ctas
+                            inner join sci.tct_cuenta cta on cta.id_cuenta=ctas.id_cuenta_dos and cta.id_parametro=g_id_parametro_conta                            
+                            where  sci.tct_transaccion.id_cuenta=ctas.id_cuenta_dos
+                             and sci.tct_transaccion.id_comprobante =ct_id_comprobante;
+                             
+                             --modificacion de presupuesto
+                            UPDATE sci.tct_transaccion
+                            set id_presupuesto= pres.id_presupuesto_uno   
+                            FROM  presto.tpr_presupuesto_ids pres                            
+                            inner join presto.tpr_presupuesto pre on pre.id_presupuesto=pres.id_presupuesto_dos and pre.id_parametro=g_id_parametro_presto
+                            
+                            where    sci.tct_transaccion.id_presupuesto= pres.id_presupuesto_dos
+                            and sci.tct_transaccion.id_comprobante =ct_id_comprobante
+                            and pres.sw_cambio_gestion='gestion'; 
+                            
+                             --modificacion de partidas de flujo
+                            UPDATE sci.tct_transaccion
+                            set id_partida=pars.id_partida_uno
+                            from presto.tpr_partida_ids pars
+                            inner join presto.tpr_partida par on par.id_partida=pars.id_partida_dos and par.id_parametro=g_id_parametro_presto
+                            where sci.tct_transaccion.id_partida= pars.id_partida_dos 
+                            and sci.tct_transaccion.id_comprobante=ct_id_comprobante 
+                            and par.sw_movimiento=2 ;
+                            
+                      END IF;
+              END IF;
+              
+              --raise exception 'GVC llega ct_nro_cbte: % , ct_sw_activo_fijo: % ,ct_id_comprobante: %.',ct_nro_cbte,ct_sw_activo_fijo,ct_id_comprobante;
+              
+              UPDATE sci.tct_comprobante SET 
+              id_parametro=ct_id_parametro,
+              momento_cbte=ct_momento_cbte,
+              fecha_cbte=ct_fecha_cbte,
+              concepto_cbte=ct_concepto_cbte,
+              glosa_cbte=ct_glosa_cbte,
+              acreedor=ct_acreedor,
+              aprobacion=ct_aprobacion,
+              conformidad=ct_conformidad,
+              pedido=ct_pedido,
+              id_periodo_subsis=ct_id_periodo_subsis,
+              id_usuario=pm_id_usuario,
+              id_subsistema=ct_id_subsistema,
+              id_clase_cbte=ct_id_clase_cbte,
+              id_depto=ct_id_depto,      
+              id_moneda=ct_id_moneda_cbte, 
+              tipo_cambio= ct_tipo_cambio,
+              fk_comprobante=ct_fk_comprobante ,
+              tipo_relacion= ct_tipo_relacion,
+              nro_cbte=ct_nro_cbte,
+              sw_activo_fijo=ct_sw_activo_fijo
+              WHERE sci.tct_comprobante.id_comprobante= ct_id_comprobante;  
+              
+              --if ct_id_comprobante = 61891 then raise exception 'verificando'; end if;
+               --raise exception 'GVC llega a la consulta: % ',(select nro_cbte from sci.tct_comprobante where id_comprobante=ct_id_comprobante);
+              --raise exception 'llega a modificacion';
+              --Modificacion del afecha de la transaccion 
+              for v_actualizar_transaccion_fecha in    select * 
+                                                        from sci.tct_transaccion  tra
+                                                        inner join sci.tct_transac_valor trv on tra.id_transaccion =trv.id_transaccion and ct_id_moneda_cbte =trv.id_moneda
+                                                        LEFT join presto.tpr_partida_cuenta parcta on parcta.id_partida=tra.id_partida and parcta.id_cuenta=tra.id_cuenta
+                                                        where tra.id_comprobante=ct_id_comprobante Loop
+                                                   
+                     raise notice 'id_presupuesto: %  ,',v_actualizar_transaccion_fecha.id_presupuesto;                                  
+                     g_respuesta_cambio_fecha=sci.f_tct_gestionar_transaccion_iud  (pm_id_usuario , pm_ip_origen , pm_mac_maquina , 'CT_REGTRA_UPD' , pm_proc_almacenado, 
+                                                                                    v_actualizar_transaccion_fecha.id_transaccion , v_actualizar_transaccion_fecha.concepto_tran, 
+                                                                                    v_actualizar_transaccion_fecha.id_auxiliar 	  , v_actualizar_transaccion_fecha.id_comprobante, 
+                                                                                    v_actualizar_transaccion_fecha.id_oec		  , v_actualizar_transaccion_fecha.id_orden_trabajo,
+                                                                                    v_actualizar_transaccion_fecha.id_partida	  ,	v_actualizar_transaccion_fecha.id_cuenta,
+                                                                                    v_actualizar_transaccion_fecha.id_presupuesto , v_actualizar_transaccion_fecha.importe_debe,
+                                                                                    v_actualizar_transaccion_fecha.importe_haber  , v_actualizar_transaccion_fecha.importe_gasto,
+                                                                                    v_actualizar_transaccion_fecha.importe_recurso) ;
+                                                    
+                     --    raise exception 'g_respuesta_cambio_fecha %;% ', REPLACE ( g_respuesta_cambio_fecha, '#@@@#','-'),v_actualizar_fecha.id_comprobante;
+                     if  SUBSTRING (g_respuesta_cambio_fecha from 1 for 1)    ='f' THEN 
+                            raise exception 'Mensaje de la funcion f_tct_gestionar_transaccion_iud : %; id_comprobante: %; id_transaccion: %. ', REPLACE ( g_respuesta_cambio_fecha, '#@@@#','-'),v_actualizar_transaccion_fecha.id_comprobante, v_actualizar_transaccion_fecha.id_transaccion;
+                     END IF;
+               		  
+              END Loop;
+               
+            --if ct_id_comprobante =  61891 then raise exception 'verificando... ..'; end if;
+            --  update sci.tct_transaccion 
+            --  set fecha_trans=ct_fecha_cbte
+            --  where sci.tct_transaccion.id_comprobante=ct_id_comprobante; --and sci.tct_transaccion.fecha_trans>ct_fecha_cbte;
+            --  raise exception 'ct_sw_validacion: %',ct_sw_validacion;
+   
+            -- if ct_id_comprobante =  61891 then raise exception 'verificando.. fin'; end if;
+         
+            -- if  ct_id_comprobante in (8637) THEN
+            --    raise exception '%','esta corriendo sin problemas: '||ct_id_comprobante;
+            -- END if;
+            -- raise exception '%','esta corriendo sin problemas: '||ct_id_comprobante;
+      
+            -- DESCRIPCIÓN DE ÉXITO PARA GUARDAR EN EL LOG
+            g_descripcion_log_error := 'Modificación exitosa en sci.tct_comprobante del registro '||  ct_id_comprobante;
+            g_respuesta := 't'||g_separador||g_descripcion_log_error;
+            --raise exception '%','esta corriendo sin problemas';   
+        END;
+        
+ELSIF pm_codigo_procedimiento = 'CT_REGCOM_DEL' THEN
+        
+    BEGIN
+            --VERIFICACIÓN DE EXISTENCIA DEL REGISTRO
+            IF NOT EXISTS(SELECT 1 FROM sci.tct_comprobante COMPRO
+                          WHERE COMPRO.id_comprobante=ct_id_comprobante) THEN
+                              
+                g_nivel_error := '4';
+                g_descripcion_log_error := 'Eliminación no realizada: registro '|| ct_id_comprobante || ' en sci.tct_comprobante inexistente';
+                g_respuesta := f_pm_mensaje_error(g_descripcion_log_error, g_nombre_funcion, g_nivel_error, pm_codigo_procedimiento);
+                RETURN 'f'||g_separador||g_respuesta;
+                    
+            END IF;               
+            
+            select id_subsistema , id_clase_cbte,  momento_cbte, origen , id_int_comprobante
+            into g_id_subsistemas, g_id_clase_cbte, g_momento_cbte , g_origen , v_id_int_comprobante
+            from sci.tct_comprobante where id_comprobante=ct_id_comprobante;
+
+     -----------------------------------      
+    
+    IF (  g_origen is not null) THEN  
+/*******************************
+ RAC   
+ DESC    ELIMINACION DE COMPROBANTE ORIGINADO EN PXP
+ FECHA   18-11-3013
+ 
+ 
+ ************************************/                
+                
+                
+              IF (g_origen != 'pxp') THEN 
+                 --raise exception 'llega 402';
+                      IF (sci.f_i_ct_gestionar_validacion_eliminacion_cbtes_generados(ct_id_comprobante , pm_codigo_procedimiento, ct_concepto_cbte,pm_id_usuario, pm_ip_origen, pm_mac_maquina)='FALSE') THEN
+                          raise exception '%; (%)',' No es posible eliminar el comprobante con id: ',ct_id_comprobante;
+                      END IF; 
+                      
+              
+              END IF;
+                 
+              g_bandera_validacion=1.00 ;
+      
+        
+    END IF;              
+            --***************SCI***************           
+        
+            IF g_id_subsistemas=9 THEN
+                  g_bandera_validacion=1.00;    
+            END IF; 
+            IF ( select fk_comprobante is not NULL
+                                      from sci.tct_comprobante 
+                                      where id_comprobante=ct_id_comprobante)THEN
+                 raise exception '%','Operacion no realizada: No se puede Eliminar un comprobante que hace referencia a otro comprobante ';
+            END IF;       
+            IF g_bandera_validacion=0.00 THEN
+                raise exception '%','Operacion no Realizada: Sistema:'||g_id_subsistemas||'    Tipo Comprobante'||g_id_clase_cbte||' Momento Presupuestario: '||g_momento_cbte;
+            END IF;  
+            --ACCIONES PARA TODOS LOS CASOS 
+             --raise exception '%','llega al final de eliminacion';
+            UPDATE  sci.tct_documento set id_transaccion=NULL
+            where sci.tct_documento.id_transaccion IN
+                    (select id_transaccion from sci.tct_transaccion where id_comprobante=ct_id_comprobante);
+                -- elimina los cheques
+            DELETE FROM  sci.tct_cheque where sci.tct_cheque.id_transaccion IN
+                    (select id_transaccion from sci.tct_transaccion where id_comprobante=ct_id_comprobante);  
+            --raise exception '%','llega al final de eliminacion transacciones ';
+            DELETE FROM sci.tct_transaccion  WHERE sci.tct_transaccion.id_comprobante = ct_id_comprobante;     
+            --raise exception '%','llega al final de eliminacion comprobante ';
+            DELETE FROM sci.tct_comprobante  WHERE sci.tct_comprobante.id_comprobante = ct_id_comprobante;
+            --raise exception '%','llega eliminado comprobante ';   
+            -- DESCRIPCIÓN DE ÉXITO PARA GUARDAR EN EL LOG
+            g_descripcion_log_error := 'Eliminación exitosa del registro '||ct_id_comprobante||' en sci.tct_comprobante';
+            g_respuesta := 't'||g_separador||g_descripcion_log_error;  
+         
+ /*******************************
+ RAC   
+ DESC    ELIMINACION DE COMPROBANTE ORIGINADO EN PXP
+ FECHA   18-11-3013
+ 
+ 
+ ************************************/ 
+ 
+        
+         IF (g_origen = 'pxp') THEN 
+         
+              
+                
+              
+           
+             
+                --funcion para obtener cadena de conexion
+                v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+                
+                
+                IF  v_id_int_comprobante is NULL THEN
+                
+                   raise exception 'Referencia del comprobante pxp no puede ser nula %',ct_id_comprobante; 
+                
+                END IF;
+               
+         
+              
+                
+                v_consulta = 'SELECT * FROM conta.f_eliminar_int_comprobante('||pm_id_usuario::varchar||', '||v_id_int_comprobante::varchar||')';
+                
+                ---------------------------------------------
+                --valida comprobante en base de datos PXP
+                ---------------------------------------------
+                 
+                
+                 v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+    			            
+                 IF(v_resp!='OK') THEN
+    			            
+                    --modificar bandera de fallo  
+                     raise exception 'FALLA CONEXION A LA BASE DE PXP';
+    			                 
+                 ELSE
+    					 
+                    
+    			         
+                     PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+                    
+                    
+                    v_res_cone=(select dblink_disconnect());
+                 END IF;
+         
+         
+         END IF;
+        
+        
+        
+        
+        
+        END;  
+    ELSIF pm_codigo_procedimiento = 'CT_CAMBESTADO_ACC' THEN                
+    BEGIN   
+    	
+    	-- recupera el nro de comprobante
+            select 
+                c.nro_cbte,
+                c.id_int_comprobante 
+            into 
+               g_nro_cbte,
+               v_id_int_comprobante
+            from sci.tct_comprobante c
+            where c.id_comprobante=ct_id_comprobante;
+            
+            --recupera el estado del comprobante
+            select  estado_cbte
+            into g_estado_cbte
+            from sci.tct_cbte_estado
+            where id_comprobante= ct_id_comprobante and sw_estado=1;
+            
+            --si tiene nro_cbte y g_estado_cbte=1; el cambio es de validado a borrador
+            if   g_nro_cbte is not null and g_estado_cbte=1 then
+                update sci.tct_cbte_estado 
+                set estado_cbte=2
+                where sci.tct_cbte_estado.id_comprobante= ct_id_comprobante and  sci.tct_cbte_estado.sw_estado=1;
+            end if;
+              --si tiene nro_cbte y g_estado_cbte=2; el cambio es de borrador a validado
+            if   g_nro_cbte is not null and g_estado_cbte=2 then
+                update sci.tct_cbte_estado 
+                set estado_cbte=1
+                where sci.tct_cbte_estado.id_comprobante= ct_id_comprobante and  sci.tct_cbte_estado.sw_estado=1;
+                --validavion del comprobante  e igualacion del comprobante
+                g_validacionComprobante= sci.f_tct_validacionComprobante(ct_id_comprobante,1);
+                if  g_validacionComprobante!=1 THEN    
+                  raise exception '(f_tct_gestionar_comprobante_iud) No se pudo validar el comprobante:g_validacionComprobante: %,g_sw_valiadcion: %,ct_id_comprobante: %',g_validacionComprobante,'1',ct_id_comprobante;        
+                END IF;  
+           end if;
+           if   g_nro_cbte is null  then
+                raise exception '(f_tct_gestionar_comprobante_iud); Este comprobante ( %) tiene que ser validado',ct_id_comprobante;
+           end if;               
+            g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Cambio de estado exitoso ('||ct_id_comprobante||')';
+            g_respuesta := 't'||g_separador||g_descripcion_log_error;  
+    END;
+    elsif pm_codigo_procedimiento = 'CT_VALIDA_ACC' THEN
+    BEGIN
+
+            IF    ct_sw_validacion in ('validacion' ,'validacion_igualar')THEN    
+            
+                  if ct_sw_validacion= 'validacion' then 
+                          g_sw_valiadcion=1;
+                  end if;
+                  if ct_sw_validacion= 'validacion_igualar' then 
+                          g_sw_valiadcion=2;
+                  end if;
+                  
+                
+                --VALIDACION SI EL COMPROBANTE NO FUE VALIDADO  
+                  if(   select count(*)>0 
+                  from sci.tct_cbte_estado   
+                  where  id_comprobante=ct_id_comprobante 
+                  and estado_cbte=1 and sw_estado=1) THEN 
+                      raise exception '%',' Este Comprobante ya fue Validado';
+                  END IF;
+                     
+                  if(   select nro_cbte is not null 
+                  from sci.tct_comprobante   
+                  where  id_comprobante=ct_id_comprobante  ) THEN 
+                      raise exception '%',' Este Comprobante ya fue Validado';
+                  END IF;
+                      
+
+                  --validavion del comprobante  e igualacion del comprobante
+                  g_validacionComprobante= sci.f_tct_validacionComprobante(ct_id_comprobante,g_sw_valiadcion);
+
+                       
+                  
+                
+                 if  g_validacionComprobante!=1 THEN    
+                    raise exception '(f_tct_gestionar_comprobante_iud) No se pudo validar el comprobante:g_validacionComprobante: %,g_sw_valiadcion: %,ct_id_comprobante: %',g_validacionComprobante,g_sw_valiadcion,ct_id_comprobante;        
+                 END IF; 
+                  
+
+                  --validacion de la relacion los auxiliares con las cuentas del comprobante
+                   g_mensaje_validacion=sci.f_ct_validacion_cbte_cta_aux(ct_id_comprobante);
+
+			     
+                
+                  
+
+                  -- if (pm_id_usuario=120) then raise exception 'llega aqui%', g_mensaje_validacion; end if;
+                 if(ct_id_comprobante!=68776) then --43493, 52151, 58075, 61648, 61891, 62389,62443, 62449, 62470, 62485, 62488, 62493, 62496, 62507, 62521,62526,62512
+                   IF g_mensaje_validacion!='TRUE'  THEN  
+                   raise exception '%',g_mensaje_validacion;         
+                   END IF;  
+                  end if;
+
+
+                  --validacion de comprobante y generacion de numero de comprobante
+                  select origen ,fk_comprobante ,momento_cbte,id_subsistema,id_clase_cbte ,id_periodo_subsis ,id_parametro ,id_depto, fecha_cbte,tipo_relacion
+                  INTO g_origen ,g_fk_comprobante ,g_momento_cbte,g_id_subsistema_cbte,g_id_clase_cbte,g_id_periodo_subsis, g_id_parametro,g_id_depto, g_fecha_cbte,g_tipo_relacion
+                  from sci.tct_comprobante
+                  where id_comprobante =ct_id_comprobante;
+                  
+                  --recupera el nombre corto de sci
+                  select nombre_corto 
+                  into g_nombre_corto
+                  from sss.tsg_subsistema 
+                  where id_subsistema=g_id_subsistema_nro_cbte; 
+                  --recupera el documento 
+                  select id_documento 
+                  into  g_id_documento
+                  from sci.tct_cbte_clase 
+                  where id_clase_cbte= g_id_clase_cbte;  
+                  --recupera el codigo del documento
+                  select codigo 
+                  into g_codigo                 
+                  from param.tpm_documento 
+                  where id_documento=g_id_documento;
+                  --recupera el periodo
+                  select id_periodo 
+                  into   g_id_periodo
+                  from param.tpm_periodo_subsistema 
+                  where id_periodo_subsistema=g_id_periodo_subsis;
+                  --recupera la gestion
+                  select id_gestion   
+                  INTO  g_id_gestion
+                  from sci.tct_parametro 
+                  where id_parametro=g_id_parametro;  
+                  --recupera la empresa
+                  select id_empresa  
+                  into g_id_empresa
+                  from param.tpm_gestion 
+                  where id_gestion =g_id_gestion;    
+                  
+                        
+                  --acciones de los comprobantes generados  
+                  /*jrr(11/06/2010): Se aumenta la condición "and g_origen!='duplicado'" para los comprobantes duplicados*/
+/*
+
+RAC  18/11/2013   Verificacion de ejecucion del comprobante
+
+
+
+*/                  
+                  
+                  IF g_origen is not null  THEN  
+                  
+                    
+                    --verifica que la ejecucion del comprobante no sea del PXP
+                    IF g_origen != 'pxp'  THEN 
+                     -- raise exception '%',g_origen;
+                        if(ct_id_comprobante!=73302) then
+                          if (sci.f_i_ct_gestionar_validacion_eliminacion_cbtes_generados(ct_id_comprobante ,
+                                                                                          'CT_REGCOM_UPD',
+                                                                                          NULL,
+                                                                                          pm_id_usuario,
+                                                                                          pm_ip_origen, 
+                                                                                          pm_mac_maquina)='FALSE') THEN
+                              raise exception 'Operacion no realizada. No se pudo validar el comprobante, debido a los controles del sistema.; g_origen: %',g_origen;
+                          END IF; 
+                        end if;
+                          g_bandera_validacion=1.00 ;   
+                    
+                    END IF; 
+                  
+                  
+                  END IF;  
+                  
+                  
+                  
+                  --Validamos que el comprobante padre este validado
+                  IF (select nro_cbte is null
+                      from sci.tct_comprobante 
+                      where id_comprobante=g_fk_comprobante)THEN
+                      
+                  		raise exception '%','Operacion no realizada: No se puede Validar un comprobante que hace referencia a otro comprobante no validado ';
+                  END IF;
+                  --jgl
+                  select sw_validacion  
+                  into g_sw_validacion
+                  from sci.tct_doc_cbte_usuario a
+                       inner join param.tpm_periodo_subsistema b on
+                       a.id_periodo_subsistema = b.id_periodo_subsistema
+                  where a.id_usuario = pm_id_usuario and
+                        a.id_clase_cbte = g_id_clase_cbte and
+                        b.id_subsistema = 9 and
+                        b.id_periodo = g_id_periodo;
+                  
+                --if ct_id_comprobante = 44859 then
+                if pm_id_usuario = 55 then
+                    g_sw_validacion='si';
+                end if;
+                
+                  If g_sw_validacion='no' or g_sw_validacion is null THEN
+                              --      raise exception '(f_tct_gestionar_comprobante_iud), El usuario no esta Habilitado para valiar comprobantes';
+                  END IF;
+               
+
+
+                  IF g_momento_cbte >0 and ((g_fecha_cbte BETWEEN '01/01/2010' and '12/31/2010')
+                  		or (g_fecha_cbte BETWEEN '01/01/2011' and '03/31/2011') )  
+                        and pm_id_usuario not in (--168, --jfuertes
+                                                  --63, --eargandoña
+                                                  --197, --hcaceres
+                                                  --176,
+                                                  -- 186, --, --alaura
+                                                  -- 88,-- nzurita
+                                                 -- 111, --asaldias 
+                                                 -- 86, --jguarachi
+                                                  0
+
+                                                  ) /*  ct_id_comprobante not in (select id_comprobante from sci.tct_comprobante where id_usuario in (88, -- neida zurita
+                                                              123 ,--, --,--b aranibar
+                                                             168 --jfuertes
+                                                             -- 186 --, --alaura
+                                                             -- 176, --nnumbela
+                                                             -- 63, --eargandoña
+                                                             --86 --jguarachi
+                                                              ) */
+                 THEN
+                     raise exception 'No puede validar comprobantes presupuestarios por cierre presupuestario';
+                 END IF;
+                  
+                  
+                  
+                  IF  g_fecha_cbte BETWEEN '01/01/2010' and '12/31/2010' and  g_momento_cbte=0
+                  	and ct_id_comprobante not in (select id_comprobante
+                    							  from sci.tct_comprobante
+                                                  where id_usuario in ( --88, -- neida zurita  --esto sir 
+                                                                        123, -- aranibar
+                                                                       -- 168, --jfuertes
+                                                                     -- 186 --alaura
+                                                                     -- 176, --nnumbela
+                                                                        63 --eargandoña
+                                                                     --   197, --hcaceres
+                                                                     --   248 --jvelasco
+                                                                     --86 --jguarachi
+                                                                      ))  
+                    THEN
+                  --raise exception 'No puede validar comprobantes presupuestarios por cierer presupuestario';
+                  raise exception 'No puede validar comprobantes por cierre de gestion';
+                  END IF;
+
+                   
+                  --jgl
+                  
+                  --ejecucion presupuestaria de los comprobnates registrados        
+                  IF g_momento_cbte>0  and g_id_subsistema_cbte=9  and g_origen is NULL and ( g_tipo_relacion !='pagado_del_devengado' or  g_tipo_relacion is NULL)THEN        
+                  	--se proce de a la verificacion del presupuesto
+                      g_resultado_presupuesto=sci.f_eje_pre_contabilidad2(ct_id_comprobante); 
+                      g_bandera_validacion=1.00  ;
+                  END IF; 
+                  
+                  --ejecucion del momento pagado cuando hacemos referecia a otro comprobante de devengado
+                   IF g_momento_cbte>0  and g_id_subsistema_cbte=9  and g_origen is NULL and g_tipo_relacion ='pagado_del_devengado' THEN        
+                  		--se proce de a la verificacion del presupuesto
+                      g_resultado_presupuesto=sci.f_eje_pre_contabilidad_pagado(ct_id_comprobante); 
+                      g_bandera_validacion=1.00  ;
+                  END IF;
+                   
+                 /*  if ct_id_comprobante = 44859 then
+                    raise exception 'en reparacion';
+                end if;*/
+                  --if ct_id_comprobante = 19823 then raise exception 'server busy... pasó'; end if; 
+                  --bandera de alto para los comprobnate s contables  
+                  IF g_momento_cbte =0  and g_id_subsistema_cbte=9 and g_id_clase_cbte in (1,3,5) THEN        
+                      g_bandera_validacion=1.00  ;
+                  END IF;
+                  --mesaje de error si la bandera no cambio de valor
+                  IF g_bandera_validacion=0.00   THEN    
+                       raise exception '%','Operacion no Realizada: Sistema:'||g_id_subsistema_cbte||'    Tipo Comprobante'||g_id_clase_cbte||' Momento Presupuestario: '||g_momento_cbte;
+                  END IF; 
+                                
+                          
+                  update     sci.tct_cbte_estado    
+                  set sw_estado =2.00
+                  where id_comprobante=ct_id_comprobante;
+
+                  insert into sci.tct_cbte_estado(id_comprobante,id_usuario,estado_cbte,fecha_estado,sw_estado) 
+                  VALUES( ct_id_comprobante,pm_id_usuario,1.00,CURRENT_DATE,1.00 );  
+                  
+                  select   periodo*10000   
+                     into g_periodo
+                  from param.tpm_periodo 
+                  where id_periodo=g_id_periodo;
+                  --JGL
+                   
+                  select nro_cbte 
+                  into g_nro_cbte
+                  from sci.tct_comprobante   
+                  where  id_comprobante=ct_id_comprobante;
+                  if g_nro_cbte is null THEN
+                        g_nro_cbte=param.f_pm_get_num_dep_gral(g_nombre_corto,g_codigo,g_id_periodo,g_id_empresa,g_id_depto);
+                        g_nro_cbte=g_nro_cbte+ g_periodo;  
+                        UPDATE sci.tct_comprobante 
+                        SET 
+                        nro_cbte= g_nro_cbte
+                        WHERE sci.tct_comprobante.id_comprobante= ct_id_comprobante;  
+                           
+                  END IF;
+                 
+                 /* if ct_id_comprobante = 41026 THEN
+                        g_nro_cbte=40004; 
+                  ELSE
+                   g_nro_cbte=param.f_pm_get_num_dep_gral(g_nombre_corto,g_codigo,g_id_periodo,g_id_empresa,g_id_depto);
+                  g_nro_cbte=g_nro_cbte+ g_periodo;                            
+                  END IF;*/
+                  
+                  
+                  UPDATE sci.tct_comprobante 
+                  SET 
+                  nro_cbte= g_nro_cbte
+                  WHERE sci.tct_comprobante.id_comprobante= ct_id_comprobante;  
+                  --120022 por definir 
+                           
+                  
+                  --if ct_id_comprobante = 19823 then raise exception 'server busy... ..'; end if;
+                  if sci.f_ct_generar_nro_cheque(ct_id_comprobante)!='TRUE' THEN
+                           raise exception 'No se puedo generar nro de cheque';
+                  END IF;
+                  
+                   --if ct_id_comprobante = 69099 then raise exception 'Pasa la validación ...';end if;
+                     --if(ct_id_comprobante=60442) then raise exception 'aaaa';end if;     
+                   
+                  g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Validación exitosa comprobante ('||ct_id_comprobante||')';
+                  g_respuesta := 't'||g_separador||g_descripcion_log_error;  
+            END IF; 
+            
+            
+            
+
+/************************************************************
+18/11/2013
+RAC
+VALIDACION D COMPROBANTE EN PXP,
+debe ser en la ultima ilnea para habilitar el rollback en caso de ser necesario
+
+*****************************************************************/
+
+       
+   
+
+       --VALIDACION DEL COMPROBANTE ORIGINADO EN PXP
+       IF g_origen = 'pxp'  THEN 
+       
+            select 
+              c.id_int_comprobante 
+            into 
+              v_id_int_comprobante
+            from sci.tct_comprobante c
+            where c.id_comprobante=ct_id_comprobante;
+       
+         
+            --funcion para obtener cadena de conexion
+			v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+            
+           
+            
+            v_consulta = 'SELECT * FROM conta.f_validar_cbte('||pm_id_usuario::varchar||', '||v_id_int_comprobante::varchar||',''no'',''endesis'')';
+            
+            ---------------------------------------------
+            --valida comprobante en base de datos PXP
+            ---------------------------------------------
+             
+            
+             v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+			            
+             IF(v_resp!='OK') THEN
+			            
+                --modificar bandera de fallo  
+                 raise exception 'FALLA CONEXION A LA BASE DE PXP';
+			                 
+             ELSE
+					 
+                
+			         
+                 PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+                
+                
+                v_res_cone=(select dblink_disconnect());
+             END IF;
+       --raise exception 'final';
+       
+       
+       END IF;
+       
+          
+
+
+
+ END;
+    
+    ELSIF pm_codigo_procedimiento = 'CT_ACCION_ACC' THEN       
+     
+    	BEGIN  
+        
+        --raise exception 'id: %  sw_val: %',ct_id_comprobante,ct_sw_validacion;
+         
+            IF ct_sw_validacion = 'actualizar_fecha' THEN 
+                -- recupera los datos del comprobnate    
+                select id_clase_cbte ,id_periodo_subsis ,id_depto
+                INTO g_id_clase_cbte,g_id_periodo_subsis,g_id_depto
+                from sci.tct_comprobante
+                where id_comprobante =ct_id_comprobante;
+                
+                --recupera el documento 
+                select id_documento 
+                into  g_id_documento
+                from sci.tct_cbte_clase 
+                where id_clase_cbte= g_id_clase_cbte;  
+                
+                --recupera el periodo
+                select id_periodo 
+                into   g_id_periodo
+                from param.tpm_periodo_subsistema 
+                where id_periodo_subsistema=g_id_periodo_subsis; 
+                 
+                --recupera la fecha de la actualizacion 
+                select fecha_final 
+                into g_fecha_actualizacion
+                from param.tpm_periodo 
+                where id_periodo=g_id_periodo;
+                  
+                IF CURRENT_DATE < g_fecha_actualizacion THEN   
+                	g_fecha_actualizacion=CURRENT_DATE;
+                END IF;
+
+                --raise exception 'g_id_depto:% ;g_id_documento: %;g_id_periodo: %',g_id_depto,g_id_documento,g_id_periodo;
+                FOR v_actualizar_fecha IN (SELECT  * 
+                                          FROM sci.tct_comprobante 
+                                          WHERE id_depto= g_id_depto 
+                                          AND id_clase_cbte IN(SELECT id_clase_cbte 
+                                                               FROM sci.tct_cbte_clase 
+                                                               WHERE id_documento = g_id_documento)
+                                          AND id_periodo_subsis IN (SELECT id_periodo_subsistema 
+                                                                    FROM param.tpm_periodo_subsistema 
+                                                                    WHERE id_periodo = g_id_periodo)  
+                                          AND  nro_cbte IS NULL) LOOP 
+                   
+                	g_respuesta_cambio_fecha=sci.f_tct_gestionar_comprobante_iud (pm_id_usuario , pm_ip_origen , pm_mac_maquina , 'CT_REGCOM_UPD' , pm_proc_almacenado , 
+                                                                                  v_actualizar_fecha.id_comprobante , v_actualizar_fecha.id_parametro , v_actualizar_fecha.nro_cbte , 
+                                                                                  v_actualizar_fecha.momento_cbte ,g_fecha_actualizacion , v_actualizar_fecha.concepto_cbte , 
+                                                                                  v_actualizar_fecha.glosa_cbte , v_actualizar_fecha.acreedor , v_actualizar_fecha.aprobacion , 
+                                                                                  v_actualizar_fecha.conformidad , v_actualizar_fecha.pedido ,v_actualizar_fecha.id_periodo_subsis , 
+                                                                                  v_actualizar_fecha.id_subsistema , v_actualizar_fecha.id_clase_cbte ,NULL, v_actualizar_fecha.id_depto,
+                                                                                  v_actualizar_fecha.id_moneda , v_actualizar_fecha.tipo_cambio ) ;
+                    
+                                  
+                    --raise exception 'g_respuesta_cambio_fecha %;% ', REPLACE ( g_respuesta_cambio_fecha, '#@@@#','-'),v_actualizar_fecha.id_comprobante;
+                    IF SUBSTRING(g_respuesta_cambio_fecha from 1 for 1) = 'f' THEN 
+                    	RAISE EXCEPTION 'g_respuesta_cambio_fecha %;% ', REPLACE ( g_respuesta_cambio_fecha, '#@@@#','-'),v_actualizar_fecha.id_comprobante;
+                    END IF;
+                    --g_respuesta_cambio_fecha   
+                                   
+                END LOOP;  
+
+                --Modificacion de la fecha de la transaccion 
+                FOR v_actualizar_transaccion_fecha IN (SELECT * 
+                                                      FROM sci.tct_transaccion  tra
+                                                      INNER JOIN sci.tct_transac_valor trv
+                                                      ON tra.id_transaccion = trv.id_transaccion
+                                                      AND tra.id_moneda = trv.id_moneda
+                                                      INNER JOIN presto.tpr_partida_cuenta parcta
+                                                      ON parcta.id_partida = tra.id_partida
+                                                      AND parcta.id_cuenta = tra.id_cuenta
+                                                      WHERE tra.id_comprobante = ct_id_comprobante) LOOP
+                                                      
+                    g_respuesta_cambio_fecha=sci.f_tct_gestionar_transaccion_iud(pm_id_usuario , pm_ip_origen , pm_mac_maquina , 'CT_REGTRA_UPD' , pm_proc_almacenado , 
+                                                                                 v_actualizar_transaccion_fecha.id_transaccion , v_actualizar_transaccion_fecha.concepto_tran , 
+                                                                                 v_actualizar_transaccion_fecha.id_auxiliar ,v_actualizar_transaccion_fecha.id_comprobante, 
+                                                                                 v_actualizar_transaccion_fecha.id_oec, v_actualizar_transaccion_fecha.id_orden_trabajo,
+                                                                                 v_actualizar_transaccion_fecha.id_partida_cuenta,v_actualizar_transaccion_fecha.id_presupuesto,
+                                                                                 v_actualizar_transaccion_fecha.importe_debe,v_actualizar_transaccion_fecha.importe_haber,
+                                                                                 v_actualizar_transaccion_fecha.importe_gasto,v_actualizar_transaccion_fecha.importe_recurso) ;
+                                                    
+                    --   raise exception 'g_respuesta_cambio_fecha %;% ', REPLACE ( g_respuesta_cambio_fecha, '#@@@#','-'),v_actualizar_fecha.id_comprobante;
+                    IF SUBSTRING(g_respuesta_cambio_fecha from 1 for 1) ='f' THEN 
+                        RAISE EXCEPTION 'Mensaje de la funcion gestionar_transaccion_iud: %; id_comprobante: % ', REPLACE(g_respuesta_cambio_fecha, '#@@@#','-'),v_actualizar_fecha.id_comprobante;
+                    END IF;
+                    
+                END LOOP;
+
+				g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Actualizacion de fechas exitosa ('||ct_id_comprobante||')';
+                g_respuesta := 't'||g_separador||g_descripcion_log_error;  
+                    
+            END IF; -- fin de actualizar fecha
+            
+            
+            IF ct_sw_validacion IN ('duplicar','revertir') THEN 
+            
+                g_id_comprobante= nextval('sci.tct_comprobante_id_comprobante_seq'::regclass); 
+                --inserta el comprobnate
+               g_id_subsistemas=9;           
+                
+               
+                
+                FOR  v_transaccion IN SELECT *
+                                      FROM sci.tct_comprobante
+                                      WHERE id_comprobante= ct_id_comprobante LOOP
+                                                                    
+                                         
+                                      --recupera el periodo subsistema de conta
+                                      select id_periodo 
+                                      into   g_id_periodo
+                                      from param.tpm_periodo_subsistema 
+                                      where id_periodo_subsistema=v_transaccion.id_periodo_subsis;
+                                       
+                                      select id_periodo_subsistema
+                                      into g_id_periodo_subsis
+                                      from param.tpm_periodo_subsistema 
+                                      where  id_subsistema=g_id_subsistemas and id_periodo=g_id_periodo;
+                                      v_transaccion.origen='duplicado';
+                                      
+                                      INSERT INTO  sci.tct_comprobante(
+                                        id_comprobante  ,id_parametro  ,nro_cbte  ,momento_cbte  ,
+                                        fecha_cbte  ,concepto_cbte  ,glosa_cbte  ,acreedor  ,aprobacion  ,
+                                        conformidad  ,pedido  ,id_periodo_subsis  ,id_usuario  ,id_subsistema,
+                                        id_clase_cbte  ,fk_comprobante  ,origen  ,id_depto  ,id_moneda  , 
+                                        tipo_cambio 
+                                      ) 
+                                      VALUES
+                                      (
+                                        g_id_comprobante ,v_transaccion.id_parametro  ,
+                                        null  ,v_transaccion.momento_cbte  ,
+                                        v_transaccion.fecha_cbte  ,v_transaccion.concepto_cbte  ,
+                                        v_transaccion.glosa_cbte  ,v_transaccion.acreedor  ,
+                                        v_transaccion.aprobacion  ,v_transaccion.conformidad  ,
+                                        v_transaccion.pedido  ,g_id_periodo_subsis  ,
+                                        pm_id_usuario  ,g_id_subsistemas  ,
+                                        v_transaccion.id_clase_cbte  ,NULL ,
+                                        v_transaccion.origen  ,v_transaccion.id_depto  ,v_transaccion.id_moneda  ,
+                                        v_transaccion.tipo_cambio
+                                      );                                 
+                      
+                END LOOP;
+ 
+              	INSERT INTO sci.tct_cbte_estado(
+                id_comprobante, id_usuario, estado_cbte, fecha_estado ,sw_estado
+                ) VALUES(
+                g_id_comprobante,pm_id_usuario,2 , CURRENT_DATE,1
+                );
+               
+                --inserta las transacciones
+                FOR  v_transaccion in select id_transaccion,  id_comprobante,  id_fuente_financiamiento,  id_fina_regi_prog_proy_acti,
+                                      id_unidad_organizacional,  id_cuenta,  id_partida,  id_auxiliar,  
+                                      id_orden_trabajo,  id_oec,  concepto_tran,  id_moneda,  fecha_trans,  
+                                      NULL,  id_partida_ejecucion,  id_presupuesto 
+                                      from sci.tct_transaccion 
+                                      where id_comprobante=ct_id_comprobante LOOP
+                                      
+                    g_id_transaccion=nextval('sci.tct_transaccion_id_transaccion_seq'::regclass);
+                    
+                    INSERT INTO sci.tct_transaccion(
+                      id_transaccion,  id_comprobante,  id_fuente_financiamiento,  
+                      id_fina_regi_prog_proy_acti,  id_unidad_organizacional,  
+                      id_cuenta,  id_partida,  id_auxiliar,  id_orden_trabajo,  
+                      id_oec,  concepto_tran,  id_moneda,  fecha_trans,  fk_transaccion,  
+                      id_partida_ejecucion,  id_presupuesto
+                    ) VALUES(
+                      g_id_transaccion,g_id_comprobante, v_transaccion.id_fuente_financiamiento,  
+                      v_transaccion.id_fina_regi_prog_proy_acti,  v_transaccion.id_unidad_organizacional, 
+                      v_transaccion.id_cuenta,  v_transaccion.id_partida,  v_transaccion.id_auxiliar,  
+                      v_transaccion.id_orden_trabajo,  v_transaccion.id_oec,  v_transaccion.concepto_tran, 
+                      v_transaccion.id_moneda,  v_transaccion.fecha_trans,  null, 
+                      NULL,  v_transaccion.id_presupuesto
+                    );
+                    
+                    if ct_sw_validacion='duplicar' THEN
+                        INSERT into sci.tct_transac_valor 
+                        select nextval('sci.tct_transac_valor_id_transac_valor_seq'::regclass),  g_id_transaccion,  
+                        id_moneda,  importe_debe,  importe_haber,  importe_recurso,  importe_gasto  
+                        from  sci.tct_transac_valor 
+                        where id_transaccion=v_transaccion.id_transaccion;  
+                    END IF; 
+                    
+                    if ct_sw_validacion='revertir' THEN
+                        INSERT into sci.tct_transac_valor 
+                        select nextval('sci.tct_transac_valor_id_transac_valor_seq'::regclass),  g_id_transaccion,  
+                        id_moneda, importe_haber, importe_debe, importe_gasto ,  importe_recurso
+                        from  sci.tct_transac_valor 
+                        where id_transaccion=v_transaccion.id_transaccion;  
+                    END IF;
+                    
+                END LOOP;
+                   
+                g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Se genero el comprobante correctamente('||g_id_comprobante||')';
+                g_respuesta := 't'||g_separador||g_descripcion_log_error;   
+                   
+            END IF;   --fin de duplicar o revertir          
+          
+        	--cuando finalizamos un comprobante enviado a edicion
+            IF ct_sw_validacion in ('fin_edicion','fin_edicion_igulando')THEN    
+             --validavion del comprobante  e igualacion del comprobante
+
+                  if ct_sw_validacion= 'fin_edicion' then 
+                          g_sw_valiadcion=1;
+                  end if;
+                  
+                  if ct_sw_validacion= 'fin_edicion_igulando' then 
+                          g_sw_valiadcion=2;
+                  end if;
+               
+                  g_validacionComprobante= sci.f_tct_validacionComprobante(ct_id_comprobante,g_sw_valiadcion);
+                  
+                  if  g_validacionComprobante!=1 THEN    
+                    raise exception '(f_tct_gestionar_comprobante_iud) No se pudo validar el comprobante: g_validacionComprobante: %,g_sw_valiadcion: %,ct_id_comprobante: %',g_validacionComprobante,g_sw_valiadcion,ct_id_comprobante;        
+                  END IF; 
+
+                  --validacion de las cuentas del comprobante
+                   g_mensaje_validacion=sci.f_ct_validacion_cbte_cta_aux(ct_id_comprobante);
+                   
+                   /*if ct_id_comprobante = 45508 then --41407 then
+                  	raise exception 'en mantenimiento... %',g_mensaje_validacion;
+                  end if;*/
+                   IF g_mensaje_validacion!='TRUE'  THEN  
+                   raise exception '%',g_mensaje_validacion;         
+                   END IF;  
+--                 if ct_id_comprobante = 62349 then raise exception 'aaaaabbb'; end if;                                
+                    
+                   --modifica los estados de los otros comprobantes 
+                   update sci.tct_cbte_estado set 
+                   sw_estado=2
+                   where sci.tct_cbte_estado.id_comprobante=ct_id_comprobante;
+                   
+                  --recuperar los datos del comprobante 
+                  select origen ,fk_comprobante ,momento_cbte,id_subsistema,id_clase_cbte ,id_periodo_subsis ,id_parametro ,id_depto , tipo_relacion
+                  INTO g_origen ,g_fk_comprobante ,g_momento_cbte,g_id_subsistema_cbte,g_id_clase_cbte,g_id_periodo_subsis, g_id_parametro,g_id_depto, g_tipo_relacion
+                  from sci.tct_comprobante
+                  where id_comprobante =ct_id_comprobante;
+                  
+                  raise notice '896 %',g_origen;
+                  IF (g_origen is not null and  g_origen='duplicado' )  THEN  
+                              if (sci.f_i_ct_gestionar_validacion_eliminacion_cbtes_generados(ct_id_comprobante , 'CT_REGCOM_UPD', NULL,pm_id_usuario, pm_ip_origen, pm_mac_maquina)='FALSE') THEN
+                              raise exception ' No se pudo validar el comprobante; g_origen: %',g_origen;
+                              END IF; 
+                               g_bandera_validacion=1.00 ;   
+                  END IF;
+                  
+                  raise notice '896';
+                  --ejecucion presupuestaria de los comprobantes registrados        
+                  /*IF g_momento_cbte >0  and g_id_subsistema_cbte=9  and (g_origen is NULL )  THEN        
+                      --se procede a la verificacion de la disponibilidad de presupuesto
+                      g_resultado_presupuesto=sci.f_eje_pre_contabilidad2(ct_id_comprobante); 
+                      g_bandera_validacion=1.00  ;
+                  END IF;*/ 
+                  
+                  --raise exception 'g_momento_cbte:%, g_id_subsistema_cbte:%, g_origen:%, g_tipo_relacion:% .', g_momento_cbte, g_id_subsistema_cbte, g_origen, g_tipo_relacion;
+                  --ejecucion presupuestaria de los comprobnates registrados        
+                  IF g_momento_cbte>0  and g_id_subsistema_cbte=9  and g_origen is NULL and ( g_tipo_relacion !='pagado_del_devengado' or  g_tipo_relacion is NULL)THEN        
+                  	
+                    --raise exception 'Grover llega1';
+                    --se proce de a la verificacion del presupuesto
+                      g_resultado_presupuesto=sci.f_eje_pre_contabilidad2(ct_id_comprobante); 
+                      g_bandera_validacion=1.00  ;
+                  END IF; 
+                  
+                  --ejecucion del momento pagado cuando hacemos referecia a otro comprobante de devengado
+                   IF g_momento_cbte>0  and g_id_subsistema_cbte=9  and g_origen is NULL and g_tipo_relacion ='pagado_del_devengado' THEN        
+				
+				      --raise exception 'Grover llega2';
+                  	  --se proce de a la verificacion del presupuesto
+                      g_resultado_presupuesto=sci.f_eje_pre_contabilidad_pagado(ct_id_comprobante); 
+                      g_bandera_validacion=1.00  ;
+                  END IF;
+                  
+                  
+                  
+                  IF g_momento_cbte =0  and g_id_subsistema_cbte=9 and g_id_clase_cbte in (1,3,5) THEN        
+                      g_bandera_validacion=1.00  ;
+                  END IF;
+                  
+                  IF  g_id_subsistema_cbte!=9   THEN        
+                      g_bandera_validacion=1.00  ;
+                  END IF;
+                  
+                  --mesaje de error si la bandera no cambio de valor
+                  IF g_bandera_validacion=0.00   THEN    
+                       raise exception '%','Operacion no Realizada: Sistema:'||g_id_subsistema_cbte||'    Tipo Comprobante'||g_id_clase_cbte||' Momento Presupuestario: '||g_momento_cbte;
+                  END IF; 
+                   
+                   --inserta el nuevo estado de validado del comprobante                   
+                   insert into sci.tct_cbte_estado(id_comprobante,id_usuario,estado_cbte,fecha_estado,sw_estado) 
+                                VALUES( ct_id_comprobante,pm_id_usuario,1.00,CURRENT_DATE,1.00 );
+                   
+                   /*if ct_id_comprobante = 35274 then
+             		raise exception 'Integridad al cien por cien';
+            		 end if; */
+                   
+                  g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Cambio de estado exitoso ('||ct_id_comprobante||')';
+                  g_respuesta := 't'||g_separador||g_descripcion_log_error;    
+            
+            END IF;  
+            
+          
+            
+          
+    END;
+    
+    ELSIF pm_codigo_procedimiento = 'CT_CBTEVA_MOD' THEN --ComproBanTE VAlidado MODificacion
+        BEGIN 
+            /*
+            Autor: RCM
+            Fecha: 22/04/2010
+            Descripción: Procedimiento que habilitará al comprobante validado para su modificación, creando el log del comprobante al momento.
+            
+            1. Validación de existencia del comprobante, estado sea validado.
+            2. Guardar en comprobante el usuario a realizar la modificación
+            3. Registrar el cambio de estado en cbte_estado
+            4. Generación del log del comprobante
+            5. Devolver respuesta
+            */
+            
+            /*1. Validación de existencia del comprobante, estado sea validado.*/
+            IF NOT EXISTS(SELECT 1 FROM sci.tct_comprobante
+                        WHERE id_comprobante = ct_id_comprobante) THEN
+                RAISE EXCEPTION 'Comprobante inexistente';
+            END IF;
+            
+            IF NOT EXISTS(SELECT 1 FROM sci.tct_cbte_estado
+                        WHERE id_comprobante = ct_id_comprobante
+                        AND estado_cbte = 1
+                        AND sw_estado = 1) THEN
+                RAISE EXCEPTION 'No se puede habilitar el comprobante porque no está en estado Validado';
+            END IF;
+            if (select fecha_cbte BETWEEN '01/01/2010' and '12/31/2010'
+                from sci.tct_comprobante
+                where id_comprobante=ct_id_comprobante) THEN
+                raise EXCeption '%','No se puede habilitar el comprobante por cierre de gestiòn';
+            END IF;
+            /*2. Guardar en comprobante el usuario a realizar la modificación*/
+            UPDATE sci.tct_comprobante SET
+            id_usuario_mod = ct_id_usuario_mod
+            WHERE id_comprobante = ct_id_comprobante;
+            
+            /*3. Generación del log del comprobante*/
+            g_resp = sci.f_ct_generar_comprobante_log(ct_id_comprobante);
+            
+            /*4. Registrar el cambio de estado en cbte_estado*/
+            g_resp = sci.f_ct_historico_estado_cbte(ct_id_comprobante,ct_id_usuario_mod,3);
+            
+            /*5. Devolver respuesta*/
+            g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Comprobante habilitado para su modificación ('||ct_id_comprobante||')';
+            g_respuesta := 't'||g_separador||g_descripcion_log_error;  
+        END;
+    
+    ELSE
+        --PROCEDIMIENTO INEXISTENTE
+        g_nivel_error := '2';
+        g_descripcion_log_error := 'Procedimiento inexistente';
+        g_respuesta := param.f_pm_mensaje_error(g_descripcion_log_error, g_nombre_funcion, g_nivel_error, pm_codigo_procedimiento);
+        
+        --REGISTRA EL LOG
+        g_reg_evento:= sss.f_tsg_registro_evento(pm_id_usuario            ,g_id_subsistema           ,g_id_lugar         ,g_descripcion_log_error,
+                                            pm_ip_origen              ,pm_mac_maquina            ,'error'            ,NULL,
+                                            pm_codigo_procedimiento   ,pm_proc_almacenado);
+        --DEVUELVE MENSAJE DE ERROR
+        RETURN 'f'||g_separador||g_respuesta||g_separador||g_reg_evento;
+        
+    END IF;
+
+    ---*** REGISTRO EN EL LOG EL ÉXITO DE LA EJECUIÓN DEL PROCEDIMIENTO
+    g_reg_evento:= sss.f_tsg_registro_evento(pm_id_usuario             ,g_id_subsistema           ,g_id_lugar         ,g_descripcion_log_error,
+                                         pm_ip_origen              ,pm_mac_maquina            ,'log'              ,NULL,
+                                         pm_codigo_procedimiento   ,pm_proc_almacenado);
+
+    ---*** SE DEVUELVE LA RESPUESTA
+    RETURN g_respuesta||g_separador||g_reg_evento;
+
+
+EXCEPTION
+
+    WHEN others THEN BEGIN
+
+        --SE OBTIENE EL MENSAJE Y EL NÚMERO DEL ERROR LANZADO POR EL GESTOR DE BASE DE DATOS
+        g_mensaje_error := SQLERRM ;
+        g_numero_error := SQLSTATE;
+    
+        -- SE REGISTRA EL ERROR OCURRIDO
+        g_reg_error:= sss.f_tsg_registro_evento (pm_id_usuario            ,g_id_subsistema          ,g_id_lugar         ,g_mensaje_error,
+                                             pm_ip_origen             ,pm_mac_maquina           ,'error'            ,g_numero_error,
+                                             pm_codigo_procedimiento  ,pm_proc_almacenado);
+                                             
+        --SE DEVUELVE EL MENSAJE DE ERROR
+        g_nivel_error := '1';
+        g_descripcion_log_error := g_numero_error || ' - ' || g_mensaje_error;
+        g_respuesta := param.f_pm_mensaje_error(g_descripcion_log_error, g_nombre_funcion, g_nivel_error, pm_codigo_procedimiento);
+        RETURN 'f'||g_separador||g_respuesta||g_separador||g_reg_error;         
+    END;
+    
+END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

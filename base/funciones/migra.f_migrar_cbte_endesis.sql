@@ -1,3 +1,10 @@
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_endesis (
+  p_id_int_comprobante integer
+)
+RETURNS varchar AS
+$body$
 /*
 Autor: RCM
 Fecha: 24/09/2013
@@ -26,6 +33,8 @@ DECLARE
     va_importe_gasto numeric[];
     va_id_uo integer[];
 	va_id_ep integer[];
+    
+    v_id_depto_endesis  integer;
 
 BEGIN
 
@@ -64,7 +73,16 @@ BEGIN
 	on cla.id_clase_comprobante = cbte.id_clase_comprobante
     where cbte.id_int_comprobante = p_id_int_comprobante;
     
---    raise exception '%',v_rec.id_int_comprobante;
+    
+    select 
+        dd.id_depto_endesis 
+      into 
+        v_id_depto_endesis 
+    from migra.tdepto_to_depto_endesis dd 
+    where dd.id_depto_pxp = v_rec.id_depto;
+    
+    
+    v_rec.id_depto = v_id_depto_endesis;
     
     --Obtiene los datos de la transacción
     v_cont = 1;
@@ -88,9 +106,10 @@ BEGIN
                   cco.id_uo,
                   cco.id_ep
                   from conta.tint_transaccion tra
-                  left join param.tcentro_costo cco
+                  inner join param.tcentro_costo cco
                   on cco.id_centro_costo = tra.id_centro_costo
                   where tra.id_int_comprobante = p_id_int_comprobante) loop
+                  
     	va_id_int_transaccion[v_cont]=v_dat.id_int_transaccion;
         va_id_cuenta[v_cont]=v_dat.id_cuenta;
         va_id_auxiliar[v_cont]=v_dat.id_auxiliar;
@@ -98,7 +117,7 @@ BEGIN
         va_id_partida[v_cont]=v_dat.id_partida;
         va_id_partida_ejecucion[v_cont]=v_dat.id_partida_ejecucion;
         va_id_int_transaccion_fk[v_cont]=v_dat.id_int_transaccion_fk;
-        va_glosa[v_cont]=v_dat.glosa;
+        va_glosa[v_cont]=COALESCE(v_dat.glosa,'--');
         va_importe_debe[v_cont]=v_dat.importe_debe;
         va_importe_haber[v_cont]=v_dat.importe_haber;
         va_importe_recurso[v_cont]=v_dat.importe_recurso;
@@ -107,10 +126,6 @@ BEGIN
         va_id_ep[v_cont]=v_dat.id_ep;
         v_cont = v_cont + 1;
    	end loop;
-    
-    if v_cont = 1 then
-    	raise exception 'No se ha podido generar el comprobante. Comuníquese con el administrador';
-    end if;
     
     --Forma la llamada para enviar los datos del comprobante al servidor destino
     v_sql:='select migracion.f_migrar_cbte_pxp('||
@@ -148,7 +163,7 @@ BEGIN
                 '||COALESCE(('array['|| array_to_string(va_id_uo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['|| array_to_string(va_id_ep, ',')||']::integer[]')::varchar,'NULL::integer[]')||') ';
                 
-                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
+                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>FASS: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
 
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
@@ -170,3 +185,9 @@ BEGIN
     return 'Hecho';
 
 END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;
