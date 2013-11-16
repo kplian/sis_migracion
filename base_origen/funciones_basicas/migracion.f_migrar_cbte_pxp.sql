@@ -69,13 +69,15 @@ BEGIN
     v_mensaje_verif='';
     v_id_subsistema=9;
     v_momento_cbte=0;
-    v_origen=NULL;
+    v_origen='pxp';
     v_ip_origen='0.0.0.0';
     v_importe_ejecucion=0;
     v_mac_maquina='autogenerado';
     v_resp='';
 
     v_size = array_upper(p_id_int_transaccion, 1);
+    
+    --raise exception 'hola: %',v_size;
     
     for i in 1..v_size loop
     	insert into migracion.tct_comprobante
@@ -128,7 +130,6 @@ BEGIN
 		--Obtención de parámetros
         --id_parametro, momento_cbte, id_periodo_subsis, id_subsistema, id_usuario, id_clase_cbte,id_depto
 
-        --TODO: sincronizar id_depto para que sean iguales entre pxp y endesis
         --Obtener id_parametro
         select id_parametro
         into v_id_parametro
@@ -222,7 +223,7 @@ BEGIN
         id_comprobante,id_usuario,estado_cbte,fecha_estado,sw_estado
         ) VALUES(
         v_id_comprobante,v_rec.id_usuario_reg,2.00,CURRENT_DATE,1.00 );
-        
+
         --3. Registro de las transacciones
         v_resp = sci.f_tct_gestionar_transaccion_iud(
         					v_rec.id_usuario_reg,--pm_id_usuario integer, 
@@ -231,7 +232,7 @@ BEGIN
                             'CT_REGTRA_INS',--pm_codigo_procedimiento varchar, 
                             NULL,--pm_proc_almacenado varchar, 
                             NULL,--ct_id_transaccion integer, 
-                            NULL,--ct_concepto_tran varchar, 
+                            v_rec.glosa,--ct_concepto_tran varchar, 
                             v_rec.id_auxiliar,--ct_id_auxiliar integer, 
                             v_id_comprobante,--ct_id_comprobante integer, 
                             NULL,--ct_id_oec integer, 
@@ -243,6 +244,7 @@ BEGIN
                             v_rec.importe_haber,--ct_importe_haber numeric, 
                             v_rec.importe_gasto,--ct_importe_gasto numeric, 
                             v_rec.importe_recurso);--ct_importe_recurso numeric);
+                            
         
 		/*v_resp = sci.f_tct_transaccion_iud(
                 v_rec.id_usuario_reg,--pm_id_usuario integer,

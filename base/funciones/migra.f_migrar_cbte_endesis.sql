@@ -1,8 +1,3 @@
-CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_endesis (
-  p_id_int_comprobante integer
-)
-RETURNS varchar AS
-$body$
 /*
 Autor: RCM
 Fecha: 24/09/2013
@@ -69,6 +64,8 @@ BEGIN
 	on cla.id_clase_comprobante = cbte.id_clase_comprobante
     where cbte.id_int_comprobante = p_id_int_comprobante;
     
+--    raise exception '%',v_rec.id_int_comprobante;
+    
     --Obtiene los datos de la transacción
     v_cont = 1;
     for v_dat in (select
@@ -91,7 +88,7 @@ BEGIN
                   cco.id_uo,
                   cco.id_ep
                   from conta.tint_transaccion tra
-                  inner join param.tcentro_costo cco
+                  left join param.tcentro_costo cco
                   on cco.id_centro_costo = tra.id_centro_costo
                   where tra.id_int_comprobante = p_id_int_comprobante) loop
     	va_id_int_transaccion[v_cont]=v_dat.id_int_transaccion;
@@ -173,9 +170,3 @@ BEGIN
     return 'Hecho';
 
 END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
