@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_endesis (
   p_id_int_comprobante integer
 )
@@ -103,7 +105,7 @@ BEGIN
         va_id_partida[v_cont]=v_dat.id_partida;
         va_id_partida_ejecucion[v_cont]=v_dat.id_partida_ejecucion;
         va_id_int_transaccion_fk[v_cont]=v_dat.id_int_transaccion_fk;
-        va_glosa[v_cont]=coalesce(v_dat.glosa,'S/N');
+        va_glosa[v_cont]=v_dat.glosa;
         va_importe_debe[v_cont]=v_dat.importe_debe;
         va_importe_haber[v_cont]=v_dat.importe_haber;
         va_importe_recurso[v_cont]=v_dat.importe_recurso;
