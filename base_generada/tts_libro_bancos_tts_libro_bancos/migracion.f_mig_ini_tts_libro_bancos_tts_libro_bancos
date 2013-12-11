@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_ingas()
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_libro_bancos_tts_libro_bancos()
 						RETURNS boolean AS
 						$BODY$
 
@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_inga
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tconcepto_ingas'',''PRE'',''eliminar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_libro_bancos'',''MIGRA'',''eliminar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
@@ -37,36 +37,54 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_inga
 						   --consulta los registro de la tabla origen
 						    FOR g_registros in (
 						        SELECT 
-						id_concepto_ingas,
-						id_item,
-						id_oec,
-						id_partida,
-						id_servicio,
-						desc_ingas,
+						id_cuenta_bancaria,
+						id_libro_bancos,
+						fk_libro_bancos,
+						id_cuenta_bancaria,
+						a_favor,
+						detalle,
+						estado,
+						fecha,
+						fecha_mod,
 						fecha_reg,
-						id_usr_reg,
-						sw_tesoro,
+						importe_cheque,
+						importe_deposito,
+						indice,
+						nro_cheque,
+						nro_comprobante,
+						nro_liquidacion,
+						observaciones,
+						origen,
 						tipo,
-						activo_fijo,
-						almacenable
+						usr_mod,
+						usr_reg
 FROM 
-						          PRESTO.tpr_concepto_ingas) LOOP
+						          TESORO.tts_libro_bancos) LOOP
 						        
 						        -- inserta en el destino
 						      
-						            v_cadena_resp = migracion.f_trans_tpr_concepto_ingas_tconcepto_ingas(
-						            'INSERT',g_registros.id_concepto_ingas
-					,g_registros.id_item
-					,g_registros.id_oec
-					,g_registros.id_partida
-					,g_registros.id_servicio
-					,g_registros.desc_ingas
+						            v_cadena_resp = migracion.f_trans_tts_libro_bancos_tts_libro_bancos(
+						            'INSERT',g_registros.id_cuenta_bancaria
+					,g_registros.id_libro_bancos
+					,g_registros.fk_libro_bancos
+					,g_registros.id_cuenta_bancaria
+					,g_registros.a_favor
+					,g_registros.detalle
+					,g_registros.estado
+					,g_registros.fecha
+					,g_registros.fecha_mod
 					,g_registros.fecha_reg
-					,g_registros.id_usr_reg
-					,g_registros.sw_tesoro
+					,g_registros.importe_cheque
+					,g_registros.importe_deposito
+					,g_registros.indice
+					,g_registros.nro_cheque
+					,g_registros.nro_comprobante
+					,g_registros.nro_liquidacion
+					,g_registros.observaciones
+					,g_registros.origen
 					,g_registros.tipo
-					,g_registros.activo_fijo
-					,g_registros.almacenable
+					,g_registros.usr_mod
+					,g_registros.usr_reg
 					);	
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
@@ -82,7 +100,7 @@ FROM
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tconcepto_ingas'',''PRE'',''insertar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_libro_bancos'',''MIGRA'',''insertar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());

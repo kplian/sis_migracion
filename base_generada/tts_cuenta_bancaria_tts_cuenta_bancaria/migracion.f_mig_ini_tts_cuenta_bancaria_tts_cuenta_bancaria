@@ -1,8 +1,7 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_ingas()
-						RETURNS boolean AS
-						$BODY$
-
-
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_cuenta_bancaria_tts_cuenta_bancaria (
+)
+RETURNS boolean AS
+$body$
 						DECLARE
 						 
 						g_registros record;
@@ -17,57 +16,55 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpr_concepto_ingas_tconcepto_inga
 						     --funcion para obtener cadena de conexion
 							 v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
 									          
-						  
+
 						    --quirta llaves foraneas en el destino
 						     v_resp =  (SELECT dblink_connect(v_cadena_cnx));
-									            
+
 						     IF(v_resp!='OK') THEN
 									            
 						        --modificar bandera de fallo  
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tconcepto_ingas'',''PRE'',''eliminar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_cuenta_bancaria'',''MIGRA'',''eliminar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+
 						        v_res_cone=(select dblink_disconnect());
 						     END IF;
 						
-						
+
 						   --consulta los registro de la tabla origen
 						    FOR g_registros in (
 						        SELECT 
-						id_concepto_ingas,
-						id_item,
-						id_oec,
-						id_partida,
-						id_servicio,
-						desc_ingas,
-						fecha_reg,
-						id_usr_reg,
-						sw_tesoro,
-						tipo,
-						activo_fijo,
-						almacenable
-FROM 
-						          PRESTO.tpr_concepto_ingas) LOOP
+                                cb.id_cuenta_bancaria,
+                                cb.id_auxiliar,
+                                cb.id_cuenta,
+                                cb.id_institucion,
+                                cb.id_parametro,
+                                cb.estado_cuenta,
+                                cb.nro_cheque,
+                                cb.nro_cuenta_banco,
+                                pa.id_gestion
+                                FROM TESORO.tts_cuenta_bancaria cb
+                                INNER JOIN tesoro.tts_parametro pa
+                                ON pa.id_parametro = cb.id_parametro
+                                ORDER BY pa.id_gestion
+                                ) LOOP
 						        
 						        -- inserta en el destino
-						      
-						            v_cadena_resp = migracion.f_trans_tpr_concepto_ingas_tconcepto_ingas(
-						            'INSERT',g_registros.id_concepto_ingas
-					,g_registros.id_item
-					,g_registros.id_oec
-					,g_registros.id_partida
-					,g_registros.id_servicio
-					,g_registros.desc_ingas
-					,g_registros.fecha_reg
-					,g_registros.id_usr_reg
-					,g_registros.sw_tesoro
-					,g_registros.tipo
-					,g_registros.activo_fijo
-					,g_registros.almacenable
+						            v_cadena_resp = migracion.f_trans_tts_cuenta_bancaria_tts_cuenta_bancaria(
+						            'INSERT',g_registros.id_cuenta_bancaria
+					,g_registros.id_auxiliar
+					,g_registros.id_cuenta
+					,g_registros.id_institucion
+					,g_registros.id_parametro
+					,g_registros.estado_cuenta
+					,g_registros.nro_cheque
+					,g_registros.nro_cuenta_banco
+                    ,g_registros.id_gestion
 					);	
+
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
 					            END IF; 	
@@ -82,7 +79,7 @@ FROM
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tconcepto_ingas'',''PRE'',''insertar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_cuenta_bancaria'',''MIGRA'',''insertar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
@@ -90,10 +87,8 @@ FROM
 						
 						RETURN TRUE;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

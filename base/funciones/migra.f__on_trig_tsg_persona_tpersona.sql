@@ -31,8 +31,14 @@ $body$
 						*/
 						
 						DECLARE
+                        
+                        	v_cadena_cnx varchar;
 						
 						BEGIN
+                        
+                        	v_cadena_cnx = migra.f_obtener_cadena_conexion();
+                            
+                            
 						
 						    if(v_operacion = 'INSERT') THEN
 						
@@ -79,19 +85,44 @@ $body$
 						p_num_documento,
 						p_telefono1,
 						p_telefono2);
-                          
-                        update segu.tpersona set 
+                      
+                       /* update segu.tpersona set 
                             foto=(
                                     select foto 
-                                    from dblink('host=192.168.1.108 dbname=dbendesis user=postgres password=postgres','select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
+                                    --from dblink('host=192.168.1.108 dbname=dbendesis user=postgres password=postgres','select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
+                                    from dblink(v_cadena_cnx,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
                                     as (foto bytea))
-                             where id_persona=p_id_persona;
+                             where id_persona=p_id_persona;*/
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
+                                
+                                
+                                /*raise exception '%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%',p_apellido_materno
+						 ,p_apellido_paterno
+						 ,p_celular1
+						 ,p_celular2
+						 ,p_ci
+						 ,p_correo
+						 ,p_direccion
+						 ,p_estado_reg
+						 ,p_extension
+						 ,p_fecha_mod
+						 ,p_fecha_nacimiento
+						 ,p_fecha_reg
+						 ,p_genero
+						 ,p_id_usuario_mod
+						 ,p_id_usuario_reg
+						 ,p_nombre
+						 ,p_num_documento
+						 ,p_telefono1
+						 ,p_telefono2;*/
+                                
+
 						               UPDATE 
 						                  SEGU.tpersona  
-						                SET						 apellido_materno=p_apellido_materno
+						                SET						 
+                                        apellido_materno=p_apellido_materno
 						 ,apellido_paterno=p_apellido_paterno
 						 ,celular1=p_celular1
 						 ,celular2=p_celular2
@@ -111,13 +142,16 @@ $body$
 						 ,telefono1=p_telefono1
 						 ,telefono2=p_telefono2
 						 WHERE id_persona=p_id_persona;
+                         
+                      
 
-						 update segu.tpersona set 
+						 /*update segu.tpersona set 
                             foto=(
                                     select foto 
-                                    from dblink('host=192.168.1.108 dbname=dbendesis user=postgres password=postgres','select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
+                                    --from dblink('host=192.168.1.108 dbname=dbendesis user=postgres password=postgres','select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
+                                    from dblink(v_cadena_cnx,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
                                     as (foto bytea))
-                             where id_persona=p_id_persona;
+                             where id_persona=p_id_persona;*/
       
                          
 						       ELSEIF  v_operacion = 'DELETE' THEN
