@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migracion.f_trans_tsg_persona_tpersona (
   v_operacion varchar,
   p_apellido_paterno varchar,
@@ -27,7 +29,8 @@ CREATE OR REPLACE FUNCTION migracion.f_trans_tsg_persona_tpersona (
   p_observaciones text,
   p_pag_web varchar,
   p_telefono1 varchar,
-  p_telefono2 varchar
+  p_telefono2 varchar,
+  p_correo2 varchar
 )
 RETURNS varchar [] AS
 $body$
@@ -64,6 +67,7 @@ DECLARE
 			v_num_documento int4;
 			v_telefono1 varchar;
 			v_telefono2 varchar;
+            v_correo2 varchar;
 BEGIN
 			
 			
@@ -96,12 +100,16 @@ BEGIN
 			v_num_documento=NULL::int4;
 			v_telefono1=convert(p_telefono1::varchar, 'LATIN1', 'UTF8');
 			v_telefono2=convert(p_telefono2::varchar, 'LATIN1', 'UTF8');
+            
+            v_correo2=convert(p_correo2::varchar, 'LATIN1', 'UTF8');
+            
+            
 
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tsg_persona_tpersona (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_persona::varchar,'NULL')||','||COALESCE(''''||v_apellido_materno::varchar||'''','NULL')||','||COALESCE(''''||v_apellido_paterno::varchar||'''','NULL')||','||COALESCE(''''||v_celular1::varchar||'''','NULL')||','||COALESCE(''''||v_celular2::varchar||'''','NULL')||','||COALESCE(''''||v_ci::varchar||'''','NULL')||','||COALESCE(''''||v_correo::varchar||'''','NULL')||','||COALESCE(''''||v_direccion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_extension::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_nacimiento::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(''''||v_genero::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')||','||COALESCE(v_num_documento::varchar,'NULL')||','||COALESCE(''''||v_telefono1::varchar||'''','NULL')||','||COALESCE(''''||v_telefono2::varchar||'''','NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_persona::varchar,'NULL')||','||COALESCE(''''||v_apellido_materno::varchar||'''','NULL')||','||COALESCE(''''||v_apellido_paterno::varchar||'''','NULL')||','||COALESCE(''''||v_celular1::varchar||'''','NULL')||','||COALESCE(''''||v_celular2::varchar||'''','NULL')||','||COALESCE(''''||v_ci::varchar||'''','NULL')||','||COALESCE(''''||v_correo::varchar||'''','NULL')||','||COALESCE(''''||v_direccion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_extension::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_nacimiento::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(''''||v_genero::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')||','||COALESCE(v_num_documento::varchar,'NULL')||','||COALESCE(''''||v_telefono1::varchar||'''','NULL')||','||COALESCE(''''||v_telefono2::varchar||'''','NULL')||','||COALESCE(''''||v_correo2::varchar||'''','NULL')||   ')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
