@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_libro_bancos_tts_libro_bancos()
 						RETURNS boolean AS
 						$BODY$
 
@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tinstitucion'',''PARAM'',''eliminar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_libro_bancos'',''MIGRA'',''eliminar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
@@ -36,66 +36,55 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
 						
 						   --consulta los registro de la tabla origen
 						    FOR g_registros in (
-						        SELECT DISTINCT
-						inst.id_institucion,
-						inst.id_tipo_doc_institucion,
-						inst.casilla,
-						inst.celular1,
-						inst.celular2,
-						inst.codigo,
-						inst.codigo_banco,
-						inst.direccion,
-						inst.doc_id,
-						inst.email1,
-						inst.email2,
-						inst.estado_institucion,
-						inst.fax,
-						inst.fecha_registro,
-						inst.fecha_ultima_modificacion,
-						inst.hora_registro,
-						inst.hora_ultima_modificacion,
-						inst.id_persona,
-						inst.nombre,
-						inst.observaciones,
-						inst.pag_web,
-						inst.telefono1,
-						inst.telefono2,
-						case coalesce(cban.id_institucion,0)
-                        	when 0 then 'no'::varchar
-                            else 'si'::varchar
-                        end as es_banco
-						FROM 
-						PARAM.tpm_institucion inst
-						LEFT JOIN tesoro.tts_cuenta_bancaria cban
-						ON cban.id_institucion = inst.id_institucion) LOOP
+						        SELECT 
+						id_cuenta_bancaria,
+						id_libro_bancos,
+						fk_libro_bancos,
+						id_cuenta_bancaria,
+						a_favor,
+						detalle,
+						estado,
+						fecha,
+						fecha_mod,
+						fecha_reg,
+						importe_cheque,
+						importe_deposito,
+						indice,
+						nro_cheque,
+						nro_comprobante,
+						nro_liquidacion,
+						observaciones,
+						origen,
+						tipo,
+						usr_mod,
+						usr_reg
+FROM 
+						          TESORO.tts_libro_bancos) LOOP
 						        
 						        -- inserta en el destino
 						      
-						            v_cadena_resp = migracion.f_trans_tpm_institucion_tinstitucion(
-						            'INSERT',g_registros.id_institucion
-					,g_registros.id_tipo_doc_institucion
-					,g_registros.casilla
-					,g_registros.celular1
-					,g_registros.celular2
-					,g_registros.codigo
-					,g_registros.codigo_banco
-					,g_registros.direccion
-					,g_registros.doc_id
-					,g_registros.email1
-					,g_registros.email2
-					,g_registros.estado_institucion
-					,g_registros.fax
-					,g_registros.fecha_registro
-					,g_registros.fecha_ultima_modificacion
-					,g_registros.hora_registro
-					,g_registros.hora_ultima_modificacion
-					,g_registros.id_persona
-					,g_registros.nombre
+						            v_cadena_resp = migracion.f_trans_tts_libro_bancos_tts_libro_bancos(
+						            'INSERT',g_registros.id_cuenta_bancaria
+					,g_registros.id_libro_bancos
+					,g_registros.fk_libro_bancos
+					,g_registros.id_cuenta_bancaria
+					,g_registros.a_favor
+					,g_registros.detalle
+					,g_registros.estado
+					,g_registros.fecha
+					,g_registros.fecha_mod
+					,g_registros.fecha_reg
+					,g_registros.importe_cheque
+					,g_registros.importe_deposito
+					,g_registros.indice
+					,g_registros.nro_cheque
+					,g_registros.nro_comprobante
+					,g_registros.nro_liquidacion
 					,g_registros.observaciones
-					,g_registros.pag_web
-					,g_registros.telefono1
-					,g_registros.telefono2
-					,g_registros.es_banco
+					,g_registros.origen
+					,g_registros.tipo
+					,g_registros.usr_mod
+					,g_registros.usr_reg
 					);	
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
@@ -111,7 +100,7 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tinstitucion'',''PARAM'',''insertar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_libro_bancos'',''MIGRA'',''insertar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
