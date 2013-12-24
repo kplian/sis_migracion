@@ -1,12 +1,12 @@
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
-						  v_operacion varchar,p_codigo varchar,p_id_institucion int4,p_id_persona int4,p_cargo_representante varchar,p_casilla varchar,p_celular1 varchar,p_celular2 varchar,p_codigo_banco varchar,p_direccion varchar,p_doc_id varchar,p_email1 varchar,p_email2 varchar,p_es_banco varchar,p_estado_reg varchar,p_fax varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nombre varchar,p_observaciones text,p_pag_web varchar,p_telefono1 varchar,p_telefono2 varchar)
+						  v_operacion varchar,p_codigo varchar,p_id_institucion int4,p_cargo_representante varchar,p_casilla varchar,p_celular1 varchar,p_celular2 varchar,p_codigo_banco varchar,p_direccion varchar,p_doc_id varchar,p_email1 varchar,p_email2 varchar,p_es_banco varchar,p_estado_reg varchar,p_fax varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_persona int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nombre varchar,p_observaciones text,p_pag_web varchar,p_telefono1 varchar,p_telefono2 varchar)
 						RETURNS text AS
 						$BODY$
 
 /*
 						Function:  Para migracion de la tabla param.tgestion
-						Fecha Creacion:  February 8, 2013, 4:26 pm
-						Autor: autogenerado (ADMINISTRADOR DEL SISTEMA )
+						Fecha Creacion:  December 24, 2013, 1:52 pm
+						Autor: autogenerado (DORA CASTRO MINA)
 						
 						*/
 						
@@ -20,7 +20,6 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
 						            PARAM.tinstitucion (
 						codigo,
 						id_institucion,
-						id_persona,
 						cargo_representante,
 						casilla,
 						celular1,
@@ -35,6 +34,7 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
 						fax,
 						fecha_mod,
 						fecha_reg,
+						id_persona,
 						id_usuario_mod,
 						id_usuario_reg,
 						nombre,
@@ -45,7 +45,6 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
 				VALUES (
 						p_codigo,
 						p_id_institucion,
-						p_id_persona,
 						p_cargo_representante,
 						p_casilla,
 						p_celular1,
@@ -60,6 +59,7 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
 						p_fax,
 						p_fecha_mod,
 						p_fecha_reg,
+						p_id_persona,
 						p_id_usuario_mod,
 						p_id_usuario_reg,
 						p_nombre,
@@ -73,7 +73,6 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
 						               UPDATE 
 						                  PARAM.tinstitucion  
 						                SET						 codigo=p_codigo
-						 ,id_persona=p_id_persona
 						 ,cargo_representante=p_cargo_representante
 						 ,casilla=p_casilla
 						 ,celular1=p_celular1
@@ -88,6 +87,7 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
 						 ,fax=p_fax
 						 ,fecha_mod=p_fecha_mod
 						 ,fecha_reg=p_fecha_reg
+						 ,id_persona=p_id_persona
 						 ,id_usuario_mod=p_id_usuario_mod
 						 ,id_usuario_reg=p_id_usuario_reg
 						 ,nombre=p_nombre

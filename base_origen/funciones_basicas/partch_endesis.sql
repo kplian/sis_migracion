@@ -37,3 +37,8 @@ CREATE TABLE migracion.tct_comprobante (
   id_uo INTEGER, 
   id_ep INTEGER
 ) WITHOUT OIDS;
+
+
+--24/12/2013
+ALTER TABLE tesoro.tts_cuenta_bancaria
+  ALTER COLUMN id_cuenta DROP NOT NULL;
