@@ -36,32 +36,38 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
 						
 						   --consulta los registro de la tabla origen
 						    FOR g_registros in (
-						        SELECT 
-						id_institucion,
-						id_tipo_doc_institucion,
-						casilla,
-						celular1,
-						celular2,
-						codigo,
-						codigo_banco,
-						direccion,
-						doc_id,
-						email1,
-						email2,
-						estado_institucion,
-						fax,
-						fecha_registro,
-						fecha_ultima_modificacion,
-						hora_registro,
-						hora_ultima_modificacion,
-						id_persona,
-						nombre,
-						observaciones,
-						pag_web,
-						telefono1,
-						telefono2
-FROM 
-						          PARAM.tpm_institucion) LOOP
+						        SELECT DISTINCT
+						inst.id_institucion,
+						inst.id_tipo_doc_institucion,
+						inst.casilla,
+						inst.celular1,
+						inst.celular2,
+						inst.codigo,
+						inst.codigo_banco,
+						inst.direccion,
+						inst.doc_id,
+						inst.email1,
+						inst.email2,
+						inst.estado_institucion,
+						inst.fax,
+						inst.fecha_registro,
+						inst.fecha_ultima_modificacion,
+						inst.hora_registro,
+						inst.hora_ultima_modificacion,
+						inst.id_persona,
+						inst.nombre,
+						inst.observaciones,
+						inst.pag_web,
+						inst.telefono1,
+						inst.telefono2,
+						case coalesce(cban.id_institucion,0)
+                        	when 0 then 'no'::varchar
+                            else 'si'::varchar
+                        end as es_banco
+						FROM 
+						PARAM.tpm_institucion inst
+						LEFT JOIN tesoro.tts_cuenta_bancaria cban
+						ON cban.id_institucion = inst.id_institucion) LOOP
 						        
 						        -- inserta en el destino
 						      
@@ -89,6 +95,7 @@ FROM
 					,g_registros.pag_web
 					,g_registros.telefono1
 					,g_registros.telefono2
+					,g_registros.es_banco
 					);	
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
