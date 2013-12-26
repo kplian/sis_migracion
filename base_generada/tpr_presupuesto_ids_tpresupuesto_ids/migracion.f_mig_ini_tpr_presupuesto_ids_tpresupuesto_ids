@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpr_presupuesto_ids_tpresupuesto_ids()
 						RETURNS boolean AS
 						$BODY$
 
@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tinstitucion'',''PARAM'',''eliminar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tpresupuesto_ids'',''PARAM'',''eliminar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
@@ -37,58 +37,20 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
 						   --consulta los registro de la tabla origen
 						    FOR g_registros in (
 						        SELECT 
-						id_institucion,
-						id_tipo_doc_institucion,
-						casilla,
-						celular1,
-						celular2,
-						codigo,
-						codigo_banco,
-						direccion,
-						doc_id,
-						email1,
-						email2,
-						estado_institucion,
-						fax,
-						fecha_registro,
-						fecha_ultima_modificacion,
-						hora_registro,
-						hora_ultima_modificacion,
-						id_persona,
-						nombre,
-						observaciones,
-						pag_web,
-						telefono1,
-						telefono2
+						id_presupuesto_uno,
+						id_presupuesto_dos,
+						id_presupuesto_uno,
+						sw_cambio_gestion
 FROM 
-						          PARAM.tpm_institucion) LOOP
+						          PRESTO.tpr_presupuesto_ids) LOOP
 						        
 						        -- inserta en el destino
 						      
-						            v_cadena_resp = migracion.f_trans_tpm_institucion_tinstitucion(
-						            'INSERT',g_registros.id_institucion
-					,g_registros.id_tipo_doc_institucion
-					,g_registros.casilla
-					,g_registros.celular1
-					,g_registros.celular2
-					,g_registros.codigo
-					,g_registros.codigo_banco
-					,g_registros.direccion
-					,g_registros.doc_id
-					,g_registros.email1
-					,g_registros.email2
-					,g_registros.estado_institucion
-					,g_registros.fax
-					,g_registros.fecha_registro
-					,g_registros.fecha_ultima_modificacion
-					,g_registros.hora_registro
-					,g_registros.hora_ultima_modificacion
-					,g_registros.id_persona
-					,g_registros.nombre
-					,g_registros.observaciones
-					,g_registros.pag_web
-					,g_registros.telefono1
-					,g_registros.telefono2
+						            v_cadena_resp = migracion.f_trans_tpr_presupuesto_ids_tpresupuesto_ids(
+						            'INSERT',g_registros.id_presupuesto_uno
+					,g_registros.id_presupuesto_dos
+					,g_registros.id_presupuesto_uno
+					,g_registros.sw_cambio_gestion
 					);	
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
@@ -104,7 +66,7 @@ FROM
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tinstitucion'',''PARAM'',''insertar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tpresupuesto_ids'',''PARAM'',''insertar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());

@@ -14,7 +14,7 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->objParam->defecto('dir_ordenacion','asc');
 		
 		if($this->objParam->getParametro('id_cuenta_bancaria')!=''){
-			$this->objParam->addFiltro("id_cuenta_bancaria = ".$this->objParam->getParametro('id_cuenta_bancaria'));	
+			$this->objParam->addFiltro("id_cuenta_bancaria_pxp = ".$this->objParam->getParametro('id_cuenta_bancaria'));	
 		}
 		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
