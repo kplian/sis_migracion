@@ -100,6 +100,9 @@ BEGIN
             id_cuenta_bancaria_pxp = p_id_cuenta_bancaria
             where id_cuenta_bancaria = p_id_cuenta_bancaria;
             
+            --MIGRACION DE SU RELACION CONTABLE
+            
+            
         end if;
         
                         

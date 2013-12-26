@@ -19,6 +19,7 @@ DECLARE
     v_id_tabla_relacion_contable integer;
     v_id_tipo_relacion_contable integer;
     v_rec record;
+    v_id_cuenta_bancaria integer;
 
 BEGIN
 	
@@ -276,13 +277,19 @@ BEGIN
         v_sql = 'select
         		cc.id_cuenta, cc.id_auxiliar, cc.id_cuenta_bancaria
         		from tesoro.tts_parametro p
-                inner join tesoro.tts_cuenta_bancaria_cuenta cc
+                inner join tesoro.tts_cuenta_bancaria cc
                 on cc.id_parametro = p.id_parametro
                 where p.id_gestion = ' || v_id_gestion;
                 
         for v_rec in (select *
     				from dblink(v_sql,true)
                     as (id_cuenta integer, id_auxiliar integer, id_cuenta_bancaria integer)) loop
+                    
+            --Obtiene el id_cuenta_bancaria_pxp
+            select id_cuenta_bancaria_pxp
+            into v_id_cuenta_bancaria
+            from migra.tts_cuenta_bancaria
+            where id_cuenta_bancaria = v_rec.id_cuenta_bancaria;
         	
         	INSERT INTO conta.trelacion_contable(
               id_usuario_reg,
@@ -303,7 +310,7 @@ BEGIN
               v_rec.id_cuenta,
               v_rec.id_auxiliar,
               v_id_gestion,
-              v_rec.id,
+              v_id_cuenta_bancaria,
               'no',
               null
             );	 
