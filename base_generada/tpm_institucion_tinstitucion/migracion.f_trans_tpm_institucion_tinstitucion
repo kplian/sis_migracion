@@ -124,7 +124,7 @@ BEGIN
 			               COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||'::timestamp,'||
 			               COALESCE(v_id_usuario_mod::varchar,'NULL')||','||
 			               COALESCE(v_id_usuario_reg::varchar,'NULL')||','||
-			               COALESCE(''''||v_nombre::varchar||'''','NULL')||','||
+			               COALESCE(''''||v_nombre::varchar||'''','''NULL''')||','||
 			               COALESCE(''''||v_observaciones::varchar||'''','NULL')||','||
 			               COALESCE(''''||v_pag_web::varchar||'''','NULL')||','||
 			               COALESCE(''''||v_telefono1::varchar||'''','NULL')||','||
