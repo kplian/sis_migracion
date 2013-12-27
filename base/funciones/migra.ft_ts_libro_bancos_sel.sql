@@ -102,6 +102,44 @@ BEGIN
 			return v_consulta;
 
 		end;
+		
+		
+		
+	/*********************************    
+ 	#TRANSACCION:  'MIG_CBANESIS_SEL'
+ 	#DESCRIPCION:	Consulta de datos
+ 	#AUTOR:			RCM	
+ 	#FECHA:			27/12/2013
+	***********************************/
+
+	elsif(p_transaccion='MIG_CBANESIS_SEL')then
+     				
+    	begin
+    		--Sentencia de la consulta
+			v_consulta:='SELECT * 
+						FROM tesoro.f_tts_libro_bancos_sel(18, '172.17.45.12', '00:19:d1:09:22:7e',
+						'TS_LBRBANSAL_SEL', NULL, 10, 0,
+						'fecha desc, id_libro_bancos desc,fecha desc, id_libro_bancos desc,fecha desc, id_libro_bancos desc',
+						'desc',
+						'LBRBAN.id_cuenta_bancaria = ' ||v_parametros.id_cuenta_bancaria ||' AND LBRBAN.tipo = ''deposito'' AND LBRBAN.fk_libro_bancos is null',
+						'%', '%', '%', '%', '%', NULL, NULL, NULL, NULL, NULL) AS (id_libro_bancos
+						int4, id_cuenta_bancaria int4, fecha date, a_favor varchar, detalle text,
+						observaciones text, nro_liquidacion varchar, nro_comprobante varchar,
+						nro_cheque int4, tipo varchar, importe_deposito numeric, importe_cheque
+						numeric, saldo numeric, origen varchar, estado varchar, usr_reg varchar,
+						fecha_reg timestamp, usr_mod varchar, fecha_mod timestamp,
+						fk_libro_bancos int4, fecha_cheque_literal text, emparejado varchar)';
+						
+			raise exception '%',v_consulta;
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
 					
 	else
 					     

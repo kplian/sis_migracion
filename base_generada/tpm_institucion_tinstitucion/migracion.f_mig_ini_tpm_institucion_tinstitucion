@@ -72,7 +72,8 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
 						        -- inserta en el destino
 						      
 						            v_cadena_resp = migracion.f_trans_tpm_institucion_tinstitucion(
-						            'INSERT',g_registros.id_institucion
+						            'INSERT'
+					,g_registros.id_institucion
 					,g_registros.id_tipo_doc_institucion
 					,g_registros.casilla
 					,g_registros.celular1

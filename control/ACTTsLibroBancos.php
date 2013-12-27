@@ -43,6 +43,24 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->res=$this->objFunc->eliminarTsLibroBancos($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function listarDepositosENDESIS(){
+		$this->objParam->defecto('ordenacion','id_libro_bancos');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('id_cuenta_bancaria')!=''){
+			$this->objParam->addFiltro("id_cuenta_bancaria = ".$this->objParam->getParametro('id_cuenta_bancaria'));	
+		}
+		
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODTsLibroBancos','listarDepositosENDESIS');
+		} else{
+			$this->objFunc=$this->create('MODTsLibroBancos');
+			$this->res=$this->objFunc->listarDepositosENDESIS($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 			
 }
 
