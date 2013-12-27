@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_persona_tpersona (
   v_operacion varchar,
   p_id_persona integer,
@@ -19,7 +21,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_persona_tpersona (
   p_nombre varchar,
   p_num_documento integer,
   p_telefono1 varchar,
-  p_telefono2 varchar
+  p_telefono2 varchar,
+  p_correo2 varchar
 )
 RETURNS text AS
 $body$
@@ -32,18 +35,15 @@ $body$
 						
 						DECLARE
                         
-                        	v_cadena_cnx varchar;
+                        
+                        v_conexion  varchar;
 						
 						BEGIN
-                        
-                        	v_cadena_cnx = migra.f_obtener_cadena_conexion();
-                            
-                            
 						
 						    if(v_operacion = 'INSERT') THEN
 						
-						          INSERT INTO 
-						            SEGU.tpersona (
+				 INSERT INTO 
+				      SEGU.tpersona (
 						id_persona,
 						apellido_materno,
 						apellido_paterno,
@@ -63,7 +63,8 @@ $body$
 						nombre,
 						num_documento,
 						telefono1,
-						telefono2)
+						telefono2,
+                        correo2)
 				VALUES (
 						p_id_persona,
 						p_apellido_materno,
@@ -84,45 +85,27 @@ $body$
 						p_nombre,
 						p_num_documento,
 						p_telefono1,
-						p_telefono2);
-                      
-                       /* update segu.tpersona set 
+						p_telefono2,
+                        p_correo2);
+                          
+                        
+                         v_conexion:=migra.f_obtener_cadena_conexion();
+                        
+                        update segu.tpersona set 
                             foto=(
                                     select foto 
-                                    --from dblink('host=192.168.1.108 dbname=dbendesis user=postgres password=postgres','select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
-                                    from dblink(v_cadena_cnx,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
+                                    from dblink(v_conexion,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
                                     as (foto bytea))
-                             where id_persona=p_id_persona;*/
+                             where id_persona=p_id_persona;
 
 						       
-							    ELSEIF  v_operacion = 'UPDATE' THEN
-                                
-                                
-                                /*raise exception '%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%,%',p_apellido_materno
-						 ,p_apellido_paterno
-						 ,p_celular1
-						 ,p_celular2
-						 ,p_ci
-						 ,p_correo
-						 ,p_direccion
-						 ,p_estado_reg
-						 ,p_extension
-						 ,p_fecha_mod
-						 ,p_fecha_nacimiento
-						 ,p_fecha_reg
-						 ,p_genero
-						 ,p_id_usuario_mod
-						 ,p_id_usuario_reg
-						 ,p_nombre
-						 ,p_num_documento
-						 ,p_telefono1
-						 ,p_telefono2;*/
-                                
-
-						               UPDATE 
-						                  SEGU.tpersona  
-						                SET						 
-                                        apellido_materno=p_apellido_materno
+			   ELSEIF  v_operacion = 'UPDATE' THEN
+						               
+                                       
+                        UPDATE 
+						    SEGU.tpersona  
+						  SET						
+                          apellido_materno=p_apellido_materno
 						 ,apellido_paterno=p_apellido_paterno
 						 ,celular1=p_celular1
 						 ,celular2=p_celular2
@@ -141,36 +124,43 @@ $body$
 						 ,num_documento=p_num_documento
 						 ,telefono1=p_telefono1
 						 ,telefono2=p_telefono2
+                         ,correo2=p_correo2
 						 WHERE id_persona=p_id_persona;
                          
-                      
-
-						 /*update segu.tpersona set 
+                         
+                         
+                         --si la parsona tiene un funcionario actuliazamos el correo
+                         
+                         update  orga.tfuncionario  set
+                         email_empresa = p_correo2
+                         where id_persona = p_id_persona;
+                         
+                         
+                         
+                         v_conexion:=migra.f_obtener_cadena_conexion();
+                        
+						  update segu.tpersona set 
                             foto=(
                                     select foto 
-                                    --from dblink('host=192.168.1.108 dbname=dbendesis user=postgres password=postgres','select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
-                                    from dblink(v_cadena_cnx,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
+                                    from dblink(v_conexion,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
                                     as (foto bytea))
-                             where id_persona=p_id_persona;*/
+                             where id_persona=p_id_persona;
       
                          
-						       ELSEIF  v_operacion = 'DELETE' THEN
+		     ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
-						              SEGU.tpersona
- 
-						              						 WHERE id_persona=p_id_persona;
+			     DELETE FROM  SEGU.tpersona  WHERE  id_persona=p_id_persona;
 
 						       
-						       END IF;  
+		    END IF;  
 						  
-						 return 'true';
+   return 'true';
 						
-						-- statements;
-						--EXCEPTION
-						--WHEN exception_name THEN
-						--  statements;
-						END;
+  -- statements;
+  --EXCEPTION
+  --WHEN exception_name THEN
+  --  statements;
+  END;
 $body$
 LANGUAGE 'plpgsql'
 VOLATILE

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_empleado_tfuncionario (
   v_operacion varchar,
   p_id_funcionario integer,
@@ -22,10 +24,22 @@ $body$
 						*/
 						
 						DECLARE
+                        
+                        v_correo2 varchar;
 						
 						BEGIN
 						
 						    if(v_operacion = 'INSERT') THEN
+                            
+                            
+                            -- obtener el correo2 de persona para deseignarlo como correo del funcionario
+                            select 
+                              p.correo2 
+                            into 
+                              v_correo2  
+                            from segu.tpersona p 
+                            where p.id_persona = p_id_persona;
+                            
 						
 						          INSERT INTO 
 						            ORGA.tfuncionario (
@@ -46,7 +60,7 @@ $body$
 						p_id_usuario_mod,
 						p_id_usuario_reg,
 						p_codigo,
-						p_email_empresa,
+						v_correo2,
 						p_estado_reg,
 						p_fecha_ingreso,
 						p_fecha_mod,
@@ -54,14 +68,28 @@ $body$
 						p_interno);
 
 						       
-							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
-						                  ORGA.tfuncionario  
-						                SET						 id_persona=p_id_persona
+		 ELSEIF  v_operacion = 'UPDATE' THEN
+         
+         
+                      -- obtener el correo2 de persona para deseignarlo como correo del funcionario
+                            select 
+                              p.correo2 
+                            into 
+                              v_correo2  
+                            from segu.tpersona p 
+                            where p.id_persona = p_id_persona;
+                                
+                                
+                                
+                                
+						  UPDATE 
+						  ORGA.tfuncionario  
+						  SET					
+                          id_persona=p_id_persona
 						 ,id_usuario_mod=p_id_usuario_mod
 						 ,id_usuario_reg=p_id_usuario_reg
 						 ,codigo=p_codigo
-						 ,email_empresa=p_email_empresa
+						 ,email_empresa=v_correo2
 						 ,estado_reg=p_estado_reg
 						 ,fecha_ingreso=p_fecha_ingreso
 						 ,fecha_mod=p_fecha_mod
@@ -69,13 +97,11 @@ $body$
 						 ,interno=p_interno
 						 WHERE id_funcionario=p_id_funcionario;
 
-						       
-						       ELSEIF  v_operacion = 'DELETE' THEN
+			 ELSEIF  v_operacion = 'DELETE' THEN
 						       
 						         DELETE FROM 
-						              ORGA.tfuncionario
- 
-						              						 WHERE id_funcionario=p_id_funcionario;
+						              ORGA.tfuncionario	
+                                 WHERE id_funcionario=p_id_funcionario;
 
 						       
 						       END IF;  
@@ -86,7 +112,7 @@ $body$
 						--EXCEPTION
 						--WHEN exception_name THEN
 						--  statements;
-						END;
+              END;
 $body$
 LANGUAGE 'plpgsql'
 VOLATILE
