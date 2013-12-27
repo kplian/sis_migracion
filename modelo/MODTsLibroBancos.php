@@ -136,11 +136,16 @@ class MODTsLibroBancos extends MODbase{
 
 	function listarDepositosENDESIS(){
 		//Definicion de variables para ejecucion del procedimientp
-		$this->procedimiento='migra.ft_ts_libro_bancos_sel';
+		$this->procedimiento='migra.ft_ts_libro_bancos_endesis_sel';
 		$this->transaccion='MIG_CBANESIS_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+		$this->setTipoRetorno('record');
 		
-		$this->captura('id_libro_bancos','int4');
+		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+		$this->setParametro('fecha','fecha','date');
+		
+		$this->captura('id_cuenta_bancaria_mov','int4');
 		$this->captura('id_cuenta_bancaria','int4');
 		$this->captura('fecha','date');
 		$this->captura('a_favor','varchar');
@@ -165,6 +170,7 @@ class MODTsLibroBancos extends MODbase{
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
+		//echo $this->consulta;exit; 
 		$this->ejecutarConsulta();
 		
 		//Devuelve la respuesta
