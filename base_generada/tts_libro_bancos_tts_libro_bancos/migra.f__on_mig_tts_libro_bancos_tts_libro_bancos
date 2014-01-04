@@ -1,5 +1,4 @@
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_libro_bancos_tts_libro_bancos (
-
   v_operacion varchar,
   p_id_cuenta_bancaria integer,
   p_id_libro_bancos integer,
@@ -25,7 +24,6 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_libro_bancos_tts_libro_bancos (
 )
 RETURNS text AS
 $body$
-
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  November 30, 2013, 11:48 pm
@@ -33,7 +31,6 @@ $body$
 						
 						*/
 						
-
 DECLARE
 
 	v_id_cuenta_bancaria_pxp integer;
@@ -171,6 +168,7 @@ BEGIN
 						 ,tipo=p_tipo
 						 WHERE id_libro_bancos=p_id_libro_bancos;
 						 
+                        v_tipo_mov = 'egreso';
 						if p_tipo = 'cheque' then
 			        		v_tipo_mov = 'egreso';
 			        	end if;

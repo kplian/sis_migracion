@@ -133,6 +133,49 @@ class MODTsLibroBancos extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+	function listarDepositosENDESIS(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='migra.ft_ts_libro_bancos_endesis_sel';
+		$this->transaccion='MIG_CBANESIS_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+		$this->setTipoRetorno('record');
+		
+		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+		$this->setParametro('fecha','fecha','date');
+		
+		$this->captura('id_cuenta_bancaria_mov','int4');
+		$this->captura('id_cuenta_bancaria','int4');
+		$this->captura('fecha','date');
+		$this->captura('a_favor','varchar');
+		$this->captura('detalle','text');
+		$this->captura('observaciones','text');
+		$this->captura('nro_liquidacion','varchar');
+		$this->captura('nro_comprobante','varchar');
+		$this->captura('nro_cheque','int4');
+		$this->captura('tipo','varchar');
+		$this->captura('importe_deposito','numeric');
+		$this->captura('importe_cheque','numeric');
+		$this->captura('saldo','numeric');
+		$this->captura('origen','varchar');
+		$this->captura('estado','varchar');
+		$this->captura('usr_reg','varchar');
+		$this->captura('fecha_reg','timestamp');
+		$this->captura('usr_mod','varchar');
+		$this->captura('fecha_mod','timestamp');
+		$this->captura('fk_libro_bancos','int4');
+		$this->captura('fecha_cheque_literal','text');
+		$this->captura('emparejado','varchar');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		//echo $this->consulta;exit; 
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 			
 }
 ?>
