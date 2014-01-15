@@ -62,13 +62,13 @@ ALTER TABLE migra.tcolumna_ori
 /***********************************I-SCP-RAC-MIGRA-1-18/11/2013****************************************/
 
 --------------- SQL ---------------
-
+/*
 CREATE TABLE migra.tdepto_to_depto_endesis (
   id_depto_to_depto_endesis SERIAL, 
   id_depto_pxp INTEGER, 
   id_depto_endesis INTEGER, 
   PRIMARY KEY(id_depto_to_depto_endesis)
-) WITHOUT OIDS;
+) WITHOUT OIDS;*/
 
 
 
