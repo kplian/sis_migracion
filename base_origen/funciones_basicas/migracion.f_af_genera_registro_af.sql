@@ -20,11 +20,12 @@ DECLARE
     v_vida_util integer;
     v_id_presupuesto integer;
     v_id_deposito integer;
+    v_result	varchar;
 
 BEGIN
 
 	--Obtención de cadana de conexión
-	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
+	v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
     
     --Abrir conexión
     v_resp = dblink_connect(v_cadena_cnx);
@@ -43,14 +44,15 @@ BEGIN
             cc.id_centro_costo,cc.id_ep,cc.id_uo,cc.id_gestion
     		from alm.tpreingreso ping
             inner join alm.tpreingreso_det pdet on pdet.id_preingreso = ping.id_preingreso
-            inner join adq.tcotizacion cot on cot.id_cotizacion = ping.id_preingreso
+            inner join adq.tcotizacion cot on cot.id_cotizacion = ping.id_cotizacion
             inner join adq.tproceso_compra pro on pro.id_proceso_compra = cot.id_proceso_compra
             inner join adq.tsolicitud sol on sol.id_solicitud = pro.id_solicitud
             inner join adq.tsolicitud_det sdet on sdet.id_solicitud = sol.id_solicitud
             inner join param.tcentro_costo cc on cc.id_centro_costo = sdet.id_centro_costo
             where ping.id_preingreso = '||p_id_preingreso;
+            
     
-    for v_rec in (select * from dblink_exec(v_sql,true) as (descripcion TEXT,
+    for v_rec in (select * from dblink(v_sql,true) as (descripcion TEXT,
                                                             fecha_adju DATE,
                                                             precio_compra NUMERIC,
                                                             id_moneda INTEGER,
@@ -70,7 +72,7 @@ BEGIN
         select vida_util
         into v_vida_util
         from actif.taf_clasificacion
-        where v_rec.id_clasificacion;
+        where id_clasificacion = v_rec.id_clasificacion;
         
         --Obtener la ep
         select p.id_presupuesto
@@ -79,7 +81,7 @@ BEGIN
         inner join presto.tpr_presupuesto p
         on p.id_parametro = par.id_parametro
         where par.id_gestion = v_rec.id_gestion
-        and p.id_fina_regi_prop_proy_acti = v_rec.id_ep
+        and p.id_fina_regi_prog_proy_acti = v_rec.id_ep
         and p.id_unidad_organizacional = v_rec.id_uo;
         
         --Obtener deposito
@@ -89,74 +91,80 @@ BEGIN
         where id_depto_af = v_rec.id_depto;
         
         --Registro del activo fijo en función de la cantidad
-        SELECT * FROM actif.f_taf_activo_fijo_iud(
-        p_id_usuario,
-        '192.168.225.0',
-        '',
-        'AF_AF_INS',
-        NULL,
-        pm_id_fina_regi_prog_proy_acti,
-        NULL,
-        NULL,
-        v_desc,
-        v_rec.descripcion,
-        v_vida_util,
-        v_vida_util,
-        v_vida_util/100,
-        NULL,
-        0,
-        0,
-        0,
-        'no',
-        1,
-        v_rec.fecha_adju,
-        v_rec.precio_compra,
-        v_rec.precio_compra,
-        v_rec.precio_compra,
-        'no',
-        NULL,
-        NULL,
-        now(),
-        NULL,
-        NULL,
-        1,
-        'registrado',
-        v_rec.observaciones,
-        NULL, 
-        NULL, 
-        v_rec.id_moneda, 
-        v_rec.id_moneda, 
-        NULL, 
-        NULL, 
-        NULL,
-        v_rec.numero_oc,
-        1, v_rec.precio_compra, 
-        v_rec.precio_compra, 
-        0, 
-        0, 
-        0, 
-        v_vida_util, 
-        v_vida_util, 
-        v_rec.id_depto, 
-        v_rec.id_cotizacion,
-        v_rec.id_cotizacion_det, 
-        NULL,
-        v_id_presupuesto,
-        NULL,
-        v_rec.id_gestion,
-        v_rec.id_solicitud,
-        'si',
-        v_rec.cantidad_det-1,
-        v_id_deposito,
-        'activo',
-        'no',
-        v_rec.id_clasificacion, 
-        NULL,
-        NULL,
-        v_rec.precio_compra);
+        v_result = actif.f_taf_activo_fijo_iud(
+        p_id_usuario::integer,
+        '192.168.225.0'::varchar,
+        '99:99:99:99:99:99'::text,
+        'AF_AF_INS'::varchar,
+        NULL::varchar,
+        v_rec.id_ep::integer,
+        NULL::integer,
+        NULL::varchar,
+        v_desc::varchar,
+        v_rec.descripcion::varchar, --10
+        v_vida_util::integer,
+        v_vida_util::integer,
+        (v_vida_util/100)::numeric,
+        NULL::date,  --fecha_ult_deprec
+        0::numeric,
+        0::numeric,
+        0::numeric,
+        'no'::varchar,
+        1::numeric,
+        v_rec.fecha_adju::date, --20
+        v_rec.precio_compra::numeric,
+        v_rec.precio_compra::numeric,
+        v_rec.precio_compra::numeric,
+        'no'::varchar,
+        NULL::varchar,
+        NULL::date,
+        now()::date,
+        NULL::bytea,
+        NULL::varchar,
+        1::numeric,--30
+        'registrado'::varchar,
+        v_rec.observaciones::varchar,
+        NULL::integer, 
+        NULL::integer, 
+        v_rec.id_moneda::integer, 
+        v_rec.id_moneda::integer, 
+        NULL::integer, 
+        NULL::date, 
+        NULL::varchar,
+        v_rec.numero_oc::varchar, --40
+        1::integer,
+        v_rec.precio_compra::numeric, 
+        v_rec.precio_compra::numeric, 
+        0::numeric, 
+        0::numeric, 
+        0::numeric, 
+        v_vida_util::integer, 
+        v_vida_util::integer, 
+        v_rec.id_depto::integer, 
+        v_rec.id_cotizacion::integer, --50
+        v_rec.id_cotizacion_det::integer, 
+        NULL::varchar,
+        v_id_presupuesto::integer,
+        NULL::integer,
+        v_rec.id_gestion::integer,
+        v_rec.id_solicitud::integer,
+        'no',--'si'::varchar,
+        NULL::integer,--(v_rec.cantidad_det-1)::integer,
+        v_id_deposito::integer,
+        'activo'::varchar, --60
+        'no'::varchar, 
+        v_rec.id_clasificacion::integer, 
+        NULL::varchar,
+        NULL::date,
+        v_rec.precio_compra::numeric --65
+        );
+
+        if substr(v_result,1,1) = 'f' then
+        	raise exception '%',v_result;
+        end if;
     
     end loop;
-    
+    raise exception 'fuck';
     return 'Hecho';
     
 

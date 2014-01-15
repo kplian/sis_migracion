@@ -6,7 +6,8 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_relacion_contable__tts_cuenta_bancari
   p_id_auxiliar integer,
   p_id_centro_costo integer,
   p_id_gestion integer,
-  p_nro_cuenta_banco varchar
+  p_nro_cuenta_banco varchar,
+  p_id_institucion integer
 )
 RETURNS varchar AS
 $body$
@@ -44,24 +45,15 @@ BEGIN
 			and id_parametro = v_id_parametro;
 			
 		else
-		
-			--Obtiene la institucion de la cuenta bancaria de otras gestiones
-			select id_institucion
-			into v_id_institucion
-			from tesoro.tts_cuenta_bancaria
-			where nro_cuenta_banco = p_nro_cuenta_banco
-			order by id_cuenta_bancaria desc limit 1;
-			
-			if v_id_institucion is null then
-				raise exception 'Error al migrar cuenta a Endesis, no existe la cuenta bancaria';
-			end if;
-			
+        
+        	if not exists(select 1 from param.tpm_institucion
+            			where id_institucion = p_id_institucion) then
+            	raise exception 'Error al migrar cuenta a Endesis, no existe la Institución';
+            end if;
 		
 			--Inserción del registro
-	        INSERT INTO 
-			tesoro.tts_cuenta_bancaria
-			(
-			  id_cuenta_bancaria,
+	        INSERT INTO tesoro.tts_cuenta_bancaria (
+--			  id_cuenta_bancaria,
 			  id_institucion,
 			  id_cuenta,
 			  nro_cuenta_banco,
@@ -70,8 +62,8 @@ BEGIN
 			  id_auxiliar,
 			  id_parametro
 			) values(
-			  p_id_cuenta_bancaria,
-			  v_id_institucion,
+--			  p_id_cuenta_bancaria,
+			  p_id_institucion,
 			  p_id_cuenta,
 			  p_nro_cuenta_banco,
 			  0,
@@ -98,16 +90,14 @@ BEGIN
         v_respuesta= 'Modificación de parametrización de Cuenta Bancaria de pxp a endesis realizada';
         
     else
-    	--Eliminación: solo se pone en null la cuenta y el auxiliar contable
+    	--Eliminación: se intenta eliminar la cuenta bancaria cuando se borró la relación contable
     
-    	update tesoro.tts_cuenta_bancaria set
-    	id_cuenta = null,
-    	id_auxiliar = null 
+    	delete from tesoro.tts_cuenta_bancaria
         where nro_cuenta_banco = p_nro_cuenta_banco
 		and id_parametro = v_id_parametro;
         
         --Respuesta
-        v_respuesta= 'Eliminación de parametrización de Cuenta Bancaria de pxp a endesis realizada';
+        v_respuesta= 'Eliminación de Cuenta Bancaria realizada';
     
     end if;
 
