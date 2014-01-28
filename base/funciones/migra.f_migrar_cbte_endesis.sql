@@ -35,6 +35,8 @@ DECLARE
 	va_id_ep integer[];
     
     v_id_depto_endesis  integer;
+    
+    v_tipo_cambio numeric;
 
 BEGIN
 
@@ -84,6 +86,27 @@ BEGIN
     
     v_rec.id_depto = v_id_depto_endesis;
     
+    --  RAC   29/01/2014
+    --obtener tipo de cambio para la fecha del comprobante si el tipo de cambio combenido en NULL
+    
+    IF v_rec.tipo_cambio  is NULL  THEN
+    
+          v_tipo_cambio =  param.f_get_tipo_cambio(v_rec.id_moneda, v_rec.fecha::date, 'O');
+                    
+          IF  v_tipo_cambio is NULL  THEN
+                    
+                      raise exception 'No existe tipo de cambio para la fecha %', v_rec.fecha;
+                    
+          END IF;
+    
+    ELSE
+    
+         v_tipo_cambio = v_rec.tipo_cambio;
+    
+    END IF;
+    
+    
+    
     --Obtiene los datos de la transacción
     v_cont = 1;
     for v_dat in (select
@@ -127,6 +150,12 @@ BEGIN
         v_cont = v_cont + 1;
    	end loop;
     
+    
+    
+    
+    
+    
+    
     --Forma la llamada para enviar los datos del comprobante al servidor destino
     v_sql:='select migracion.f_migrar_cbte_pxp('||
                 v_rec.id_int_comprobante ||','|| --p_id_int_comprobante,
@@ -141,7 +170,7 @@ BEGIN
                 ''''||coalesce(v_rec.glosa1,'') ||''','||
                 ''''||coalesce(v_rec.glosa2,'') ||''','||
                 ''''||coalesce(v_rec.beneficiario,'') ||''','||
-                coalesce(v_rec.tipo_cambio,1) ||','||
+                coalesce(v_tipo_cambio,0) ||','||
                 'null' ||','|| --id_funcionario_firma1
                 'null' ||','|| --id_funcionario_firma2
                 'null' ||','|| --id_funcionario_firma3
