@@ -1,21 +1,23 @@
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_concepto_ingas_tconcepto_ingas (
-						  v_operacion varchar,
-						  p_id_concepto_ingas int4,
-						  p_desc_ingas varchar,
-						  p_fecha_mod timestamp,
-						  p_fecha_reg timestamp,
-						  p_id_item int4,
-						  p_id_oec int4,
-						  p_id_servicio int4,
-						  p_id_usuario_mod int4,
-						  p_id_usuario_reg int4,
-						  p_sw_tesoro int4,
-						  p_tipo varchar,
-						  p_activo_fijo varchar,
-						  p_almacenable varchar)
-						RETURNS text AS
-						$BODY$
-
+  v_operacion varchar,
+  p_id_concepto_ingas integer,
+  p_desc_ingas varchar,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_item integer,
+  p_id_oec integer,
+  p_id_servicio integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_sw_tesoro integer,
+  p_tipo varchar,
+  p_id_partida integer,
+  p_activo_fijo varchar,
+  p_almacenable varchar
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  February 18, 2013, 4:15 pm
@@ -23,159 +25,184 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_concepto_ingas_tconcepto_ingas (
 						
 						*/
 						
-DECLARE
-
-	v_id_concepto_ingas integer;
-	v_id_concepto_ingas_pxp integer;
+						DECLARE
+                        
+                        
+                        v_id_concepto_ingas integer;
+                        v_desc_ingas varchar;
+                        v_tipo varchar;
+                        
+                  /*
+                  
+                  0)  isnerta en ENDESIS
+                  
+                     verifiquemos que el nombre del concepto no este repetido
+                     
+                     0.1)  si el concepto existe,  solo insertamoas la nueva relacion con la partida presupuestaria
+                     
+                     0.2) si el concepto no existe insertamos nuevo concepto y partida
+                     
+                     
+                     
+                  
+                  1) si es MODIFICACION
+                  
+                     TODO BLOQUEAR LA MODIFICACION
+                      
+ 				 2)  si es eliminacion 
+                   
+                    2.1)  BUSCAMOS AL DESCRIPCION Y ELIMINAMOS LA RELACION CON LA APRTIDA  
+                    
+                  
+                  */      
+                        
 						
-BEGIN
+						BEGIN
+                        
+                        
+                         select 
+                               p.tipo
+                              into
+                               v_tipo
+                              from 
+                              pre.tpartida p  
+                              where p.id_partida = p_id_partida;
+                              
+                          v_desc_ingas =   trim(upper(p_desc_ingas));
+                              
+                        SELECT 
+                          ci.id_concepto_ingas
+                        into
+                          v_id_concepto_ingas
+                        FROM param.tconcepto_ingas ci
+                        WHERE  trim(upper(ci.desc_ingas)) = v_desc_ingas;    
 						
-		if(v_operacion = 'INSERT') THEN
-						
-			INSERT INTO migra.tpr_concepto_ingas (
-						id_concepto_ingas,
-						  desc_ingas,
-						  id_partida,
-						  id_item,
-						  id_servicio,
-						  sw_tesoro,
-						  id_oec,
-						  id_usr_reg,
-						  fecha_reg,
-						  usuario_reg,
-						  tipo,
-						  activo_fijo,
-						  almacenable
-							)
-				VALUES (
-						p_id_concepto_ingas,
-						  p_desc_ingas,
-						  p_id_partida,
-						  p_id_item,
-						  p_id_servicio,
-						  p_sw_tesoro,
-						  p_id_oec,
-						  p_id_usr_reg,
-						  p_fecha_reg,
-						  p_usuario_reg,
-						  p_tipo,
-						  p_activo_fijo,
-						  p_almacenable);
-						  
-			-------------------------------------------
-			--Inserción en tabla tes.tconcepto_ingas
-	        -------------------------------------------
-	        --Verificación de existencia del concepto de gasto en base a la descripción
-	        select ci.id_concepto_ingas
-	        into v_id_concepto_ingas
-	        from param.tconcepto_ingas ci
-	        where lower(trim(cb.desc_ingas)) = lower(trim(p_desc_ingas));
-	        
-	        if v_id_concepto_ingas is not null then
-	        	--Ya existe creada este concepto de gasto. Sólo guarda la referencia entre registros
-	            update migra.tts_concepto_ingas set
-	            id_concepto_ingas_pxp = v_id_concepto_ingas
-	            where id_concepto_ingas = p_id_concepto_ingas;
-	            
-	        else
-	        	--Concepto de gasto nuevo. Se realiza el nuevo registro más la referencia entre registros
-	            INSERT INTO param.tconcepto_ingas
-	            (
-	              id_usuario_reg,
-				  fecha_reg,
-				  estado_reg,
-				  id_concepto_ingas,
-				  tipo,
-				  desc_ingas,
-				  sw_tes,
-				  id_oec,
-				  activo_fijo,
-				  almacenable
-	            ) 
-	            VALUES (
-	  			  1,
-				  now(),
-				  'activo',
-				  p_id_concepto_ingas,
-				  p_tipo,
-				  p_desc_ingas,
-				  'si',
-				  p_id_oec,
-				  p_activo_fijo,
-				  p_almacenable
-	            );
-	            
-	            update migra.tts_concepto_ingas set
-	            id_concepto_ingas_pxp = p_id_concepto_ingas
-	            where id_concepto_ingas = p_id_concepto_ingas;
-	            
-	        end if;
-			
-
+						    if(v_operacion = 'INSERT') THEN
+                            
+                              if(v_id_concepto_ingas is NULL)THEN
+  						
+                                   INSERT INTO 
+                                          param.tconcepto_ingas (
+                                          id_concepto_ingas,
+                                          desc_ingas,
+                                          estado_reg,
+                                          fecha_mod,
+                                          fecha_reg,
+                                          id_oec,
+                                          id_usuario_mod,
+                                          id_usuario_reg,
+                                          sw_tes,
+                                          tipo,
+                                          activo_fijo,
+                                          almacenable,
+                                          movimiento)
+                                  VALUES (
+                                          p_id_concepto_ingas,
+                                          v_desc_ingas,
+                                          p_estado_reg,
+                                          p_fecha_mod,
+                                          p_fecha_reg,
+                                          p_id_oec,
+                                          p_id_usuario_mod,
+                                          p_id_usuario_reg,
+                                          p_sw_tesoro,
+                                          p_tipo,
+                                          p_activo_fijo,
+                                          p_almacenable,
+                                          v_tipo) RETURNING id_concepto_ingas into v_id_concepto_ingas;
+                                    
+                                                    
+                             
+                             END IF;     
+                                    
+                            --insercion a la tabla tconcepto_partida                        
+                            INSERT INTO pre.tconcepto_partida(
+                                  
+                                    id_concepto_ingas,                        
+                                    id_partida,
+                                    fecha_reg,
+                                    id_usuario_reg)
+                            VALUES(
+                                   
+                                    v_id_concepto_ingas,
+                                    p_id_partida,
+                                    p_fecha_reg,
+                                    p_id_usuario_reg);
 						       
 		ELSEIF  v_operacion = 'UPDATE' THEN
-		
-			  UPDATE migra.tpr_concepto_ingas SET
-			  desc_ingas=p_desc_ingas,
-			  id_partida=p_id_partida,
-			  id_item=p_id_item,
-			  id_servicio=p_id_servicio,
-			  sw_tesoro=p_sw_tesoro,
-			  id_oec=p_id_oec,
-			  id_usr_reg=p_id_usr_reg,
-			  fecha_reg=p_fecha_reg,
-			  usuario_reg=p_,
-			  tipo=p_tipo,
-			  activo_fijo=p_activo_fijo,
-			  almacenable=p_almacenable
-			 WHERE id_concepto_ingas=p_id_concepto_ingas;
-			 
-			 --Obtiene el id_concepto_ingas_pxp para realizar el update
-	        select
-	        cb.id_concepto_ingas_pxp
-	        into v_id_concepto_ingas_pxp
-	        from migra.tpr_concepto_ingas cb
-	        where id_concepto_ingas=p_id_concepto_ingas;
-	                         
-			--Actualiza concepto ingas de pxp
-	        update param.tconcepto_ingas set
-	        id_usuario_mod = 1,
-	        fecha_mod = now(),
-	        id_concepto_ingas,
-			tipo = p_tipo,
-			desc_ingas = p_desc_ingas,
-			id_oec = p_id_oec,
-			activo_fijo = p_activo_fijo,
-			almacenable = p_almacenable
-	      	where id_concepto_ingas = v_id_concepto_ingas_pxp;    
+        
+                    --raise exception '%',v_id_concepto_ingas;          
+                    UPDATE 
+                      param.tconcepto_ingas  
+                    SET						 
+                    estado_reg=p_estado_reg
+                   ,fecha_mod=p_fecha_mod
+                   ,fecha_reg=p_fecha_reg
+                   ,id_oec=p_id_oec
+                   ,id_usuario_mod=p_id_usuario_mod
+                   ,id_usuario_reg=p_id_usuario_reg
+                   ,sw_tes=p_sw_tesoro
+                   ,tipo=p_tipo
+                   ,activo_fijo=p_activo_fijo
+                   ,almacenable=p_almacenable,
+                    movimiento = v_tipo
+                   WHERE id_concepto_ingas=v_id_concepto_ingas;
+                         
+				--actualizacion de la tabla tconcepto_partida
+               
+                
+                 IF EXISTS( SELECT 1 FROM  pre.tconcepto_partida cp
+                             WHERE cp.id_partida = p_id_partida
+                                  and cp.id_concepto_ingas = v_id_concepto_ingas) THEN
+                         
+                  ELSE   
+                  
+                       INSERT INTO pre.tconcepto_partida(
+                          
+                            id_concepto_ingas,                        
+                            id_partida,
+                            fecha_reg,
+                            id_usuario_reg)
+                       VALUES(
+                          
+                            v_id_concepto_ingas,
+                            p_id_partida,
+                            p_fecha_reg,
+                            p_id_usuario_reg);      
+                                  
+                  END IF;                
+                
+               
+				
+					
+                	       ELSEIF  v_operacion = 'DELETE' THEN
+                            
+                                 DELETE FROM 
+						              pre.tconcepto_partida
+                                  WHERE 
+                                        id_concepto_ingas=v_id_concepto_ingas
+                                  AND  id_partida = p_id_partida;
+                               
 						       
-		ELSEIF  v_operacion = 'DELETE' THEN
-		
-			--Obtiene el id_concepto_ingas_pxp para realizar el update
-	        select
-	        cb.id_concepto_ingas_pxp
-	        into v_id_concepto_ingas_pxp
-	        from migra.tpr_concepto_ingas cb
-	        where id_concepto_ingas=p_id_concepto_ingas;
+                                IF (not exists(select 1 from pre.tconcepto_partida  cp where cp.id_concepto_ingas = v_id_concepto_ingas)) THEN
+                           
+                                   DELETE FROM 
+                                        param.tconcepto_ingas
+                                    WHERE id_concepto_ingas=v_id_concepto_ingas;
+                                  
+                                END IF;  
+
 						       
-			DELETE FROM migra.tpr_concepto_ingas
-			WHERE id_concepto_ingas=p_id_concepto_ingas;
-			
-			delete from param.tconcepto_ingas
-			where id_concepto_ingas = v_id_concepto_ingas_pxp;
-						       
-		END IF;  
+						  END IF;  
 						  
-		return 'true';
+						 return 'true';
 						
--- statements;
---EXCEPTION
---WHEN exception_name THEN
---  statements;
-END;
-$BODY$
-
-
+						-- statements;
+						--EXCEPTION
+						--WHEN exception_name THEN
+						--  statements;
+						END;
+$body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT

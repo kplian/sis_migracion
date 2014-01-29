@@ -1,32 +1,32 @@
 CREATE OR REPLACE FUNCTION migracion.f_trans_tpm_institucion_tinstitucion (
-			  v_operacion varchar,
-			  p_id_institucion int4,
-			  p_id_tipo_doc_institucion int4,
-			  p_casilla varchar,
-			  p_celular1 varchar,
-			  p_celular2 varchar,
-			  p_codigo varchar,
-			  p_codigo_banco varchar,
-			  p_direccion varchar,
-			  p_doc_id varchar,
-			  p_email1 varchar,
-			  p_email2 varchar,
-			  p_estado_institucion varchar,
-			  p_fax varchar,
-			  p_fecha_registro date,
-			  p_fecha_ultima_modificacion date,
-			  p_hora_registro time,
-			  p_hora_ultima_modificacion time,
-			  p_id_persona int4,
-			  p_nombre varchar,
-			  p_observaciones text,
-			  p_pag_web varchar,
-			  p_telefono1 varchar,
-			  p_telefono2 varchar,
-			  p_es_banco varchar)
-			RETURNS varchar [] AS
-			$BODY$
-
+  v_operacion varchar,
+  p_id_institucion integer,
+  p_id_tipo_doc_institucion integer,
+  p_casilla varchar,
+  p_celular1 varchar,
+  p_celular2 varchar,
+  p_codigo varchar,
+  p_codigo_banco varchar,
+  p_direccion varchar,
+  p_doc_id varchar,
+  p_email1 varchar,
+  p_email2 varchar,
+  p_estado_institucion varchar,
+  p_fax varchar,
+  p_fecha_registro date,
+  p_fecha_ultima_modificacion date,
+  p_hora_registro time,
+  p_hora_ultima_modificacion time,
+  p_id_persona integer,
+  p_nombre varchar,
+  p_observaciones text,
+  p_pag_web varchar,
+  p_telefono1 varchar,
+  p_telefono2 varchar,
+  p_es_banco varchar
+)
+RETURNS varchar [] AS
+$body$
 DECLARE
 			 
 			g_registros record;
@@ -99,6 +99,7 @@ BEGIN
 			v_pag_web=convert(p_pag_web::varchar, 'LATIN1', 'UTF8');
 			v_telefono1=convert(p_telefono1::varchar, 'LATIN1', 'UTF8');
 			v_telefono2=convert(p_telefono2::varchar, 'LATIN1', 'UTF8');
+            v_es_banco=convert(p_es_banco::varchar, 'LATIN1', 'UTF8');
  
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
@@ -163,9 +164,8 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
-			$BODY$
-
+$body$
 LANGUAGE 'plpgsql'
-			VOLATILE
-			CALLED ON NULL INPUT
-			SECURITY INVOKER;
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

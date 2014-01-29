@@ -1,6 +1,6 @@
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_libro_bancos_tts_libro_bancos (
   v_operacion varchar,
-  p_id_cuenta_bancaria integer,
+  p_nro_cuenta varchar,
   p_id_libro_bancos integer,
   p_a_favor varchar,
   p_detalle text,
@@ -42,17 +42,12 @@ BEGIN
 	if(v_operacion = 'INSERT') THEN
 	
 				--Verifica el id_cuenta_bancaria a asociar
-				if not exists(select 1 from tes.tcuenta_bancaria
-							where id_cuenta_bancaria = p_id_cuenta_bancaria) then
-							
-					select id_cuenta_bancaria_pxp
+										
+					select cb.id_cuenta_bancaria
 					into v_id_cuenta_bancaria
-					from migra.tts_cuenta_bancaria
-					where id_cuenta_bancaria = p_id_cuenta_bancaria;
-				else
-					v_id_cuenta_bancaria = p_id_cuenta_bancaria;
-				end if;
-						
+					from tes.tcuenta_bancaria cb
+					where cb.nro_cuenta = p_nro_cuenta and cb.estado_reg = 'activo';
+										
 						INSERT INTO 
 						MIGRA.tts_libro_bancos (
 						id_cuenta_bancaria,
@@ -78,7 +73,7 @@ BEGIN
 						tipo,
 						id_cuenta_bancaria_pxp)
 				VALUES (
-						p_id_cuenta_bancaria,
+						v_id_cuenta_bancaria,
 						p_id_libro_bancos,
 						p_a_favor,
 						p_detalle,
@@ -144,9 +139,14 @@ BEGIN
 
                 
 		ELSEIF  v_operacion = 'UPDATE' THEN
-						               
+						  select cb.id_cuenta_bancaria
+                          into v_id_cuenta_bancaria
+                          from tes.tcuenta_bancaria cb
+                          where cb.nro_cuenta = p_nro_cuenta and cb.estado_reg = 'activo';
+                          
+                                       
 						  UPDATE MIGRA.tts_libro_bancos SET
-						  id_cuenta_bancaria=p_id_cuenta_bancaria
+						  id_cuenta_bancaria=v_id_cuenta_bancaria
 						 ,a_favor=p_a_favor
 						 ,detalle=p_detalle
 						 ,estado=p_estado

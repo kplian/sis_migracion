@@ -1,8 +1,7 @@
-
-		CREATE OR REPLACE FUNCTION migracion.f_tri_tpm_institucion_tinstitucion ()
-		RETURNS trigger AS
-		$BODY$
-
+CREATE OR REPLACE FUNCTION migracion.f_tri_tpm_institucion_tinstitucion (
+)
+RETURNS trigger AS
+$body$
 DECLARE
 		 
 		g_registros record;
@@ -69,7 +68,8 @@ DECLARE
 		  RETURN NULL;
 		
 		END;
-		$BODY$LANGUAGE 'plpgsql'
-		VOLATILE
-		CALLED ON NULL INPUT
-		SECURITY INVOKER;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;
