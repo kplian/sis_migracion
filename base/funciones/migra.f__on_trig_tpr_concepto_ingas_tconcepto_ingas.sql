@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_concepto_ingas_tconcepto_ingas (
   v_operacion varchar,
   p_id_concepto_ingas integer,
@@ -77,24 +75,10 @@ $body$
                         into
                           v_id_concepto_ingas
                         FROM param.tconcepto_ingas ci
-                        WHERE  ci.desc_ingas = v_desc_ingas;    
+                        WHERE  trim(upper(ci.desc_ingas)) = v_desc_ingas;    
 						
 						    if(v_operacion = 'INSERT') THEN
                             
-                            
-                             
-                            
-                            
-                              v_desc_ingas =   trim(upper(p_desc_ingas));
-                              
-                              SELECT 
-                                ci.id_concepto_ingas
-                              into
-                                v_id_concepto_ingas
-                              FROM param.tconcepto_ingas ci
-                              WHERE  ci.desc_ingas = v_desc_ingas;
-                              
-                              
                               if(v_id_concepto_ingas is NULL)THEN
   						
                                    INSERT INTO 
@@ -147,14 +131,11 @@ $body$
 						       
 		ELSEIF  v_operacion = 'UPDATE' THEN
         
-                      v_desc_ingas =   trim(upper(p_desc_ingas));
-                  
-        
+                    --raise exception '%',v_id_concepto_ingas;          
                     UPDATE 
                       param.tconcepto_ingas  
                     SET						 
-                    desc_ingas=v_desc_ingas
-                   ,estado_reg=p_estado_reg
+                    estado_reg=p_estado_reg
                    ,fecha_mod=p_fecha_mod
                    ,fecha_reg=p_fecha_reg
                    ,id_oec=p_id_oec
@@ -165,14 +146,14 @@ $body$
                    ,activo_fijo=p_activo_fijo
                    ,almacenable=p_almacenable,
                     movimiento = v_tipo
-                   WHERE id_concepto_ingas=p_id_concepto_ingas;
+                   WHERE id_concepto_ingas=v_id_concepto_ingas;
                          
 				--actualizacion de la tabla tconcepto_partida
-                
+               
                 
                  IF EXISTS( SELECT 1 FROM  pre.tconcepto_partida cp
                              WHERE cp.id_partida = p_id_partida
-                                  and cp.id_concepto_ingas = p_id_concepto_ingas) THEN
+                                  and cp.id_concepto_ingas = v_id_concepto_ingas) THEN
                          
                   ELSE   
                   
@@ -184,7 +165,7 @@ $body$
                             id_usuario_reg)
                        VALUES(
                           
-                            p_id_concepto_ingas,
+                            v_id_concepto_ingas,
                             p_id_partida,
                             p_fecha_reg,
                             p_id_usuario_reg);      
@@ -192,13 +173,10 @@ $body$
                   END IF;                
                 
                
-                        
-                
 				
 					
                 	       ELSEIF  v_operacion = 'DELETE' THEN
-                           
-                           
+                            
                                  DELETE FROM 
 						              pre.tconcepto_partida
                                   WHERE 
