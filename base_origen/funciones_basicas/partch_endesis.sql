@@ -42,3 +42,18 @@ CREATE TABLE migracion.tct_comprobante (
 --24/12/2013
 ALTER TABLE tesoro.tts_cuenta_bancaria
   ALTER COLUMN id_cuenta DROP NOT NULL;
+  
+ALTER TABLE sss.tsg_persona
+  ALTER COLUMN id_tipo_doc_identificacion DROP NOT NULL;
+  
+ALTER TABLE presto.tpr_partida_ejecucion
+  DROP CONSTRAINT fk_tpr_partida_ejecucion__id_solicitud_compra RESTRICT;
+  
+  
+ALTER TABLE presto.tpr_partida_ejecucion
+  ADD COLUMN id_obligacion_pago INTEGER;  
+  
+  --------------- SQL ---------------
+
+ALTER TABLE presto.tpr_partida_ejecucion
+  ADD COLUMN id_int_transaccion INTEGER;
