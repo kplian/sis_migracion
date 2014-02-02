@@ -42,7 +42,7 @@ BEGIN
 	if(v_operacion = 'INSERT') THEN
 	
 				--Verifica el id_cuenta_bancaria a asociar
-										
+									
 					select cb.id_cuenta_bancaria
 					into v_id_cuenta_bancaria
 					from tes.tcuenta_bancaria cb
@@ -70,8 +70,7 @@ BEGIN
 						nro_liquidacion,
 						observaciones,
 						origen,
-						tipo,
-						id_cuenta_bancaria_pxp)
+						tipo)
 				VALUES (
 						v_id_cuenta_bancaria,
 						p_id_libro_bancos,
@@ -93,8 +92,7 @@ BEGIN
 						p_nro_liquidacion,
 						p_observaciones,
 						p_origen,
-						p_tipo,
-						v_id_cuenta_bancaria);
+						p_tipo);
 						
 				-------------------------------------------
 				--Inserción en tabla tes.tcuenta_bancaria_mov
@@ -118,6 +116,7 @@ BEGIN
                       tipo,
                       descripcion,
                       nro_doc_tipo,
+                      id_libro_bancos_fk,
                       importe,
                       estado,
                       observaciones
@@ -131,6 +130,7 @@ BEGIN
                       'cheque',
                       p_detalle,
                       p_nro_cheque,
+                      p_id_libro_bancos_fk,
                       coalesce(p_importe_cheque,p_importe_deposito)::numeric,
                       p_estado,
                       p_observaciones
@@ -182,6 +182,7 @@ BEGIN
 						estado_reg = p_estado,
 						tipo_mov = v_tipo_mov,
 						descripcion = p_detalle,
+                        id_libro_bancos_fk=p_id_libro_bancos_fk,
 						nro_doc_tipo = p_nro_cheque,
 						importe = coalesce(p_importe_cheque,p_importe_deposito)::numeric,
 						estado = p_estado,

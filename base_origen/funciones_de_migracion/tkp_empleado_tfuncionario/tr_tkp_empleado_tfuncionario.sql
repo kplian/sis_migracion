@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tkp_empleado ON KARD.tkp_empleado;
 		CREATE TRIGGER tr_tkp_empleado
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON KARD.tkp_empleado FOR EACH ROW 

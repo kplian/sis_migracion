@@ -63,7 +63,8 @@ $body$
 						observaciones,
 						pag_web,
 						telefono1,
-						telefono2
+						telefono2,
+						email2
 FROM 
 						          SSS.tsg_persona) LOOP
 						        
@@ -98,6 +99,7 @@ FROM
 					,g_registros.pag_web
 					,g_registros.telefono1
 					,g_registros.telefono2
+					,g_registros.email2
 					);	
 					           
 					

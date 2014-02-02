@@ -1,8 +1,26 @@
 CREATE OR REPLACE FUNCTION migracion.f_trans_taf_clasificacion_tclasificacion (
-			  v_operacion varchar,p_codigo varchar,p_id_clasificacion int4,p_correlativo_act int4,p_descripcion varchar,p_estado varchar,p_fecha_mod date,p_fecha_reg date,p_fk_id_clasificacion int4,p_flag_depreciacion varchar,p_id int4,p_id_metodo_depreciacion int4,p_id_padre int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_ini_correlativo int4,p_nivel int4,p_tipo varchar,p_vida_util int4)
-			RETURNS varchar [] AS
-			$BODY$
-
+  v_operacion varchar,
+  p_codigo varchar,
+  p_id_clasificacion integer,
+  p_correlativo_act integer,
+  p_descripcion varchar,
+  p_estado varchar,
+  p_fecha_mod date,
+  p_fecha_reg date,
+  p_fk_id_clasificacion integer,
+  p_flag_depreciacion varchar,
+  p_id integer,
+  p_id_metodo_depreciacion integer,
+  p_id_padre integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_ini_correlativo integer,
+  p_nivel integer,
+  p_tipo varchar,
+  p_vida_util integer
+)
+RETURNS varchar [] AS
+$body$
 DECLARE
 			 
 			g_registros record;
@@ -49,7 +67,7 @@ BEGIN
 			v_correlativo_act=p_correlativo_act::int4;
 			v_descripcion=convert(p_descripcion::varchar, 'LATIN1', 'UTF8');
 			v_estado=convert(p_estado::varchar, 'LATIN1', 'UTF8');
-			v_estado_reg=convert(p_estado_reg::varchar, 'LATIN1', 'UTF8');
+			v_estado_reg=convert(p_estado::varchar, 'LATIN1', 'UTF8');
 			v_fecha_mod=NULL;
 			v_fecha_reg=NULL;
 			v_id_clasificacion_fk=p_fk_id_clasificacion::int4;
@@ -73,15 +91,14 @@ BEGIN
 			          v_resp =  (SELECT dblink_connect(v_cadena_cnx));
 			            
 			             IF(v_resp!='OK') THEN
-			            
+			            	
 			             	--modificar bandera de fallo  
 			                 raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 			                 
 			             ELSE
 					  
-			         
 			               PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
-			                v_res_cone=(select dblink_disconnect());
+			                v_res_cone=(select dblink_disconnect(v_cadena_cnx));
 			             END IF;
 			            
 			            v_respuesta[1]='TRUE';
@@ -90,7 +107,7 @@ BEGIN
 			EXCEPTION
 			   WHEN others THEN
 			   
-			    v_res_cone=(select dblink_disconnect());
+			     v_res_cone=(select dblink_disconnect());
 			     v_respuesta[1]='FALSE';
                  v_respuesta[2]=SQLERRM;
                  v_respuesta[3]=SQLSTATE;
@@ -101,9 +118,8 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
-			$BODY$
-
+$body$
 LANGUAGE 'plpgsql'
-			VOLATILE
-			CALLED ON NULL INPUT
-			SECURITY INVOKER;
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

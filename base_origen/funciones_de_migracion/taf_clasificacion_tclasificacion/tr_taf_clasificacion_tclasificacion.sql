@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_taf_clasificacion ON ACTIF.taf_clasificacion;
 		CREATE TRIGGER tr_taf_clasificacion
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON ACTIF.taf_clasificacion FOR EACH ROW 

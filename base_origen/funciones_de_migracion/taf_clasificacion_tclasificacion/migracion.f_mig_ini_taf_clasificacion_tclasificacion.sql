@@ -1,8 +1,7 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_taf_clasificacion_tclasificacion()
-						RETURNS boolean AS
-						$BODY$
-
-
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_taf_clasificacion_tclasificacion (
+)
+RETURNS boolean AS
+$body$
 						DECLARE
 						 
 						g_registros record;
@@ -27,10 +26,13 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_taf_clasificacion_tclasificacion(
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tclasificacion'',''AF'',''eliminar'')';                   
+                             	
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tclasificacion'',''ALM'',''eliminar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+                               
 						        v_res_cone=(select dblink_disconnect());
+                                
 						     END IF;
 						
 						
@@ -56,10 +58,11 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_taf_clasificacion_tclasificacion(
 						tipo,
 						vida_util
 FROM 
-						          ACTIF.taf_clasificacion) LOOP
+						          ACTIF.taf_clasificacion
+                                  order by id_clasificacion) LOOP
 						        
 						        -- inserta en el destino
-						      
+
 						            v_cadena_resp = migracion.f_trans_taf_clasificacion_tclasificacion(
 						            'INSERT',g_registros.codigo
 					,g_registros.id_clasificacion
@@ -80,6 +83,7 @@ FROM
 					,g_registros.tipo
 					,g_registros.vida_util
 					);	
+                   
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
 					            END IF; 	
@@ -94,7 +98,8 @@ FROM
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tclasificacion'',''AF'',''insertar'')';                   
+                             
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tclasificacion'',''ALM'',''insertar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
@@ -102,10 +107,8 @@ FROM
 						
 						RETURN TRUE;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

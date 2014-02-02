@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tsg_usuario_asignacion ON SSS.tsg_usuario_asignacion;
 		CREATE TRIGGER tr_tsg_usuario_asignacion
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON SSS.tsg_usuario_asignacion FOR EACH ROW 

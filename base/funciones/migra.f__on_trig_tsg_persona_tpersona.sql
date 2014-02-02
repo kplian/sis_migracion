@@ -91,12 +91,12 @@ $body$
                         
                          v_conexion:=migra.f_obtener_cadena_conexion();
                         
-                        update segu.tpersona set 
+                        /*update segu.tpersona set 
                             foto=(
                                     select foto 
                                     from dblink(v_conexion,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
                                     as (foto bytea))
-                             where id_persona=p_id_persona;
+                             where id_persona=p_id_persona;*/
 
 						       
 			   ELSEIF  v_operacion = 'UPDATE' THEN
@@ -139,12 +139,12 @@ $body$
                          
                          v_conexion:=migra.f_obtener_cadena_conexion();
                         
-						  update segu.tpersona set 
+						  /*update segu.tpersona set 
                             foto=(
                                     select foto 
                                     from dblink(v_conexion,'select foto_persona from sss.tsg_persona where id_persona='||p_id_persona)
                                     as (foto bytea))
-                             where id_persona=p_id_persona;
+                             where id_persona=p_id_persona;*/
       
                          
 		     ELSEIF  v_operacion = 'DELETE' THEN

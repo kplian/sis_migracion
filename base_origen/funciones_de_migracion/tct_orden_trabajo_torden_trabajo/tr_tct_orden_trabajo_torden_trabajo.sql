@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tct_orden_trabajo ON SCI.tct_orden_trabajo;
 		CREATE TRIGGER tr_tct_orden_trabajo
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON SCI.tct_orden_trabajo FOR EACH ROW 

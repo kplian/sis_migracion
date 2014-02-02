@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tpm_proyecto ON PARAM.tpm_proyecto;
 		CREATE TRIGGER tr_tpm_proyecto
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON PARAM.tpm_proyecto FOR EACH ROW 

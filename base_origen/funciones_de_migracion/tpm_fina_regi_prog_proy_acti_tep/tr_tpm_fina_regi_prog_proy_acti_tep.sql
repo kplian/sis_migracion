@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tpm_fina_regi_prog_proy_acti ON PARAM.tpm_fina_regi_prog_proy_acti;
 		CREATE TRIGGER tr_tpm_fina_regi_prog_proy_acti
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON PARAM.tpm_fina_regi_prog_proy_acti FOR EACH ROW 

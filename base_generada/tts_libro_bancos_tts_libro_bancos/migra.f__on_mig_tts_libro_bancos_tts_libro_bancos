@@ -70,8 +70,7 @@ BEGIN
 						nro_liquidacion,
 						observaciones,
 						origen,
-						tipo,
-						id_cuenta_bancaria_pxp)
+						tipo)
 				VALUES (
 						v_id_cuenta_bancaria,
 						p_id_libro_bancos,
@@ -93,8 +92,7 @@ BEGIN
 						p_nro_liquidacion,
 						p_observaciones,
 						p_origen,
-						p_tipo,
-						v_id_cuenta_bancaria);
+						p_tipo);
 						
 				-------------------------------------------
 				--Inserción en tabla tes.tcuenta_bancaria_mov

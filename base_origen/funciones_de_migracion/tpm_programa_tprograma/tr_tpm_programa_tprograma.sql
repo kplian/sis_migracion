@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tpm_programa ON PARAM.tpm_programa;
 		CREATE TRIGGER tr_tpm_programa
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON PARAM.tpm_programa FOR EACH ROW 

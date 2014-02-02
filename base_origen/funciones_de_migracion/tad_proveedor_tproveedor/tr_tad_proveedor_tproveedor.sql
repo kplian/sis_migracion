@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tad_proveedor ON COMPRO.tad_proveedor;
 		CREATE TRIGGER tr_tad_proveedor
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON COMPRO.tad_proveedor FOR EACH ROW 

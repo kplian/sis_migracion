@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tsg_asignacion_estructura_tpm_frppa ON SSS.tsg_asignacion_estructura_tpm_frppa; 
 		CREATE TRIGGER tr_tsg_asignacion_estructura_tpm_frppa
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON SSS.tsg_asignacion_estructura_tpm_frppa FOR EACH ROW 

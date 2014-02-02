@@ -1,4 +1,4 @@
- 
+		DROP TRIGGER tr_tpr_partida_ids ON PRESTO.tpr_partida_ids;
 		CREATE TRIGGER tr_tpr_partida_ids
   		AFTER INSERT OR UPDATE OR DELETE 
   		ON PRESTO.tpr_partida_ids FOR EACH ROW 
