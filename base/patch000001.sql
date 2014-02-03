@@ -166,3 +166,16 @@ COMMENT ON COLUMN migra.tts_libro_bancos.id_libro_bancos_fk
 IS 'nombre=fk_libro_bancos&label=fk_libro_bancos&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=fk_libro_bancos';
 
 /***********************************F-SCP-RCM-MIGRA-1-03/12/2013****************************************/
+
+
+/***********************************I-SCP-RAC-MIGRA-1-03/02/2014****************************************/
+
+
+CREATE TABLE migra.tdepto_to_depto_endesis (
+  id_depto_to_depto_endesis SERIAL, 
+  id_depto_pxp INTEGER, 
+  id_depto_endesis INTEGER, 
+  CONSTRAINT tdepto_to_depto_endesis_pkey PRIMARY KEY(id_depto_to_depto_endesis)
+) WITHOUT OIDS;
+
+/***********************************F-SCP-RAC-MIGRA-1-03/02/2014****************************************/
