@@ -1,8 +1,7 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_libro_bancos_tts_libro_bancos()
-						RETURNS boolean AS
-						$BODY$
-
-
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_libro_bancos_tts_libro_bancos (
+)
+RETURNS boolean AS
+$body$
 						DECLARE
 						 
 						g_registros record;
@@ -28,6 +27,10 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_libro_bancos_tts_libro_bancos
 									                 
 						     ELSE
 						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_libro_bancos'',''MIGRA'',''eliminar'')';                   
+						       raise notice '%',v_consulta;
+						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+						       
+                               v_consulta = 'select pxp.f_add_remove_foraneas(''tcuenta_bancaria_mov'',''TES'',''eliminar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
@@ -103,15 +106,16 @@ FROM
 						       v_consulta = 'select pxp.f_add_remove_foraneas(''tts_libro_bancos'',''MIGRA'',''insertar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+                               v_consulta = 'select pxp.f_add_remove_foraneas(''tcuenta_bancaria_mov'',''TES'',''insertar'')';                   
+						       raise notice '%',v_consulta;
+						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
 						     END IF;
 						
 						RETURN TRUE;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

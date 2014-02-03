@@ -9,7 +9,7 @@ SELECT * FROM migracion.f_mig_ini_tpm_periodo_tperiodo();
 --MIGRACION DE DATOS BASICOS
 
 SELECT * FROM migracion.f_mig_ini_tsg_persona_tpersona();
-SELECT * FROM migracion.f_mig_ini_tpm_institucion_tinstitucion();
+SELECT * FROM migracion.f_mig_ini_tpm_institucion_tinstitucion();---
 SELECT * FROM migracion.f_mig_ini_tsg_usuario_tusuario();
 SELECT * FROM migracion.f_mig_ini_tad_proveedor_tproveedor();
 

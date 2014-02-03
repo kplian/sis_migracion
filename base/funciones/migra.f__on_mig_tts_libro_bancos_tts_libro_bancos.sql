@@ -116,7 +116,7 @@ BEGIN
                       tipo,
                       descripcion,
                       nro_doc_tipo,
-                      id_libro_bancos_fk,
+                      id_cuenta_bancaria_mov_fk,
                       importe,
                       estado,
                       observaciones
@@ -182,7 +182,7 @@ BEGIN
 						estado_reg = p_estado,
 						tipo_mov = v_tipo_mov,
 						descripcion = p_detalle,
-                        id_libro_bancos_fk=p_id_libro_bancos_fk,
+                        id_cuenta_bancaria_mov_fk=p_id_libro_bancos_fk,
 						nro_doc_tipo = p_nro_cheque,
 						importe = coalesce(p_importe_cheque,p_importe_deposito)::numeric,
 						estado = p_estado,

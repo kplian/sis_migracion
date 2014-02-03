@@ -1,7 +1,8 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion (
-)
-RETURNS boolean AS
-$body$
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tpm_institucion_tinstitucion()
+						RETURNS boolean AS
+						$BODY$
+
+
 						DECLARE
 						 
 						g_registros record;
@@ -35,42 +36,49 @@ $body$
 						
 						   --consulta los registro de la tabla origen
 						    FOR g_registros in (
-						        SELECT 
-						id_institucion,
-						id_persona,
-						id_tipo_doc_institucion,
-						casilla,
-						celular1,
-						celular2,
-						codigo_banco,
-						direccion,
-						doc_id,
-						email1,
-						email2,
-						estado_institucion,
-						fax,
-						fecha_registro,
-						fecha_ultima_modificacion,
-						hora_registro,
-						hora_ultima_modificacion,
-						nombre,
-						observaciones,
-						pag_web,
-						telefono1,
-						telefono2,
-                        codigo
-FROM 
-						          PARAM.tpm_institucion) LOOP
+						        SELECT DISTINCT
+						inst.id_institucion,
+						inst.id_tipo_doc_institucion,
+						inst.casilla,
+						inst.celular1,
+						inst.celular2,
+						inst.codigo,
+						inst.codigo_banco,
+						inst.direccion,
+						inst.doc_id,
+						inst.email1,
+						inst.email2,
+						inst.estado_institucion,
+						inst.fax,
+						inst.fecha_registro,
+						inst.fecha_ultima_modificacion,
+						inst.hora_registro,
+						inst.hora_ultima_modificacion,
+						inst.id_persona,
+						inst.nombre,
+						inst.observaciones,
+						inst.pag_web,
+						inst.telefono1,
+						inst.telefono2,
+						case coalesce(cban.id_institucion,0)
+                        	when 0 then 'no'::varchar
+                            else 'si'::varchar
+                        end as es_banco
+						FROM 
+						PARAM.tpm_institucion inst
+						LEFT JOIN tesoro.tts_cuenta_bancaria cban
+						ON cban.id_institucion = inst.id_institucion) LOOP
 						        
 						        -- inserta en el destino
 						      
 						            v_cadena_resp = migracion.f_trans_tpm_institucion_tinstitucion(
-						            'INSERT',g_registros.id_institucion
-					,g_registros.id_persona
+						            'INSERT'
+					,g_registros.id_institucion
 					,g_registros.id_tipo_doc_institucion
 					,g_registros.casilla
 					,g_registros.celular1
 					,g_registros.celular2
+					,g_registros.codigo
 					,g_registros.codigo_banco
 					,g_registros.direccion
 					,g_registros.doc_id
@@ -82,25 +90,18 @@ FROM
 					,g_registros.fecha_ultima_modificacion
 					,g_registros.hora_registro
 					,g_registros.hora_ultima_modificacion
+					,g_registros.id_persona
 					,g_registros.nombre
 					,g_registros.observaciones
 					,g_registros.pag_web
 					,g_registros.telefono1
 					,g_registros.telefono2
-                    ,g_registros.codigo
+					,g_registros.es_banco
 					);	
-					
-					
-						        IF v_cadena_resp[1] = 'FALSE' THEN
-					               
+					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
-					              
 					            END IF; 	
-						
-						
-						
-						
-						    END LOOP;
+						 END LOOP;
 						
 						     --reconstruye llaves foraneas
 						     v_resp =  (SELECT dblink_connect(v_cadena_cnx));
@@ -119,8 +120,10 @@ FROM
 						
 						RETURN TRUE;
 						END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER;
+						$BODY$
+
+
+						LANGUAGE 'plpgsql'
+						VOLATILE
+						CALLED ON NULL INPUT
+						SECURITY INVOKER;
