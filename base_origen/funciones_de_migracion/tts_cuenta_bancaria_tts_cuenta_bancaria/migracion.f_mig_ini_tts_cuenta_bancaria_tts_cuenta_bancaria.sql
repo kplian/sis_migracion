@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_cuenta_bancaria_tts_cuenta_bancaria (
 )
 RETURNS boolean AS
@@ -45,7 +47,8 @@ $body$
                                 cb.estado_cuenta,
                                 cb.nro_cheque,
                                 cb.nro_cuenta_banco,
-                                pa.id_gestion
+                                pa.id_gestion,
+                                cb.central
                                 FROM TESORO.tts_cuenta_bancaria cb
                                 INNER JOIN tesoro.tts_parametro pa
                                 ON pa.id_parametro = cb.id_parametro
@@ -63,6 +66,7 @@ $body$
 					,g_registros.nro_cheque
 					,g_registros.nro_cuenta_banco
                     ,g_registros.id_gestion
+                    ,g_registros.central
 					);	
 
 					            IF v_cadena_resp[1] = 'FALSE' THEN
