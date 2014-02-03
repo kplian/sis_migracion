@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migracion.f_trans_tts_cuenta_bancaria_tts_cuenta_bancaria (
   v_operacion varchar,
   p_id_cuenta_bancaria integer,
@@ -8,7 +10,8 @@ CREATE OR REPLACE FUNCTION migracion.f_trans_tts_cuenta_bancaria_tts_cuenta_banc
   p_estado_cuenta numeric,
   p_nro_cheque integer,
   p_nro_cuenta_banco varchar,
-  p_id_gestion integer
+  p_id_gestion integer,
+  p_central varchar
 )
 RETURNS varchar [] AS
 $body$
@@ -33,6 +36,7 @@ DECLARE
 			v_nro_cheque int4;
 			v_nro_cuenta_banco varchar;
             v_id_gestion integer;
+            v_central varchar;
 BEGIN
 		
 			
@@ -53,13 +57,13 @@ BEGIN
 			v_id_parametro=p_id_parametro::int4;
 			v_nro_cheque=p_nro_cheque::int4;
 			v_nro_cuenta_banco=convert(p_nro_cuenta_banco::varchar, 'LATIN1', 'UTF8');
-            v_id_gestion=p_id_gestion::int4;
+            v_central=convert(p_central::varchar, 'LATIN1', 'UTF8');
     
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
 
 			          v_consulta = 'select migra.f__on_trig_tts_cuenta_bancaria_tts_cuenta_bancaria (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_cuenta_bancaria::varchar,'NULL')||','||COALESCE(v_estado_cuenta::varchar,'NULL')||','||COALESCE(v_id_auxiliar::varchar,'NULL')||','||COALESCE(v_id_cuenta::varchar,'NULL')||','||COALESCE(v_id_institucion::varchar,'NULL')||','||COALESCE(v_id_parametro::varchar,'NULL')||','||COALESCE(v_nro_cheque::varchar,'NULL')||','||COALESCE(''''||v_nro_cuenta_banco::varchar||'''','NULL')||','||COALESCE(v_id_gestion::varchar,'NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_cuenta_bancaria::varchar,'NULL')||','||COALESCE(v_estado_cuenta::varchar,'NULL')||','||COALESCE(v_id_auxiliar::varchar,'NULL')||','||COALESCE(v_id_cuenta::varchar,'NULL')||','||COALESCE(v_id_institucion::varchar,'NULL')||','||COALESCE(v_id_parametro::varchar,'NULL')||','||COALESCE(v_nro_cheque::varchar,'NULL')||','||COALESCE(''''||v_nro_cuenta_banco::varchar||'''','NULL')||','||COALESCE(v_id_gestion::varchar,'NULL')||','||COALESCE(''''||v_central::varchar||'''','NULL')||')';
 			          --probar la conexion con dblink
 
 					   --probar la conexion con dblink

@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_cuenta_bancaria_tts_cuenta_bancaria (
   v_operacion varchar,
   p_id_cuenta_bancaria integer,
@@ -8,7 +10,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_cuenta_bancaria_tts_cuenta_banca
   p_id_parametro integer,
   p_nro_cheque integer,
   p_nro_cuenta_banco varchar,
-  p_id_gestion integer
+  p_id_gestion integer,
+  p_central varchar
 )
 RETURNS text AS
 $body$
@@ -38,7 +41,8 @@ BEGIN
 						id_parametro,
 						nro_cheque,
 						nro_cuenta_banco,
-                        id_gestion)
+                        id_gestion,
+                        centro)
 				VALUES (
 						p_id_cuenta_bancaria,
 						p_estado_cuenta,
@@ -48,7 +52,8 @@ BEGIN
 						p_id_parametro,
 						p_nro_cheque,
 						p_nro_cuenta_banco,
-                        p_id_gestion);
+                        p_id_gestion,
+                        p_central);
 
 		-------------------------------------------
 		--Inserción en table tes.tcuenta_bancaria
@@ -80,7 +85,8 @@ BEGIN
               nro_cuenta,
               fecha_alta,
               fecha_baja,
-              id_moneda
+              id_moneda,
+              centro
             ) 
             VALUES (
               1,
@@ -93,7 +99,8 @@ BEGIN
               p_nro_cuenta_banco,
               null,
               null,
-              1
+              1,
+              p_central
             );
             
             update migra.tts_cuenta_bancaria set
@@ -117,6 +124,7 @@ BEGIN
 						 ,id_parametro=p_id_parametro
 						 ,nro_cheque=p_nro_cheque
 						 ,nro_cuenta_banco=p_nro_cuenta_banco
+                         ,centro=p_central
 						 WHERE id_cuenta_bancaria=p_id_cuenta_bancaria;
                          
     	--Obtiene el id_cuenta_bancaria_pxp para realizar el update
@@ -132,6 +140,7 @@ BEGIN
         fecha_mod = now(),
         estado_reg = p_estado_cuenta,
         id_institucion = p_id_institucion,
+        centro=p_central,
         nro_cuenta = p_nro_cuenta_banco --,
       	--  fecha_alta = :fecha_alta,
       	--  fecha_baja = :fecha_baja,
@@ -157,13 +166,9 @@ BEGIN
 						       
 	END IF;  
 						  
-						 return 'true';
-						
-						-- statements;
-						--EXCEPTION
-						--WHEN exception_name THEN
-						--  statements;
-						END;
+	return 'true';
+	
+	END;
 $body$
 LANGUAGE 'plpgsql'
 VOLATILE

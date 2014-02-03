@@ -179,3 +179,19 @@ CREATE TABLE migra.tdepto_to_depto_endesis (
 ) WITHOUT OIDS;
 
 /***********************************F-SCP-RAC-MIGRA-1-03/02/2014****************************************/
+
+
+
+/***********************************I-SCP-RAC-MIGRA-2-03/02/2014****************************************/
+
+ALTER TABLE migra.tts_cuenta_bancaria
+  ADD COLUMN centro VARCHAR(4) DEFAULT 'si' NOT NULL;
+
+COMMENT ON COLUMN migra.tts_cuenta_bancaria.centro
+IS 'Identifica si es de la regional central o no. Viene por la integracionde cuenta bancaria endesis';
+
+/***********************************F-SCP-RAC-MIGRA-2-03/02/2014****************************************/
+
+
+
+

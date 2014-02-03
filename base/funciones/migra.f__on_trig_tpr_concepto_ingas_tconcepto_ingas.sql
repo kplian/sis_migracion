@@ -68,7 +68,7 @@ $body$
                               pre.tpartida p  
                               where p.id_partida = p_id_partida;
                               
-                          v_desc_ingas =   trim(upper(p_desc_ingas));
+                          v_desc_ingas =   trim (both  E'\t\n\r ' from upper(desc_ingas));
                               
                         SELECT 
                           ci.id_concepto_ingas
