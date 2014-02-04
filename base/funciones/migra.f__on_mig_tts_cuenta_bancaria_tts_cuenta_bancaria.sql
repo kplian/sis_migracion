@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_cuenta_bancaria_tts_cuenta_bancaria (
   v_operacion varchar,
   p_id_cuenta_bancaria integer,
@@ -138,7 +136,7 @@ BEGIN
         update tes.tcuenta_bancaria set
         id_usuario_mod = 1,
         fecha_mod = now(),
-        estado_reg = p_estado_cuenta,
+        estado_reg = (case when p_estado_cuenta = 1 then 'activo' else 'inactivo' end),
         id_institucion = p_id_institucion,
         centro=p_central,
         nro_cuenta = p_nro_cuenta_banco --,
