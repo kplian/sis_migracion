@@ -192,6 +192,11 @@ IS 'Identifica si es de la regional central o no. Viene por la integracionde cue
 
 /***********************************F-SCP-RAC-MIGRA-2-03/02/2014****************************************/
 
+/***********************************I-SCP-JRR-MIGRA-0-07/02/2014****************************************/
 
+ALTER TABLE migra.tts_libro_bancos
+  DROP CONSTRAINT tts_libro_bancos_idx RESTRICT;
+  
+/***********************************F-SCP-JRR-MIGRA-0-07/02/2014****************************************/
 
 
