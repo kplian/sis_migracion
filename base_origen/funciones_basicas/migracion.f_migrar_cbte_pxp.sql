@@ -31,14 +31,17 @@ CREATE OR REPLACE FUNCTION migracion.f_migrar_cbte_pxp (
   p_id_usuario_reg integer,
   p_codigo_clase_cbte varchar,
   p_id_uo integer [],
-  p_id_ep integer []
+  p_id_ep integer [],
+  p_momento_comprometido varchar,
+  p_momento_ejecutado varchar,
+  p_momento_pagado varchar
 )
 RETURNS varchar AS
 $body$
 /*
 Autor: RCM
 Fecha: 23/09/2013
-Descripción: Transforma los datos del comprobante generado a la estructura de CONIN
+Descripcion: Transforma los datos del comprobante generado a la estructura de CONIN
 */
 DECLARE
 
@@ -76,8 +79,6 @@ BEGIN
     v_resp='';
 
     v_size = array_upper(p_id_int_transaccion, 1);
-    
-    --raise exception 'hola: %',v_size;
     
     for i in 1..v_size loop
     	insert into migracion.tct_comprobante
@@ -118,7 +119,10 @@ BEGIN
             p_id_usuario_reg,
             p_codigo_clase_cbte,
             p_id_uo[i],
-            p_id_ep[i]
+            p_id_ep[i],
+            p_momento_comprometido,
+            p_momento_ejecutado,
+            p_momento_pagado
         );
     
     end loop;
@@ -127,7 +131,7 @@ BEGIN
     for v_rec in (select * from migracion.tct_comprobante
     			where id_int_comprobante = p_id_int_comprobante) loop
 
-		--Obtención de parámetros
+		--Obtencion de parametros
         --id_parametro, momento_cbte, id_periodo_subsis, id_subsistema, id_usuario, id_clase_cbte,id_depto
 
         --Obtener id_parametro
@@ -137,7 +141,7 @@ BEGIN
         where gestion_conta = to_char(v_rec.fecha,'yyyy');
    
         if v_id_parametro is null then
-        	v_mensaje_verif = 'Gestión no encontrada.\n';
+        	v_mensaje_verif = 'Gestion no encontrada.\n';
         end if;
         
         --Periodo subsistema
@@ -157,11 +161,30 @@ BEGIN
         select id_clase_cbte
         into v_id_clase_cbte
         from migracion.tct_cbte_clase_relacion
-        where codigo_clase = v_rec.codigo_clase_cbte;
+        where codigo_clase = v_rec.codigo_clase_cbte
+        and momento = v_rec.momento;
         
         if v_id_clase_cbte is null then
         	v_mensaje_verif = v_mensaje_verif || 'Clase de comprobante no encontrada.\n';
         end if;
+        
+        --RCM:08/02/2014: REgla de los momentos contables
+        if v_rec.momento = 'presupuestario' then
+        	--Presupuestario
+			if v_rec.momento_pagado = 'si' then
+            	v_momento_cbte = 4;
+            elsif v_rec.momento_ejecutado = 'si' and v_rec.momento_pagado = 'no' then
+            	v_momento_cbte = 3;
+            else
+            	v_momento_cbte = 0;
+            end if;            
+            
+        else
+        	--Por defecto contable si no tiene un momento válido
+            v_momento_cbte = 0;
+        end if;
+        --FIN RCM
+        
         
         --Verifica si se produjo algun error
 		if v_mensaje_verif != '' then        
@@ -273,7 +296,7 @@ BEGIN
         );*/
         
         if substring(v_resp,1,1)!='t' then
-        	raise exception 'Error al generar transacción: %',v_resp;
+        	raise exception 'Error al generar transacciÃ³n: %',v_resp;
         end if;
         
     

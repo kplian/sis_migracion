@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_endesis (
   p_id_int_comprobante integer
 )
@@ -67,7 +65,10 @@ BEGIN
     cbte.fecha,
     cbte.nro_tramite,
     cbte.id_usuario_reg,
-	cla.codigo as codigo_clase_cbte
+	cla.codigo as codigo_clase_cbte,
+    cbte.momento_comprometido,
+    cbte.momento_ejecutado,
+    cbte.momento_pagado
     into
     v_rec
     from conta.tint_comprobante cbte
@@ -190,9 +191,12 @@ BEGIN
                 v_rec.id_usuario_reg ||','||
                 ''''||coalesce(v_rec.codigo_clase_cbte,'') ||''','||'
                 '||COALESCE(('array['|| array_to_string(va_id_uo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_ep, ',')||']::integer[]')::varchar,'NULL::integer[]')||') ';
+                '||COALESCE(('array['|| array_to_string(va_id_ep, ',')||']::integer[]')::varchar,'NULL::integer[]')||','||
+                ''''||coalesce(v_rec.momento_comprometido,'') ||''','||
+                ''''||coalesce(v_rec.momento_ejecutado,'') ||''','||
+                ''''||coalesce(v_rec.momento_pagado,'') ||''')';
                 
-                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>FASS: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
+                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
 
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();

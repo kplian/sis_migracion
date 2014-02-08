@@ -57,3 +57,22 @@ ALTER TABLE presto.tpr_partida_ejecucion
 
 ALTER TABLE presto.tpr_partida_ejecucion
   ADD COLUMN id_int_transaccion INTEGER;
+  
+
+
+--08/02/2014
+alter table migracion.tct_comprobante
+add column momento_comprometido VARCHAR(4) DEFAULT 'no'::character varying;
+
+alter table migracion.tct_comprobante
+add column  momento_ejecutado VARCHAR(4) DEFAULT 'no'::character varying;
+
+alter table migracion.tct_comprobante
+add column  momento_pagado VARCHAR(4) DEFAULT 'no'::character varying;
+
+
+CREATE TABLE migracion.tct_cbte_clase_relacion (
+  id_clase_cbte INTEGER, 
+  codigo_clase VARCHAR(50), 
+  momento VARCHAR(30)
+) WITHOUT OIDS;
