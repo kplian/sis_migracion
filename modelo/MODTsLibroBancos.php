@@ -167,6 +167,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('fk_libro_bancos','int4');
 		$this->captura('fecha_cheque_literal','text');
 		$this->captura('emparejado','varchar');
+		$this->captura('origen_cbte','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
