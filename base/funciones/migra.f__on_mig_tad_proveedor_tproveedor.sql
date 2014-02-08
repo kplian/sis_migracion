@@ -1,8 +1,22 @@
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tad_proveedor_tproveedor (
-						  v_operacion varchar,p_id_proveedor int4,p_id_institucion int4,p_id_persona int4,p_codigo varchar,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_lugar int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nit varchar,p_numero_sigma varchar,p_tipo varchar)
-						RETURNS text AS
-						$BODY$
-
+  v_operacion varchar,
+  p_id_proveedor integer,
+  p_id_institucion integer,
+  p_id_persona integer,
+  p_codigo varchar,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_lugar integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_nit varchar,
+  p_numero_sigma varchar,
+  p_tipo varchar,
+  p_rotulo_comercial varchar
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  March 5, 2013, 10:25 am
@@ -30,7 +44,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tad_proveedor_tproveedor (
 						id_usuario_reg,
 						nit,
 						numero_sigma,
-						tipo)
+						tipo,
+                        rotulo_comercial)
 				VALUES (
 						p_id_proveedor,
 						p_id_institucion,
@@ -44,10 +59,12 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tad_proveedor_tproveedor (
 						p_id_usuario_reg,
 						p_nit,
 						p_numero_sigma,
-						p_tipo);
+						p_tipo,
+                        p_rotulo_comercial);
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
+                                --raise exception 'llega%',p_rotulo_comercial;
 						               UPDATE 
 						                  PARAM.tproveedor  
 						                SET						 id_institucion=p_id_institucion
@@ -62,6 +79,7 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tad_proveedor_tproveedor (
 						 ,nit=p_nit
 						 ,numero_sigma=p_numero_sigma
 						 ,tipo=p_tipo
+                         ,rotulo_comercial=p_rotulo_comercial
 						 WHERE id_proveedor=p_id_proveedor;
 
 						       
@@ -82,11 +100,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tad_proveedor_tproveedor (
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

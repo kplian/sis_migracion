@@ -1,8 +1,7 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tad_proveedor_tproveedor()
-						RETURNS boolean AS
-						$BODY$
-
-
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tad_proveedor_tproveedor (
+)
+RETURNS boolean AS
+$body$
 						DECLARE
 						 
 						g_registros record;
@@ -54,7 +53,8 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tad_proveedor_tproveedor()
 						rubro1,
 						rubro2,
 						tipo,
-						usuario
+						usuario,
+                        rotulo_comercial
 FROM 
 						          COMPRO.tad_proveedor) LOOP
 						        
@@ -79,6 +79,7 @@ FROM
 					,g_registros.rubro2
 					,g_registros.tipo
 					,g_registros.usuario
+                    ,g_registros.rotulo_comercial
 					);	
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
@@ -102,10 +103,8 @@ FROM
 						
 						RETURN TRUE;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

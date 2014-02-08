@@ -17,7 +17,8 @@ CREATE OR REPLACE FUNCTION migracion.f_trans_tad_proveedor_tproveedor (
   p_rubro1 text,
   p_rubro2 text,
   p_tipo varchar,
-  p_usuario varchar
+  p_usuario varchar,
+  p_rotulo_comercial varchar
 )
 RETURNS varchar [] AS
 $body$
@@ -47,6 +48,7 @@ DECLARE
 			v_numero_sigma varchar;
 			v_tipo varchar;
             v_doc_id	varchar;
+            v_rotulo_comercial	varchar;
 BEGIN
 			
 			
@@ -70,6 +72,7 @@ BEGIN
 			v_fecha_reg=p_fecha_reg::timestamp;
 			v_id_lugar=p_id_lugar::int4;
 			v_id_usuario_mod=NULL::int4;
+            v_rotulo_comercial=convert(p_rotulo_comercial::varchar, 'LATIN1', 'UTF8');
             if p_id_usuario_reg is NULL then
 				v_id_usuario_reg=1::int4;
             else
@@ -87,7 +90,7 @@ BEGIN
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tad_proveedor_tproveedor (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_proveedor::varchar,'NULL')||','||COALESCE(v_id_institucion::varchar,'NULL')||','||COALESCE(v_id_persona::varchar,'NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_lugar::varchar,'NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nit::varchar||'''','NULL')||','||COALESCE(''''||v_numero_sigma::varchar||'''','NULL')||','||COALESCE(''''||v_tipo::varchar||'''','NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_proveedor::varchar,'NULL')||','||COALESCE(v_id_institucion::varchar,'NULL')||','||COALESCE(v_id_persona::varchar,'NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_lugar::varchar,'NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nit::varchar||'''','NULL')||','||COALESCE(''''||v_numero_sigma::varchar||'''','NULL')||','||COALESCE(''''||v_tipo::varchar||'''','NULL')||','||COALESCE(''''||v_rotulo_comercial::varchar||'''','NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
