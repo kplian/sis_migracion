@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migracion.f_trans_tts_cuenta_bancaria_tts_cuenta_bancaria (
   v_operacion varchar,
   p_id_cuenta_bancaria integer,

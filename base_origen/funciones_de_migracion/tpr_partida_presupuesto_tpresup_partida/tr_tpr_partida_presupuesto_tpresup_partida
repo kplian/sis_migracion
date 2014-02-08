@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tpr_partida_presupuesto
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_partida_presupuesto FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_partida_presupuesto_tpresup_partida();
