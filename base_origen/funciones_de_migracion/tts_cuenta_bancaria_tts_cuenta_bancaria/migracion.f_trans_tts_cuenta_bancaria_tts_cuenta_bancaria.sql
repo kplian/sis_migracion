@@ -58,6 +58,7 @@ BEGIN
 			v_nro_cheque=p_nro_cheque::int4;
 			v_nro_cuenta_banco=convert(p_nro_cuenta_banco::varchar, 'LATIN1', 'UTF8');
             v_central=convert(p_central::varchar, 'LATIN1', 'UTF8');
+            v_id_gestion=p_id_gestion::int4;
     
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
