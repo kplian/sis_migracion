@@ -34,7 +34,12 @@ CREATE OR REPLACE FUNCTION migracion.f_migrar_cbte_pxp (
   p_id_ep integer [],
   p_momento_comprometido varchar,
   p_momento_ejecutado varchar,
-  p_momento_pagado varchar
+  p_momento_pagado varchar,
+  p_id_cuenta_bancaria integer [],
+  p_nombre_cheque varchar [],
+  p_nro_cheque integer [],
+  p_tipo varchar [],
+  p_id_libro_bancos integer []
 )
 RETURNS varchar AS
 $body$
@@ -65,6 +70,12 @@ DECLARE
     v_cadena_cnx varchar;
     v_con varchar;
     v_size integer;
+    
+    v_id_cuenta_bancaria integer;
+    v_nombre_cheque varchar;
+    v_nro_cheque integer;
+    v_tipo varchar;
+    v_id_libro_bancos integer;
 
 BEGIN
 	
@@ -79,8 +90,27 @@ BEGIN
     v_resp='';
 
     v_size = array_upper(p_id_int_transaccion, 1);
-    
+
     for i in 1..v_size loop
+    
+    	if p_id_cuenta_bancaria[i] = -1 then
+        	v_id_cuenta_bancaria = null;
+        else
+        	v_id_cuenta_bancaria = p_id_cuenta_bancaria[i];
+        end if;
+        
+        if p_nro_cheque[i] = -1 then
+        	v_nro_cheque = null;
+        else
+        	v_nro_cheque = p_nro_cheque[i];
+        end if;
+        
+        if p_id_libro_bancos[i] = -1 then
+        	v_id_libro_bancos = null;
+        else
+        	v_id_libro_bancos = p_id_libro_bancos[i];
+        end if;
+    
     	insert into migracion.tct_comprobante
         values(
             p_id_int_comprobante, 
@@ -122,7 +152,13 @@ BEGIN
             p_id_ep[i],
             p_momento_comprometido,
             p_momento_ejecutado,
-            p_momento_pagado
+            p_momento_pagado,
+            
+            v_id_cuenta_bancaria,
+            p_nombre_cheque[i],
+            v_nro_cheque,
+            p_tipo[i],
+            v_id_libro_bancos
         );
     
     end loop;
@@ -174,7 +210,7 @@ BEGIN
 			if v_rec.momento_pagado = 'si' then
             	v_momento_cbte = 4;
             elsif v_rec.momento_ejecutado = 'si' and v_rec.momento_pagado = 'no' then
-            	v_momento_cbte = 3;
+            	v_momento_cbte = 1;
             else
             	v_momento_cbte = 0;
             end if;            

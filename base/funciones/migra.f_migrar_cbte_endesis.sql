@@ -35,6 +35,12 @@ DECLARE
     v_id_depto_endesis  integer;
     
     v_tipo_cambio numeric;
+    
+    va_id_cuenta_bancaria integer[];
+    va_nombre_cheque_trans varchar[];
+    va_nro_cheque integer[];
+    va_tipo varchar[];
+    va_id_libro_bancos integer[];
 
 BEGIN
 
@@ -128,7 +134,12 @@ BEGIN
                   tra.importe_recurso_mb, 
                   tra.importe_gasto_mb,
                   cco.id_uo,
-                  cco.id_ep
+                  cco.id_ep,
+                  coalesce(tra.id_cuenta_bancaria,-1) as id_cuenta_bancaria,
+                  coalesce(tra.nombre_cheque_trans,'S/N') as nombre_cheque_trans,
+                  coalesce(tra.nro_cheque,-1) as nro_cheque,
+                  'cheque'::varchar as tipo,
+                  coalesce(tra.id_cuenta_bancaria_mov,-1) as id_libro_bancos
                   from conta.tint_transaccion tra
                   inner join param.tcentro_costo cco
                   on cco.id_centro_costo = tra.id_centro_costo
@@ -148,6 +159,13 @@ BEGIN
         va_importe_gasto[v_cont]=v_dat.importe_gasto;
         va_id_uo[v_cont]=v_dat.id_uo;
         va_id_ep[v_cont]=v_dat.id_ep;
+        
+        va_id_cuenta_bancaria[v_cont]=v_dat.id_cuenta_bancaria;
+        va_nombre_cheque_trans[v_cont]=v_dat.nombre_cheque_trans;
+        va_nro_cheque[v_cont]=v_dat.nro_cheque;
+        va_tipo[v_cont]=v_dat.tipo;
+        va_id_libro_bancos[v_cont]=v_dat.id_libro_bancos;
+        
         v_cont = v_cont + 1;
    	end loop;
     
@@ -194,9 +212,16 @@ BEGIN
                 '||COALESCE(('array['|| array_to_string(va_id_ep, ',')||']::integer[]')::varchar,'NULL::integer[]')||','||
                 ''''||coalesce(v_rec.momento_comprometido,'') ||''','||
                 ''''||coalesce(v_rec.momento_ejecutado,'') ||''','||
-                ''''||coalesce(v_rec.momento_pagado,'') ||''')';
+                ''''||coalesce(v_rec.momento_pagado,'') ||''','
+                
+                ||COALESCE(('array['|| array_to_string(va_id_cuenta_bancaria, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
+                '||COALESCE(('array['''|| array_to_string(va_nombre_cheque_trans, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
+                '||COALESCE(('array['|| array_to_string(va_nro_cheque, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
+                '||COALESCE(('array['''|| array_to_string(va_tipo, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
+                '||COALESCE(('array['|| array_to_string(va_id_libro_bancos, ',')||']::integer[]')::varchar,'NULL::integer[]')||')'; 
                 
                 raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
+                raise notice '=========================****:%',v_sql;
 
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
