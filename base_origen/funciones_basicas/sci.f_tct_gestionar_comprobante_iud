@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION sci.f_tct_gestionar_comprobante_iud (
   pm_id_usuario integer,
   pm_ip_origen varchar,
@@ -632,7 +630,7 @@ ELSIF pm_codigo_procedimiento = 'CT_REGCOM_DEL' THEN
                 v_consulta = 'SELECT * FROM conta.f_eliminar_int_comprobante('||pm_id_usuario::varchar||', '||v_id_int_comprobante::varchar||')';
                 
                 ---------------------------------------------
-                --valida comprobante en base de datos PXP
+                --elimina comprobante en base de datos PXP
                 ---------------------------------------------
                  
                 
@@ -647,8 +645,10 @@ ELSIF pm_codigo_procedimiento = 'CT_REGCOM_DEL' THEN
     					 
                     
     			         
-                     PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
-                    
+                     select * FROM dblink(v_consulta,true) AS t1( xx varchar)into v_resp;
+                     if (split_part(v_resp,g_separador,1) = 'error') then
+                     	raise exception '%',split_part(v_resp,g_separador,2);
+                     end if;
                     
                     v_res_cone=(select dblink_disconnect());
                  END IF;
@@ -821,8 +821,8 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                           END IF; 
                       end if;
                       g_bandera_validacion=1.00 ;  
-                    END IF; 
-                END IF;  
+                     END IF; 
+                   END IF;  
                   
                   --raise exception 'Esta llegando1';
                   
@@ -976,27 +976,39 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                   g_nro_cbte=g_nro_cbte+ g_periodo;                            
                   END IF;*/
                   
-                  
                   UPDATE sci.tct_comprobante 
                   SET 
                   nro_cbte= g_nro_cbte
                   WHERE sci.tct_comprobante.id_comprobante= ct_id_comprobante;  
                   --120022 por definir 
-                   
+
                   --if ct_id_comprobante = 19823 then raise exception 'server busy... ..'; end if;
                   if sci.f_ct_generar_nro_cheque(ct_id_comprobante)!='TRUE' THEN
                            raise exception 'No se puedo generar nro de cheque';
                   else 
-                                                  
-                  	 select clb.id_libro_bancos_deposito, clb.tipo, lb.id_cuenta_bancaria, 
-                     cta.nombre_cheque, cta.motivo, cta.importe,
-                     cta.observaciones, cbt.nro_cbte, cbt.nro_cheque, lb.origen into g_comprobante_libro_bancos
-                     from sci.tct_comprobante_libro_bancos clb
-                     left join tesoro.tts_libro_bancos lb on lb.id_libro_bancos=clb.id_libro_bancos_deposito
-                     inner join tesoro.tts_cuenta_doc cta on cta.id_comprobante=clb.id_comprobante
-                     inner join sci.tct_comprobante cbt on cbt.id_comprobante=clb.id_comprobante
-                     where clb.id_comprobante=ct_id_comprobante;
-                                          
+
+                  	 IF(g_origen != 'pxp')THEN                                                
+                       select clb.id_libro_bancos_deposito, clb.tipo, cta.id_cuenta_bancaria, 
+                       cta.nombre_cheque, cta.motivo, cta.importe,
+                       cta.observaciones, cbt.nro_cbte, cbt.nro_cheque, lb.origen into g_comprobante_libro_bancos
+                       from sci.tct_comprobante_libro_bancos clb
+                       left join tesoro.tts_libro_bancos lb on lb.id_libro_bancos=clb.id_libro_bancos_deposito
+                       inner join tesoro.tts_cuenta_doc cta on cta.id_comprobante=clb.id_comprobante
+                       inner join sci.tct_comprobante cbt on cbt.id_comprobante=clb.id_comprobante
+                       where clb.id_comprobante=ct_id_comprobante;
+                     ELSE
+                     	select clb.id_libro_bancos_deposito, clb.tipo, lb.id_cuenta_bancaria,
+                                cbtpxp.nombre_cheque, cbtpxp.importe_haber as importe, cbtpxp.glosa as motivo,
+                               cbtpxp.glosa as observaciones, cbt.nro_cbte, cbt.nro_cheque, lb.origen 
+                        	into g_comprobante_libro_bancos
+                        from sci.tct_comprobante_libro_bancos clb
+                        left join tesoro.tts_libro_bancos lb on lb.id_libro_bancos = clb.id_libro_bancos_deposito
+                        inner join sci.tct_comprobante cbt on cbt.id_comprobante = clb.id_comprobante
+                        inner join migracion.tct_comprobante cbtpxp on cbtpxp.id_int_comprobante=cbt.id_int_comprobante
+                        where clb.id_comprobante = ct_id_comprobante and cbtpxp.id_cuenta_bancaria is not null;                     
+
+                     END IF;                     
+                   
                      if(g_comprobante_libro_bancos.tipo='cheque')then
                         
                      	--Generación en libro de bancos
@@ -1040,7 +1052,7 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                   
                    --if ct_id_comprobante = 69099 then raise exception 'Pasa la validación ...';end if;
                      --if(ct_id_comprobante=60442) then raise exception 'aaaa';end if;     
-                   
+
                   g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Validación exitosa comprobante ('||ct_id_comprobante||')';
                   g_respuesta := 't'||g_separador||g_descripcion_log_error;  
             END IF; 
@@ -1066,7 +1078,7 @@ debe ser en la ultima ilnea para habilitar el rollback en caso de ser necesario
              
                 --funcion para obtener cadena de conexion
                 v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
-                
+
                
                 
                 v_consulta = 'SELECT * FROM conta.f_validar_cbte('||pm_id_usuario::varchar||', '||v_id_int_comprobante::varchar||',''no'',''endesis'')';
@@ -1077,7 +1089,7 @@ debe ser en la ultima ilnea para habilitar el rollback en caso de ser necesario
                 --valida comprobante en base de datos PXP
                 ---------------------------------------------
                  
-                
+
                  v_resp =  (SELECT dblink_connect(v_cadena_cnx));
     			            
                  IF(v_resp!='OK') THEN
@@ -1087,10 +1099,12 @@ debe ser en la ultima ilnea para habilitar el rollback en caso de ser necesario
     			                 
                  ELSE
     					 
-                    
+ 
     			         
-                     PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
-                    
+                     select * FROM dblink(v_consulta,true) AS t1( xx varchar) into v_resp;
+                    if (split_part(v_resp,g_separador,1) = 'error') then
+                    	raise exception '%', split_part(v_resp,g_separador,2);
+                    end if;
                     
                     v_res_cone=(select dblink_disconnect());
                  END IF;
