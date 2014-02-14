@@ -47,7 +47,7 @@ BEGIN
         where par.id_gestion = v_id_gestion and trim(upper(ci.desc_ingas)) like v_desc_ingas;
         
         if (v_id_concepto_ingas is null) then
-        	raise exception 'No existe el concepto: %, para la gestion: % en ENDESIS';
+        	raise exception 'No existe el concepto: %, para la gestion: % en ENDESIS',v_desc_ingas,v_gestion;
         end if;
         
     	----------------------------

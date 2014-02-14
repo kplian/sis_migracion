@@ -31,6 +31,8 @@ $body$
                         v_id_concepto_ingas integer;
                         v_desc_ingas varchar;
                         v_tipo varchar;
+                        v_id_gestion 	integer;
+                        v_id_concepto_ingas_pxp	integer;
                         
                   /*
                   
@@ -79,8 +81,8 @@ $body$
 						
 						    if(v_operacion = 'INSERT') THEN
                             
-                              if(v_id_concepto_ingas is NULL)THEN
-  						
+                              if(v_id_concepto_ingas is NULL)THEN                              		
+  									
                                    INSERT INTO 
                                           param.tconcepto_ingas (
                                           id_concepto_ingas,
@@ -113,8 +115,24 @@ $body$
                                     
                                                     
                              
-                             END IF;     
-                                    
+                             END IF;
+                             select id_gestion into v_id_gestion
+                             from pre.tpartida
+                             where id_partida =  p_id_partida;
+                             
+                            INSERT INTO migra.tconcepto_ids(
+                                  
+                                    id_concepto_ingas,                        
+                                    id_concepto_ingas_pxp,
+                                    desc_ingas,
+                                    id_gestion)
+                            VALUES(
+                                   
+                                    p_id_concepto_ingas,
+                                    v_id_concepto_ingas,
+                                    p_desc_ingas,
+                                    v_id_gestion);  
+                                                                      
                             --insercion a la tabla tconcepto_partida                        
                             INSERT INTO pre.tconcepto_partida(
                                   
@@ -130,12 +148,20 @@ $body$
                                     p_id_usuario_reg);
 						       
 		ELSEIF  v_operacion = 'UPDATE' THEN
-        
-                    --raise exception '%',v_id_concepto_ingas;          
+        			select id_concepto_ingas_pxp
+                    into v_id_concepto_ingas_pxp
+                    from migra.tconcepto_ids
+                    where id_concepto_ingas = p_id_concepto_ingas;
+                    --raise exception '%',v_id_concepto_ingas;   
+                    
+                    update migra.tconcepto_ids 
+                    set desc_ingas = p_desc_ingas
+                    where id_concepto_ingas = p_id_concepto_ingas;       
                     UPDATE 
                       param.tconcepto_ingas  
                     SET						 
                     estado_reg=p_estado_reg
+        			,desc_ingas = v_desc_ingas
                    ,fecha_mod=p_fecha_mod
                    ,fecha_reg=p_fecha_reg
                    ,id_oec=p_id_oec
@@ -146,14 +172,14 @@ $body$
                    ,activo_fijo=p_activo_fijo
                    ,almacenable=p_almacenable,
                     movimiento = v_tipo
-                   WHERE id_concepto_ingas=v_id_concepto_ingas;
+                   WHERE id_concepto_ingas=v_id_concepto_ingas_pxp;
                          
 				--actualizacion de la tabla tconcepto_partida
                
                 
                  IF EXISTS( SELECT 1 FROM  pre.tconcepto_partida cp
                              WHERE cp.id_partida = p_id_partida
-                                  and cp.id_concepto_ingas = v_id_concepto_ingas) THEN
+                                  and cp.id_concepto_ingas = v_id_concepto_ingas_pxp) THEN
                          
                   ELSE   
                   
@@ -165,7 +191,7 @@ $body$
                             id_usuario_reg)
                        VALUES(
                           
-                            v_id_concepto_ingas,
+                            v_id_concepto_ingas_pxp,
                             p_id_partida,
                             p_fecha_reg,
                             p_id_usuario_reg);      
@@ -176,12 +202,22 @@ $body$
 				
 					
                 	       ELSEIF  v_operacion = 'DELETE' THEN
-                            
+                            	
+                                select id_concepto_ingas_pxp
+                                into v_id_concepto_ingas
+                                from migra.tconcepto_ids
+                                where id_concepto_ingas = p_id_concepto_ingas;
+                                 
                                  DELETE FROM 
 						              pre.tconcepto_partida
                                   WHERE 
                                         id_concepto_ingas=v_id_concepto_ingas
                                   AND  id_partida = p_id_partida;
+                                  
+                                  DELETE FROM 
+						              migra.tconcepto_ids
+                                  WHERE 
+                                        id_concepto_ingas=p_id_concepto_ingas;
                                
 						       
                                 IF (not exists(select 1 from pre.tconcepto_partida  cp where cp.id_concepto_ingas = v_id_concepto_ingas)) THEN

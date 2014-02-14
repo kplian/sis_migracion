@@ -199,4 +199,14 @@ ALTER TABLE migra.tts_libro_bancos
   
 /***********************************F-SCP-JRR-MIGRA-0-07/02/2014****************************************/
 
+/***********************************I-SCP-JRR-MIGRA-0-14/02/2014****************************************/
+
+CREATE TABLE migra.tconcepto_ids (
+  id_concepto_ingas INTEGER, 
+  id_concepto_ingas_pxp INTEGER, 
+  id_gestion INTEGER, 
+  desc_ingas VARCHAR
+) WITHOUT OIDS;
+
+/***********************************F-SCP-JRR-MIGRA-0-14/02/2014****************************************/
 
