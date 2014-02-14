@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_endesis (
   p_id_int_comprobante integer
 )
@@ -9,6 +11,9 @@ Fecha: 24/09/2013
 Descripción: Migrar el comprobante generado en PXP a ENDESIS utilizando dblink entre las bases de datos
 */
 DECLARE
+
+     v_nombre_funcion        text;
+   
 
 	v_cadena_cnx varchar;
     v_resp varchar;
@@ -43,6 +48,9 @@ DECLARE
     va_id_libro_bancos integer[];
 
 BEGIN
+
+
+   v_nombre_funcion:='conta.f_migrar_cbte_endesis';
 
 	--Verificación de existencia de parámetro
     if not exists(select 1 from conta.tint_comprobante
@@ -232,6 +240,9 @@ BEGIN
     IF v_resp!='OK' THEN
         raise exception 'FALLO LA CONEXION A LA BASE DE DATOS CON DBLINK';
     END IF;
+    
+   
+    
     --raise exception 'dd:%',v_sql;
     --Ejecuta la función remotamente
     perform * from dblink(v_sql, true) as (respuesta varchar);
@@ -241,6 +252,17 @@ BEGIN
     
     --Devuelve la respuesta
     return 'Hecho';
+
+
+EXCEPTION
+WHEN OTHERS THEN
+			v_resp='';
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+			raise exception '%',v_resp;
+
+
 
 END;
 $body$

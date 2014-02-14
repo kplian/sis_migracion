@@ -1,0 +1,218 @@
+ 
+		CREATE TRIGGER tr_tad_proveedor
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON COMPRO.tad_proveedor FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tad_proveedor_tproveedor();
+        
+         
+		CREATE TRIGGER tr_taf_clasificacion
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON ACTIF.taf_clasificacion FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_taf_clasificacion_tclasificacion();
+        
+        
+         
+		CREATE TRIGGER tr_tct_auxiliar
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SCI.tct_auxiliar FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tct_auxiliar_tauxiliar();
+        
+        
+         
+		CREATE TRIGGER tr_tct_cuenta_auxiliar
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SCI.tct_cuenta_auxiliar FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tct_cuenta_auxiliar_tcuenta_auxiliar();
+        
+        
+        
+         
+		CREATE TRIGGER tr_tct_cuenta_ids
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SCI.tct_cuenta_ids FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tct_cuenta_ids_tcuenta_ids();
+        
+        
+         
+		CREATE TRIGGER tr_tct_cuenta
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SCI.tct_cuenta FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tct_cuenta_tcuenta();
+        
+        
+        
+         
+		CREATE TRIGGER tr_tct_orden_trabajo
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SCI.tct_orden_trabajo FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tct_orden_trabajo_torden_trabajo();
+        
+        
+        
+         
+		CREATE TRIGGER tr_tct_plantilla
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SCI.tct_plantilla FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tct_plantilla_tplantilla();
+        
+         
+		CREATE TRIGGER tr_tpm_programa_proyecto_actividad
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_programa_proyecto_actividad FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_programa_proyecto_actividad_tprograma_proyecto_acttividad();
+        
+         
+		CREATE TRIGGER tr_tpm_periodo
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_periodo FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_periodo_tperiodo();
+        
+        
+         
+		CREATE TRIGGER tr_tpm_moneda
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_moneda FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_moneda_tmoneda();
+        
+        
+         
+		CREATE TRIGGER tr_tpm_institucion
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_institucion FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_institucion_tinstitucion();
+        
+        
+         
+		CREATE TRIGGER tr_tpm_gestion
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_gestion FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_gestion_tgestion();
+        
+        
+         
+		CREATE TRIGGER tr_tpm_financiador
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_financiador FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_financiador_tfinanciador();
+        
+        
+         
+		CREATE TRIGGER tr_tpm_fina_regi_prog_proy_acti
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_fina_regi_prog_proy_acti FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_fina_regi_prog_proy_acti_tep();
+        
+        
+         
+		CREATE TRIGGER tr_tpm_empresa
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_empresa FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_empresa_tempresa();
+        
+         
+		CREATE TRIGGER tr_tpm_actividad
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_actividad FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_actividad_tactividad();
+        
+         
+		CREATE TRIGGER tr_tkp_unidad_organizacional
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_unidad_organizacional FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_unidad_organizacional_tuo();
+        
+         
+		CREATE TRIGGER tr_tkp_historico_asignacion
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_historico_asignacion FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_historico_asignacion_tuo_funcionario();
+        
+         
+		CREATE TRIGGER tr_tkp_estructura_organizacional
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_estructura_organizacional FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_estructura_organizacional_testructura_uo();
+        
+         
+		CREATE TRIGGER tr_tkp_empleado
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_empleado FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_empleado_tfuncionario();
+        
+         
+		CREATE TRIGGER tr_tsg_usuario
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SSS.tsg_usuario FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tsg_usuario_tusuario();
+        
+         
+		CREATE TRIGGER tr_tsg_usuario_asignacion
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SSS.tsg_usuario_asignacion FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tsg_usuario_asignacion_tusuario_grupo_ep();
+        
+         
+		CREATE TRIGGER tr_tsg_persona
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SSS.tsg_persona FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tsg_persona_tpersona();
+        
+         
+		CREATE TRIGGER tr_tsg_lugar
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SSS.tsg_lugar FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tsg_lugar_tlugar();
+        
+         
+		CREATE TRIGGER tr_tsg_asignacion_estructura_tpm_frppa
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SSS.tsg_asignacion_estructura_tpm_frppa FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tsg_asignacion_estructura_tpm_frppa_tgrupo_ep();
+        
+         
+		CREATE TRIGGER tr_tsg_asignacion_estructura
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SSS.tsg_asignacion_estructura FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tsg_asignacion_estructura_tgrupo();
+        
+         
+		CREATE TRIGGER tr_tpr_presupuesto
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_presupuesto FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_presupuesto_tcentro_costo();
+        
+         
+		CREATE TRIGGER tr_tpr_partida
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_partida FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_partida_tpartida();
+        
+         
+		CREATE TRIGGER tr_tpr_partida_cuenta
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_partida_cuenta FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_partida_cuenta_tcuenta_partida();
+        
+         
+		CREATE TRIGGER tr_tpr_concepto_ingas
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_concepto_ingas FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_concepto_ingas_tconcepto_ingas();
+        
+         
+		CREATE TRIGGER tr_tpr_concepto_cta
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_concepto_cta FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_concepto_cta_tconcepto_cta();
+        
+         
+		CREATE TRIGGER tr_tpm_tipo_cambio
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_tipo_cambio FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_tipo_cambio_ttipo_cambio();
+        
+         
+		CREATE TRIGGER tr_tpm_regional
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PARAM.tpm_regional FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpm_regional_tregional();

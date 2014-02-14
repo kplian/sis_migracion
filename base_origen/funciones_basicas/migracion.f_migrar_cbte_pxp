@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migracion.f_migrar_cbte_pxp (
   p_id_int_comprobante integer,
   p_id_clase_comprobante integer,
@@ -138,11 +140,13 @@ BEGIN
             select cb.id_cuenta_bancaria
             into v_id_cuenta_bancaria_endesis
             from tesoro.tts_cuenta_bancaria cb
-            where cb.nro_cuenta_banco = v_nro_cuenta_banca
+            where cb.nro_cuenta_banco = v_nro_cuenta_banco
             and cb.id_parametro = v_id_parametro;
             
         end if;
     
+     
+      
     	insert into migracion.tct_comprobante
         values(
             p_id_int_comprobante, 
@@ -196,6 +200,9 @@ BEGIN
     
     end loop;
     
+    
+    
+    
 	--1. Recorrer la tabla temporal de comprobantes
     /*for v_rec in (select * from migracion.tct_comprobante
     			where id_int_comprobante = p_id_int_comprobante) loop*/
@@ -219,7 +226,7 @@ BEGIN
 				  id_funcionario_firma3,
 				  fecha,
 				  nro_tramite,
-				  id_int_transaccion,
+				  --id_int_transaccion,
 				  id_cuenta,
 				  id_auxiliar,
 				  id_centro_costo,
@@ -237,7 +244,9 @@ BEGIN
 				  id_usuario_reg,
 				  codigo_clase_cbte,
 				  id_uo,
-				  id_ep
+				  id_ep,
+                  momento_pagado,
+                  momento_ejecutado
 				FROM 
 				  migracion.tct_comprobante
 				WHERE id_int_comprobante = p_id_int_comprobante
@@ -259,7 +268,7 @@ BEGIN
 				  id_funcionario_firma3,
 				  fecha,
 				  nro_tramite,
-				  id_int_transaccion,
+				  --id_int_transaccion,
 				  id_cuenta,
 				  id_auxiliar,
 				  id_centro_costo,
@@ -269,7 +278,9 @@ BEGIN
 				  id_usuario_reg,
 				  codigo_clase_cbte,
 				  id_uo,
-				  id_ep) loop
+				  id_ep,
+                  momento_pagado,
+                  momento_ejecutado) loop
 
 		--Obtencion de parametros
         --id_parametro, momento_cbte, id_periodo_subsis, id_subsistema, id_usuario, id_clase_cbte,id_depto
