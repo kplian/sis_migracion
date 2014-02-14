@@ -164,8 +164,79 @@ BEGIN
     end loop;
     
 	--1. Recorrer la tabla temporal de comprobantes
-    for v_rec in (select * from migracion.tct_comprobante
-    			where id_int_comprobante = p_id_int_comprobante) loop
+    for /*v_rec in (select * from migracion.tct_comprobante
+    			where id_int_comprobante = p_id_int_comprobante) loop*/
+    			
+	for v_rec in (SELECT 
+				  id_int_comprobante,
+				  id_clase_comprobante,
+				  id_int_comprobante_fk,
+				  id_subsistema,
+				  id_depto,
+				  id_moneda,
+				  id_periodo,
+				  nro_cbte,
+				  momento,
+				  glosa1,
+				  glosa2,
+				  beneficiario,
+				  tipo_cambio,
+				  id_funcionario_firma1,
+				  id_funcionario_firma2,
+				  id_funcionario_firma3,
+				  fecha,
+				  nro_tramite,
+				  id_int_transaccion,
+				  id_cuenta,
+				  id_auxiliar,
+				  id_centro_costo,
+				  id_partida,
+				  id_partida_ejecucion,
+				  glosa,
+				  sum(importe_debe) as importe_debe,
+				  sum(importe_haber) as importe_haber,
+				  sum(importe_recurso) as importe_recurso,
+				  sum(importe_gasto) as importe_gasto,
+				  sum(importe_debe_mb) as importe_debe_mb,
+				  sum(importe_haber_mb) as importe_haber_mb,
+				  sum(importe_recurso_mb) as importe_recurso_mb,
+				  sum(importe_gasto_mb) as importe_gasto_mb,
+				  id_usuario_reg,
+				  codigo_clase_cbte,
+				  id_uo,
+				  id_ep
+				FROM 
+				  migracion.tct_comprobante
+				WHERE id_int_comprobante = p_id_int_comprobante
+				GROUP BY id_int_comprobante,
+				  id_clase_comprobante,
+				  id_int_comprobante_fk,
+				  id_subsistema,
+				  id_depto,
+				  id_moneda,
+				  id_periodo,
+				  nro_cbte,
+				  momento,
+				  glosa1,
+				  glosa2,
+				  beneficiario,
+				  tipo_cambio,
+				  id_funcionario_firma1,
+				  id_funcionario_firma2,
+				  id_funcionario_firma3,
+				  fecha,
+				  nro_tramite,
+				  id_int_transaccion,
+				  id_cuenta,
+				  id_auxiliar,
+				  id_centro_costo,
+				  id_partida,
+				  id_partida_ejecucion,
+				  glosa,
+				  id_usuario_reg,
+				  codigo_clase_cbte,
+				  id_uo,
+				  id_ep) loop
 
 		--Obtencion de parametros
         --id_parametro, momento_cbte, id_periodo_subsis, id_subsistema, id_usuario, id_clase_cbte,id_depto
