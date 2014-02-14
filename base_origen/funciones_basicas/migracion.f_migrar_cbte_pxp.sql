@@ -76,6 +76,8 @@ DECLARE
     v_nro_cheque integer;
     v_tipo varchar;
     v_id_libro_bancos integer;
+    v_id_cuenta_bancaria_endesis integer;
+    v_nro_cuenta_banco varchar;
 
 BEGIN
 	
@@ -109,6 +111,36 @@ BEGIN
         	v_id_libro_bancos = null;
         else
         	v_id_libro_bancos = p_id_libro_bancos[i];
+        end if;
+        v_id_cuenta_bancaria_endesis=null;
+        --Obtención de cuenta bancaria de endesis
+        if v_id_libro_bancos is not null then
+        	--Se obtiene la cuenta bancaria a partir del deposito
+        	select id_cuenta_bancaria
+            into v_id_cuenta_bancaria_endesis
+            from tesoro.tts_libro_bancos lb
+            where lb.id_libro_bancos = v_id_libro_bancos;
+        else
+        	--Obtiene la gestión a partir de la fecha del comprobante
+        	select
+        	par.id_parametro
+            into v_id_parametro
+            from tesoro.tts_parametro par
+            where gestion_tesoro = to_char(p_fecha::date,'yyyy')::numeric;
+        
+        	--Obtiene el número de cuenta bancaria de alguna gestión
+        	select cb.nro_cuenta_banco
+            into v_nro_cuenta_banco
+            from tesoro.tts_cuenta_bancaria cb
+            where cb.id_cuenta_bancaria = v_id_cuenta_bancaria;
+            
+            --Se obtiene la cuenta bancaria de la gestión deseada
+            select cb.id_cuenta_bancaria
+            into v_id_cuenta_bancaria_endesis
+            from tesoro.tts_cuenta_bancaria cb
+            where cb.nro_cuenta_banco = v_nro_cuenta_banca
+            and cb.id_parametro = v_id_parametro;
+            
         end if;
     
     	insert into migracion.tct_comprobante
@@ -158,13 +190,14 @@ BEGIN
             p_nombre_cheque[i],
             v_nro_cheque,
             p_tipo[i],
-            v_id_libro_bancos
+            v_id_libro_bancos,
+            v_id_cuenta_bancaria_endesis
         );
     
     end loop;
     
 	--1. Recorrer la tabla temporal de comprobantes
-    for /*v_rec in (select * from migracion.tct_comprobante
+    /*for v_rec in (select * from migracion.tct_comprobante
     			where id_int_comprobante = p_id_int_comprobante) loop*/
     			
 	for v_rec in (SELECT 
@@ -403,7 +436,7 @@ BEGIN
         );*/
         
         if substring(v_resp,1,1)!='t' then
-        	raise exception 'Error al generar transacciÃ³n: %',v_resp;
+        	raise exception 'Error al generar transaccion: %',v_resp;
         end if;
         
     
