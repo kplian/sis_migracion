@@ -231,7 +231,7 @@ BEGIN
 				  id_auxiliar,
 				  id_centro_costo,
 				  id_partida,
-				  id_partida_ejecucion,
+				 -- id_partida_ejecucion,
 				  glosa,
 				  sum(importe_debe) as importe_debe,
 				  sum(importe_haber) as importe_haber,
@@ -273,7 +273,7 @@ BEGIN
 				  id_auxiliar,
 				  id_centro_costo,
 				  id_partida,
-				  id_partida_ejecucion,
+				  --id_partida_ejecucion,
 				  glosa,
 				  id_usuario_reg,
 				  codigo_clase_cbte,
@@ -452,6 +452,29 @@ BEGIN
         
     
     end loop;
+    
+    ------------------------
+    --GSS-14-02-2014- Insercion en tabla intermedia -Inicio
+    -----------------------
+    select tipo, id_libro_bancos into v_tipo, v_id_libro_bancos
+    from migracion.tct_comprobante
+    where id_int_comprobante = p_id_int_comprobante and id_cuenta_bancaria is not null;
+    
+    if(v_tipo is not null)then
+    		
+            select id_comprobante, origen into v_id_comprobante, v_origen
+            from sci.tct_comprobante
+            where id_int_comprobante=p_id_int_comprobante;
+            if(v_origen='pxp')then
+              INSERT INTO sci.tct_comprobante_libro_bancos(id_comprobante,id_libro_bancos_deposito,tipo)
+              VALUES(v_id_comprobante,v_id_libro_bancos,v_tipo);    	
+            else
+              raise exception 'Este comprobante no viene de pxp, esta mal';
+            end if;
+    end if;
+  	------------------------
+    --GSS-14-02-2014- FIN
+    -----------------------
 
     --Respuesta
     return 'Comprobante generado!'::varchar;
