@@ -35,9 +35,17 @@ CREATE TABLE migracion.tct_comprobante (
   id_usuario_reg INTEGER, 
   codigo_clase_cbte VARCHAR(50), 
   id_uo INTEGER, 
-  id_ep INTEGER
+  id_ep INTEGER, 
+  momento_comprometido VARCHAR(4) DEFAULT 'no'::character varying, 
+  momento_ejecutado VARCHAR(4) DEFAULT 'no'::character varying, 
+  momento_pagado VARCHAR(4) DEFAULT 'no'::character varying, 
+  id_cuenta_bancaria INTEGER, 
+  nombre_cheque VARCHAR(200), 
+  nro_cheque INTEGER, 
+  tipo VARCHAR(15), 
+  id_libro_bancos INTEGER, 
+  id_cuenta_bancaria_endesis INTEGER
 ) WITHOUT OIDS;
-
 
 --24/12/2013
 ALTER TABLE tesoro.tts_cuenta_bancaria
@@ -60,19 +68,45 @@ ALTER TABLE presto.tpr_partida_ejecucion
   
 
 
---08/02/2014
-alter table migracion.tct_comprobante
-add column momento_comprometido VARCHAR(4) DEFAULT 'no'::character varying;
-
-alter table migracion.tct_comprobante
-add column  momento_ejecutado VARCHAR(4) DEFAULT 'no'::character varying;
-
-alter table migracion.tct_comprobante
-add column  momento_pagado VARCHAR(4) DEFAULT 'no'::character varying;
-
 
 CREATE TABLE migracion.tct_cbte_clase_relacion (
   id_clase_cbte INTEGER, 
   codigo_clase VARCHAR(50), 
   momento VARCHAR(30)
 ) WITHOUT OIDS;
+
+
+/* Data for the 'migracion.tct_cbte_clase_relacion' table  (Records 1 - 6) */
+
+INSERT INTO migracion.tct_cbte_clase_relacion ("id_clase_cbte", "codigo_clase", "momento")
+VALUES (1, E'DIARIO', E'contable');
+
+INSERT INTO migracion.tct_cbte_clase_relacion ("id_clase_cbte", "codigo_clase", "momento")
+VALUES (3, E'CAJA', E'contable');
+
+INSERT INTO migracion.tct_cbte_clase_relacion ("id_clase_cbte", "codigo_clase", "momento")
+VALUES (5, E'PAGO', E'contable');
+
+INSERT INTO migracion.tct_cbte_clase_relacion ("id_clase_cbte", "codigo_clase", "momento")
+VALUES (1, E'DIARIO', E'presupuestario');
+
+INSERT INTO migracion.tct_cbte_clase_relacion ("id_clase_cbte", "codigo_clase", "momento")
+VALUES (3, E'CAJA', E'presupuestario');
+
+INSERT INTO migracion.tct_cbte_clase_relacion ("id_clase_cbte", "codigo_clase", "momento")
+VALUES (5, E'PAGO', E'presupuestario');
+
+
+
+
+--------------- SQL ---------------
+
+ALTER TABLE sci.tct_comprobante
+  DROP CONSTRAINT chk_tct_comprobante__origen RESTRICT;
+  
+  
+ --------------- SQL ---------------
+
+ALTER TABLE sci.tct_comprobante
+  ADD CONSTRAINT tct_comprobante_chk CHECK ((((((((((((((((((((((((((((origen)::text = 'alta_activo_fijo'::text) OR ((origen)::text = 'depreciacion_activo_fijo'::text)) OR ((origen)::text = 'devengado_diario'::text)) OR ((origen)::text = 'fv_facturacion_mesual'::text)) OR ((origen)::text = 'devengado_pago'::text)) OR ((origen)::text = 'devengado_reg'::text)) OR ((origen)::text = 'duplicado'::text)) OR ((origen)::text = 'finalizacion'::text)) OR ((origen)::text = 'planilla_devengado'::text)) OR ((origen)::text = 'planilla_pago'::text)) OR ((origen)::text = 'plan_pago_anticipo'::text)) OR ((origen)::text = 'plan_pago_devengado'::text)) OR ((origen)::text = 'plan_pago_pago'::text)) OR ((origen)::text = 'rendicion'::text)) OR ((origen)::text = 'reposicion'::text)) OR ((origen)::text = 'solicitud'::text)) OR ((origen)::text = 'sucursal'::text)) OR ((origen)::text = 'kp_planilla_diario_pre'::text)) OR ((origen)::text = 'actualizacion'::text)) OR ((origen)::text = 'kp_planilla_anticipo'::text)) OR ((origen)::text = 'activo_fijo'::text)) OR ((origen)::text = 'kp_planilla_diario_costo'::text)) OR (origen IS NULL)) OR ((origen)::text = 'cierre_apertura'::text)) OR ((origen)::text = 'kp_planilla_obligacion'::text)) OR ((origen)::text = 'comprobante_apertura'::text)) OR ((origen)::text = 'pxp'::text)); 
+  

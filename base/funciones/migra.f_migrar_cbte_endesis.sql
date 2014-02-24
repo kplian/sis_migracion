@@ -179,7 +179,9 @@ BEGIN
     
     
     
-    
+    IF  v_rec.id_depto is NULL THEN
+        raise exception 'DEPTO no puede estar vacio revise la relacion de deptos en el esquema de migracion %',v_rec.id_depto;
+    END IF;
     
     
     
@@ -231,12 +233,14 @@ BEGIN
                 raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
                 raise notice '=========================****:%',v_sql;
 
+  
+   
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
     
     --Abrir conexión
     v_resp = dblink_connect(v_cadena_cnx);
-
+ 
     IF v_resp!='OK' THEN
         raise exception 'FALLO LA CONEXION A LA BASE DE DATOS CON DBLINK';
     END IF;
@@ -246,6 +250,8 @@ BEGIN
     --raise exception 'dd:%',v_sql;
     --Ejecuta la función remotamente
     perform * from dblink(v_sql, true) as (respuesta varchar);
+    
+    
 
 	--Cierra la conexión abierta
 	perform dblink_disconnect();
