@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION presto.f_i_pr_gestionarpresupuesto (
   pr_id_presupuesto integer,
   pr_id_partida integer,
@@ -112,10 +110,7 @@ g_fecha_com_eje date;
 g_consulta text;
 BEGIN
 
-
-
---raise exception 'LLEGA a la funcoin final %',pr_fecha;
- -- raise notice '%','dddddddddddddddddddddddddddddddd';
+  raise notice '%','dddddddddddddddddddddddddddddddd';
 --   raise exception '%','Llega';
 g_id_partida_ejecucion =-1;
 g_id_partida_revercion_total =-1;
@@ -362,7 +357,7 @@ ELSE
                                                                                  '||coalesce(g_id_partida_presupuesto||' ','null')||'     ,  '||coalesce(g_monedas.id_moneda||' ','null')||' ,   
                                                                                '||coalesce(round(param.f_pm_conversion_monedas( g_fecha_tc,pr_monto_total, pr_id_moneda, g_monedas.id_moneda,'O' ),2)||' ','null')||'  , '''||coalesce(pr_fecha||' ','null')||'''     ,   '||coalesce(pr_sw_momento||' ','null')||',                  
                                                                                  '||coalesce(g_id_item||' ','null')||'                    ,'||coalesce(g_id_servicio||' ','null')||'            , null ,
-                                                                                 '||coalesce(pr_id_partida_ejecucion||' ','null')||' ,'||coalesce(g_id_concepto_ingas||' ','null')||' , CURRENT_TIMESTAMP, 
+                                                                                 '||coalesce(g_id_partida_ejecucion||' ','null')||' ,'||coalesce(g_id_concepto_ingas||' ','null')||' , CURRENT_TIMESTAMP, 
                                                                                  '||coalesce(g_id_cuenta_doc||' ','null')||' , '||coalesce(g_id_devengado||' ','null')||' , '||coalesce(g_id_solicitud_compra||' ','null')||',
                                                                                  '||coalesce(g_id_cuenta_doc_rendicion||' ','null')||' ,'||coalesce(pr_id_comprobante||' ','null')||' '||coalesce(', '||pr_fk_llave, '')||' );';
                                                /* INSERT INTO presto.tpr_partida_ejecucion(                id_partida_presupuesto     , id_moneda, 
