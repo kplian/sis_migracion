@@ -42,7 +42,7 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tkp_historico_asignacion_tuo_func
 						id_unidad_organizacional,
 						id_usuario_mod,
 						id_usuario_reg,
-						estado,
+						estado_reg,
 						fecha_asignacion,
 						fecha_finalizacion,
 						fecha_registro,
@@ -58,7 +58,7 @@ FROM
 					,g_registros.id_unidad_organizacional
 					,g_registros.id_usuario_mod
 					,g_registros.id_usuario_reg
-					,g_registros.estado
+					,g_registros.estado_reg
 					,g_registros.fecha_asignacion
 					,g_registros.fecha_finalizacion
 					,g_registros.fecha_registro

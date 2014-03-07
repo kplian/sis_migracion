@@ -50,7 +50,7 @@ BEGIN
 			v_id_uo_funcionario=p_id_historico_asignacion::int4;
 			v_id_funcionario=p_id_empleado::int4;
 			v_id_uo=p_id_unidad_organizacional::int4;
-			v_estado_reg=convert(p_estado::varchar, 'LATIN1', 'UTF8');
+			v_estado_reg=convert(case when p_estado = 'eliminado' then 'inactivo' else 'activo' end::varchar, 'LATIN1', 'UTF8');
 			v_fecha_asignacion=p_fecha_asignacion::date;
 			v_fecha_finalizacion=p_fecha_finalizacion::date;
 			v_fecha_mod=p_fecha_ultima_mod::timestamp;
