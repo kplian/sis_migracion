@@ -60,9 +60,9 @@ BEGIN
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
 						
-			select inst.doc_id into v_doc_id from compro.tad_proveedor prov
-			left join param.tpm_institucion inst on inst.id_institucion=prov.id_institucion
-			where prov.id_institucion=p_id_institucion;
+			select prov.nit into v_doc_id 
+            from compro.tad_proveedor prov
+			where prov.id_proveedor=p_id_proveedor;
 			v_id_proveedor=p_id_proveedor::int4;
 			v_id_institucion=p_id_institucion::int4;
 			v_id_persona=p_id_persona::int4;
@@ -78,11 +78,9 @@ BEGIN
             else
           		v_id_usuario_reg=p_id_usuario_reg::int4;
 	        end if;
-			if(v_doc_id='xxx' OR v_doc_id='sss' OR v_doc_id=0 OR v_doc_id=1)then 
-                v_nit=convert(NULL::varchar, 'LATIN1', 'UTF8');
-            else	
-				v_nit=convert(v_doc_id::varchar, 'LATIN1', 'UTF8');
-			end if;           
+			
+			v_nit=convert(v_doc_id::varchar, 'LATIN1', 'UTF8');
+			           
 			v_numero_sigma=convert(NULL::varchar, 'LATIN1', 'UTF8');
 			v_tipo=convert(p_tipo::varchar, 'LATIN1', 'UTF8');
     
