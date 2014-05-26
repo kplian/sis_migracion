@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION sci.f_tct_gestionar_comprobante_iud (
   pm_id_usuario integer,
   pm_ip_origen varchar,
@@ -170,7 +172,11 @@ DECLARE
     v_id_int_comprobante integer;
     v_res_cone  varchar;
     
-    --GSS
+    --GSS 17/02/2014
+    g_cuenta_doc		record;
+    g_id_cuenta_doc		integer;
+    g_resp_rendic_fin	varchar;
+    g_cuedoc_fin		varchar;   
     v_tipo_cuenta_doc 	VARCHAR;
     v_fecha_sol		date;
     
@@ -627,9 +633,9 @@ ELSIF pm_codigo_procedimiento = 'CT_REGCOM_DEL' THEN
                 END IF;
                
          
-              
+               --RAC 26/05/2014 se agregan dos parametros nulos hasta tener los valores, id_usuario_ai, usuario_ai
                 
-                v_consulta = 'SELECT * FROM conta.f_eliminar_int_comprobante('||pm_id_usuario::varchar||', '||v_id_int_comprobante::varchar||')';
+                v_consulta = 'SELECT * FROM conta.f_eliminar_int_comprobante('||pm_id_usuario::varchar||',NULL,NULL, '||v_id_int_comprobante::varchar||')';
                 
                 ---------------------------------------------
                 --valida comprobante en base de datos PXP
@@ -977,35 +983,36 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                   ELSE
                    g_nro_cbte=param.f_pm_get_num_dep_gral(g_nombre_corto,g_codigo,g_id_periodo,g_id_empresa,g_id_depto);
                   g_nro_cbte=g_nro_cbte+ g_periodo;                            
-                  END IF;*/
-                  
+                  END IF;*/                  
                   
                   UPDATE sci.tct_comprobante 
                   SET 
                   nro_cbte= g_nro_cbte
                   WHERE sci.tct_comprobante.id_comprobante= ct_id_comprobante;  
                   --120022 por definir 
+                  
                   select ctadoc.fecha_sol into v_fecha_sol
                   from tesoro.tts_cuenta_doc ctadoc
                   where ctadoc.id_comprobante=ct_id_comprobante;
                   
-                  if(v_fecha_sol > '02/17/2014'::DATE)then 
+                  if(COALESCE(v_fecha_sol,CURRENT_DATE)> '02/17/2014'::DATE)then 
                     --if ct_id_comprobante = 19823 then raise exception 'server busy... ..'; end if;
-                    if sci.f_ct_generar_nro_cheque(ct_id_comprobante)!='TRUE' THEN
-                             raise exception 'No se puedo generar nro de cheque';
-                    else 
-                                                      
-                       select clb.id_libro_bancos_deposito, clb.tipo, cta.id_cuenta_bancaria, 
-                       cta.nombre_cheque, cta.motivo, cta.importe,
-                       cta.observaciones, cbt.nro_cbte, cbt.nro_cheque, lb.origen into g_comprobante_libro_bancos
-                       from sci.tct_comprobante_libro_bancos clb
-                       left join tesoro.tts_libro_bancos lb on lb.id_libro_bancos=clb.id_libro_bancos_deposito
-                       inner join tesoro.tts_cuenta_doc cta on cta.id_comprobante=clb.id_comprobante
-                       inner join sci.tct_comprobante cbt on cbt.id_comprobante=clb.id_comprobante
-                       where clb.id_comprobante=ct_id_comprobante;
-                                              
+                    IF(g_origen = 'solicitud')THEN    
+                     	
+                  	  if sci.f_ct_generar_nro_cheque(ct_id_comprobante)!='TRUE' THEN
+                         raise exception 'No se puedo generar nro de cheque';
+                      else                                             
+                         select clb.id_libro_bancos_deposito, clb.tipo, cta.id_cuenta_bancaria, 
+                         cta.nombre_cheque, cta.motivo, cta.importe,
+                         cta.observaciones, cbt.nro_cbte, cbt.nro_cheque, lb.origen into g_comprobante_libro_bancos
+                         from sci.tct_comprobante_libro_bancos clb
+                         left join tesoro.tts_libro_bancos lb on lb.id_libro_bancos=clb.id_libro_bancos_deposito
+                         inner join tesoro.tts_cuenta_doc cta on cta.id_comprobante=clb.id_comprobante
+                         inner join sci.tct_comprobante cbt on cbt.id_comprobante=clb.id_comprobante
+                         where clb.id_comprobante=ct_id_comprobante;
+                      
                        if(g_comprobante_libro_bancos.tipo='cheque')then
-                            
+                          
                           --Generación en libro de bancos
                           g_resp = tesoro.f_tts_libro_bancos_iud(
                                   pm_id_usuario,
@@ -1025,7 +1032,7 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                                   'cheque'::VARCHAR,--tipo
                                   0,--importe_deposito
                                   g_comprobante_libro_bancos.importe,--importe_cheque
-                                  g_comprobante_libro_bancos.origen,--origen
+                                  NULL::VARCHAR,--origen
                                   'borrador'::VARCHAR,--estado
                                   NULL::VARCHAR,--usr_reg
                                   NULL::TIMESTAMP, --fecha_reg
@@ -1035,7 +1042,7 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                                   );                        
 
                           IF split_part(g_resp,g_separador,1) = 'f' THEN
-                              RAISE EXCEPTION 'No se pudo ingresar en libro de bancis: %',split_part(g_resp,g_separador,2);
+                              RAISE EXCEPTION 'No se pudo ingresar en libro de bancos: %',split_part(g_resp,g_separador,2);
                           ELSE 
                               g_resp=split_part(g_resp,g_separador,3);
                               UPDATE sci.tct_comprobante_libro_bancos
@@ -1044,8 +1051,64 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                           END IF;
                        end if;--fin validacion tipo cheque
                      END IF;--fin validacion que se genero el cheque
+				 END IF;--fin validacion origen solicitud
+				
+				 IF(g_origen = 'pxp')THEN
+                    
+                    if sci.f_ct_generar_nro_cheque(ct_id_comprobante)!='TRUE' THEN
+                         raise exception 'No se puedo generar nro de cheque';
+                    else    
+                      select clb.id_libro_bancos_deposito, clb.tipo, cbtpxp.id_cuenta_bancaria_endesis,
+                      cbtpxp.nombre_cheque, cbtpxp.importe_haber as importe, cbtpxp.glosa as motivo,
+                      cbtpxp.glosa as observaciones, cbtende.nro_cbte, cbtpxp.nro_cheque into g_comprobante_libro_bancos
+                      from sci.tct_comprobante_libro_bancos clb
+                      inner join sci.tct_comprobante cbtende on cbtende.id_comprobante=clb.id_comprobante
+                      inner join migracion.tct_comprobante cbtpxp on cbtpxp.id_int_comprobante=cbtende.id_int_comprobante
+                      where clb.id_comprobante=ct_id_comprobante and cbtpxp.id_cuenta_bancaria is not null;                     
+                        
+                      if(g_comprobante_libro_bancos.tipo='cheque')then
+                          
+                      --Generación en libro de bancos
+                      g_resp = tesoro.f_tts_libro_bancos_iud(
+                              pm_id_usuario,
+                              pm_ip_origen,
+                              pm_mac_maquina,
+                              'TS_LBRBAN_INS'::varchar,
+                              NULL::varchar,
+                              NULL::integer,
+                              g_comprobante_libro_bancos.id_cuenta_bancaria_endesis,--id_cuenta_bancaria
+                              current_date,--fecha
+                              g_comprobante_libro_bancos.nombre_cheque,--a_favor
+                              g_comprobante_libro_bancos.motivo::TEXT,--detalle
+                              g_comprobante_libro_bancos.observaciones::TEXT,--observaciones
+                              NULL::varchar,--nro_liquidacion
+                              g_comprobante_libro_bancos.nro_cbte::VARCHAR,--nro_comprobante
+                              NULL::INTEGER,--nro_cheque
+                              'cheque'::VARCHAR,--tipo
+                              0,--importe_deposito
+                              g_comprobante_libro_bancos.importe,--importe_cheque
+                              NULL::VARCHAR,--origen
+                              'borrador'::VARCHAR,--estado
+                              NULL::VARCHAR,--usr_reg
+                              NULL::TIMESTAMP, --fecha_reg
+                              NULL::VARCHAR,--usr_mod
+                              NULL::TIMESTAMP, --fecha_mod
+                              g_comprobante_libro_bancos.id_libro_bancos_deposito --fk_libro_bancos
+                              );                        
+
+                              IF split_part(g_resp,g_separador,1) = 'f' THEN
+                                  RAISE EXCEPTION 'No se pudo ingresar en libro de bancis: %',split_part(g_resp,g_separador,2);
+                              ELSE 
+                                  g_resp=split_part(g_resp,g_separador,3);
+                                  UPDATE sci.tct_comprobante_libro_bancos
+                                  SET id_libro_bancos_cheque=g_resp::integer
+                                  WHERE id_comprobante=ct_id_comprobante;                     
+                              END IF;
+                         end if;--fin validacion tipo cheque
+					 end if; --fin validacion se genero cheque
+                   END IF; --fin validacion origen pxp
                   ELSE
-                  
+
                   	select tipo_cuenta_doc into v_tipo_cuenta_doc
 					from tesoro.tts_cuenta_doc
 					where id_comprobante = ct_id_comprobante;
@@ -1058,10 +1121,66 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                                                 where id_comprobante=ct_id_comprobante);
                     END IF;                                            
                   END IF;--fin validacion anterior al 10-02-2014
+
+				  --GONZALO 17-02-2014
+                  --verifica el comprobante es por solicitud de fondo en avance
+                  
+                  SELECT ctap.id_cuenta_doc into g_id_cuenta_doc
+                    from TESORO.tts_cuenta_doc cta
+                    inner join tesoro.tts_cuenta_doc ctap on ctap.id_cuenta_doc=cta.fk_id_cuenta_doc
+                    where cta.id_comprobante=ct_id_comprobante;
+                    
+                  if(g_momento_cbte=4 AND g_id_cuenta_doc is not null)then                  	
+                  	
+                  	SELECT * into g_cuenta_doc
+                    FROM tesoro.f_tts_cuenta_doc_sel(pm_id_usuario, pm_ip_origen, pm_mac_maquina,
+                      'TS_SOLVIA2_SEL', NULL, 30, 0, 'id_cuenta_doc desc', 'desc',                     
+                     'CUDOC.id_cuenta_doc='||g_id_cuenta_doc ||' AND CUDOC.tipo_cuenta_doc like ''solicitud_avance'' AND CUDOC.estado != ''finalizado'' AND CUDOC.estado != ''anulado''',
+                     '%', '%', '%', '%', '%', NULL) AS (id_cuenta_doc int4, id_presupuesto int4,
+                     desc_presupuesto text, id_empleado int4, desc_empleado text, id_categoria int4,
+                     desc_categoria varchar, fecha_ini date, fecha_fin date, tipo_pago varchar,
+                     tipo_contrato varchar, id_usuario_rendicion int4, desc_usuario text, estado
+                     varchar, nro_documento varchar, fecha_reg date, motivo varchar, recorrido
+                     varchar, observaciones varchar, id_depto int4, desc_depto varchar, id_moneda
+                     int4, desc_moneda varchar, fecha_sol date, fa_solicitud varchar, id_caja int4,
+                     desc_caja varchar, id_cajero int4, desc_cajero varchar, importe numeric,
+                     id_parametro int4, desc_parametro numeric, resp_registro text, tipo_pago_fin
+                     varchar, id_cuenta_bancaria integer, id_cuenta_bancaria_fin integer,
+                     id_caja_fin integer, id_cajero_fin integer, nro_deposito varchar,
+                     desc_cuenta_bancaria_fin varchar, desc_caja_fin varchar, desc_cajero_fin
+                     varchar, id_autorizacion int4, desc_autorizacion text, nombre_cheque varchar,
+                     tipo_cuenta_doc varchar, fk_id_cuenta_doc integer, id_usuario_reg integer,
+                     id_comprobante integer, nro_dias_para_rendir integer, fecha_aut_rendicion
+                     timestamp, cant_rend_registradas bigint, cant_rend_finalizadas bigint,
+                     cant_rend_contabilizadas bigint, codigo_caja varchar, saldo_solicitante
+                     numeric, importe_detalle numeric, id_presupuesto_detalle integer);
+                     
+                     if(g_cuenta_doc.saldo_solicitante=0.00)then                     
+                     	 
+                         g_resp_rendic_fin := tesoro.f_tts_cuenta_doc_iud (pm_id_usuario,pm_ip_origen,pm_mac_maquina,
+                         'TS_RENDIC_FIN',NULL,g_id_cuenta_doc,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+                         NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+                         NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);                         
+
+                        if(SUBSTRING(g_resp_rendic_fin from 1 for 1)='f')then
+							raise exception 'No se pudo finalizar las rendiciones';
+                        end if;
+                        
+                         g_cuedoc_fin:= tesoro.f_tts_cuenta_doc_iud (pm_id_usuario,pm_ip_origen,pm_mac_maquina,
+                         'TS_CUEDOC_FIN',NULL,g_id_cuenta_doc,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+                         NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,
+                         NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);                         
+                         
+                         if(SUBSTRING(g_cuedoc_fin from 1 for 1)='f')then
+							raise exception 'No se pudo finalizar la solicitud';
+                         end if;
+                        
+                     end if;
+                  end if;
                   
                    --if ct_id_comprobante = 69099 then raise exception 'Pasa la validación ...';end if;
                      --if(ct_id_comprobante=60442) then raise exception 'aaaa';end if;     
-                   
+
                   g_descripcion_log_error := '(f_tct_gestionar_comprobante_iud); Validación exitosa comprobante ('||ct_id_comprobante||')';
                   g_respuesta := 't'||g_separador||g_descripcion_log_error;  
             END IF; 
@@ -1087,10 +1206,11 @@ debe ser en la ultima ilnea para habilitar el rollback en caso de ser necesario
              
                 --funcion para obtener cadena de conexion
                 v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
-                
+			
                
-                
-                v_consulta = 'SELECT * FROM conta.f_validar_cbte('||pm_id_usuario::varchar||', '||v_id_int_comprobante::varchar||',''no'',''endesis'')';
+                --RAC 26/05/2014 se agregan dos parametros nulos hasta tener los valores, id_usuario_ai, usuario_ai
+               
+                v_consulta = 'SELECT * FROM conta.f_validar_cbte('||pm_id_usuario::varchar||',NULL,NULL, '||v_id_int_comprobante::varchar||',''no'',''endesis'')';
                 
 --                raise exception '%',v_consulta;
                 
@@ -1098,7 +1218,7 @@ debe ser en la ultima ilnea para habilitar el rollback en caso de ser necesario
                 --valida comprobante en base de datos PXP
                 ---------------------------------------------
                  
-                
+
                  v_resp =  (SELECT dblink_connect(v_cadena_cnx));
     			            
                  IF(v_resp!='OK') THEN
@@ -1109,7 +1229,7 @@ debe ser en la ultima ilnea para habilitar el rollback en caso de ser necesario
                  ELSE
     					 
  
-    				         
+    	
                      select * FROM dblink(v_consulta,true) AS t1( xx varchar) into v_resp;
            			--raise exception '%', split_part(v_resp,g_separador,2);                            
                     if (split_part(v_resp,g_separador,1) = 'error') then
