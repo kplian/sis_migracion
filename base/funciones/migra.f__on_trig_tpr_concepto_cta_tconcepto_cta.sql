@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_concepto_cta_tconcepto_cta (
   v_operacion varchar,
   p_id_concepto_cta integer,
@@ -55,7 +57,20 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PRE.tconcepto_cta 
+                                   where id_concepto_cta=p_id_concepto_cta) THEN
+                                             
+                                    raise exception 'No existe el registro que desea modificar';
+                                                  
+                                 END IF;  
+                                       
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  PRE.tconcepto_cta  
 						                SET						 estado_reg=p_estado_reg
 						 ,fecha_mod=p_fecha_mod
@@ -72,7 +87,17 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						             --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PRE.tconcepto_cta 
+                                   where id_concepto_cta=p_id_concepto_cta) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                 END IF;
+                               
+                               
+                                DELETE FROM 
 						              PRE.tconcepto_cta
  
 						              						 WHERE id_concepto_cta=p_id_concepto_cta;

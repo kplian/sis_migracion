@@ -102,7 +102,17 @@ $body$
 			   ELSEIF  v_operacion = 'UPDATE' THEN
 						               
                                        
-                        UPDATE 
+                         --chequear si ya existe el registro si no sacar un error
+                              IF  not EXISTS(select 1 
+                                 from SEGU.tpersona  
+                                 where id_persona=p_id_persona) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea modificar';
+                                                            
+                               END IF;
+               
+               
+                          UPDATE 
 						    SEGU.tpersona  
 						  SET						
                           apellido_materno=p_apellido_materno
@@ -149,7 +159,17 @@ $body$
                          
 		     ELSEIF  v_operacion = 'DELETE' THEN
 						       
-			     DELETE FROM  SEGU.tpersona  WHERE  id_persona=p_id_persona;
+			     --chequear si ya existe el registro si no sacar un error
+                  IF  not EXISTS(select 1 
+                     from SEGU.tpersona  
+                     where id_persona=p_id_persona) THEN
+                                                       
+                      raise exception 'No existe el registro que desea eliminar';
+                                                            
+                   END IF;
+                 
+                 
+                 DELETE FROM  SEGU.tpersona  WHERE  id_persona=p_id_persona;
 
 						       
 		    END IF;  

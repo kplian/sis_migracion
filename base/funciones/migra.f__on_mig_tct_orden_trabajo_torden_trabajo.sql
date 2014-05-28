@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_orden_trabajo_torden_trabajo (
   v_operacion varchar,
   p_id_orden_trabajo integer,
@@ -52,7 +54,19 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                       IF  not EXISTS(select 1 
+                                           from conta.torden_trabajo 
+                                           where id_orden_trabajo=p_id_orden_trabajo) THEN
+                                       
+                                            raise exception 'No existe el registro que desea modificar';
+                                            
+                                        END IF;
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  CONTA.torden_trabajo  
 						                SET						 desc_orden=p_desc_orden
 						 ,estado_reg=p_estado_reg
@@ -68,7 +82,18 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         
+                                 --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                     from conta.torden_trabajo 
+                                     where id_orden_trabajo=p_id_orden_trabajo) THEN
+                                           
+                                      raise exception 'No existe el registro que desea eliminar';
+                                                
+                                  END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              CONTA.torden_trabajo
  
 						              						 WHERE id_orden_trabajo=p_id_orden_trabajo;

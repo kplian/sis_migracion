@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_taf_clasificacion_tclasificacion (
   v_operacion varchar,
   p_codigo varchar,
@@ -75,7 +77,18 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						              
+                                IF  not EXISTS(select 1 
+                                           from alm.tclasificacion 
+                                           where id_clasificacion=p_id_clasificacion) THEN
+                                       
+                                            raise exception 'No existe el registro que   desea eliminsr';
+                                            
+                                END IF;
+                                
+                                
+                                
+                                 UPDATE 
 						                  alm.tclasificacion  
 						                SET						 codigo=p_codigo						 
 						 ,descripcion=p_descripcion
@@ -93,7 +106,16 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         
+                                IF  not EXISTS(select 1 
+                                           from alm.tclasificacion 
+                                           where id_clasificacion=p_id_clasificacion) THEN
+                                       
+                                            raise exception 'No existe el registro que   desea modificar';
+                                            
+                                END IF;
+                                 
+                                 DELETE FROM 
 						              alm.tclasificacion
  
 						              						 WHERE id_clasificacion=p_id_clasificacion;

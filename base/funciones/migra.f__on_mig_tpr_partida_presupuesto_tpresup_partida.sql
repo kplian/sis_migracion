@@ -1,8 +1,14 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_presupuesto_tpresup_partida (
-						  v_operacion varchar,p_id_presup_partida int4,p_id_partida int4,p_id_presupuesto int4,p_id_usuario_reg int4)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_presupuesto_tpresup_partida (
+  v_operacion varchar,
+  p_id_presup_partida integer,
+  p_id_partida integer,
+  p_id_presupuesto integer,
+  p_id_usuario_reg integer
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  February 4, 2014, 11:29 am
@@ -36,7 +42,19 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_presupuesto_tpresup_part
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       
+                                --chequear si ya existe el registro si no sacar un error
+                               IF  not EXISTS(select 1 
+                                 from  PRE.tpresup_partida
+                                 where id_presup_partida=p_id_presup_partida) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea modificar';
+                                                            
+                               END IF;
+                                       
+                                       
+                                       UPDATE 
 						                  PRE.tpresup_partida  
 						                SET						 id_partida=p_id_partida
 						 ,id_presupuesto=p_id_presupuesto
@@ -45,28 +63,37 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_presupuesto_tpresup_part
 						 WHERE id_presup_partida=p_id_presup_partida;
 
 						       
-						       ELSEIF  v_operacion = 'DELETE' THEN
+						 ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						       --chequear si ya existe el registro
+                               IF  not EXISTS(select 1 
+                                 from  PRE.tpresup_partida
+                                 where id_presup_partida=p_id_presup_partida) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea eliminar';
+                                                            
+                               END IF;
+                                 
+                                 
+                                 
+                                 DELETE FROM 
 						              PRE.tpresup_partida
  
-						              						 WHERE id_presup_partida=p_id_presup_partida;
+						            WHERE id_presup_partida=p_id_presup_partida;
 
 						       
 						       END IF;  
 						  
-						 return 'true';
+					 return 'true';
 						
 						-- statements;
 						--EXCEPTION
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

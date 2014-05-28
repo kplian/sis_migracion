@@ -1,8 +1,21 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_plantilla_tplantilla (
-						  v_operacion varchar,p_id_plantilla int4,p_desc_plantilla varchar,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nro_linea numeric,p_sw_compro varchar,p_sw_tesoro varchar,p_tipo numeric)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_plantilla_tplantilla (
+  v_operacion varchar,
+  p_id_plantilla integer,
+  p_desc_plantilla varchar,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_nro_linea numeric,
+  p_sw_compro varchar,
+  p_sw_tesoro varchar,
+  p_tipo numeric
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  April 1, 2013, 5:27 pm
@@ -44,7 +57,19 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_plantilla_tplantilla (
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                      --chequear si ya existe el auxiliar si no sacar un error
+                                       IF  not EXISTS(select 1 
+                                           from  PARAM.tplantilla  
+                                           where id_plantilla=p_id_plantilla) THEN
+                                       
+                                            raise exception 'No existe el registro que desea modificar';
+                                            
+                                        END IF; 
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  PARAM.tplantilla  
 						                SET						 desc_plantilla=p_desc_plantilla
 						 ,estado_reg=p_estado_reg
@@ -59,15 +84,25 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_plantilla_tplantilla (
 						 WHERE id_plantilla=p_id_plantilla;
 
 						       
-						       ELSEIF  v_operacion = 'DELETE' THEN
+						 ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
-						              CONTA.tplantilla
- 
-						              						 WHERE id_plantilla=p_id_plantilla;
+						         --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                     from  PARAM.tplantilla  
+                                     where id_plantilla=p_id_plantilla) THEN
+                                       
+                                      raise exception 'No existe el registro que desea eliminar';
+                                            
+                                  END IF;
+                                 
+                                 
+                                 
+                                 DELETE FROM 
+						              PARAM.tplantilla
+                                 WHERE id_plantilla=p_id_plantilla;
 
 						       
-						       END IF;  
+						END IF;  
 						  
 						 return 'true';
 						
@@ -76,11 +111,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_plantilla_tplantilla (
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

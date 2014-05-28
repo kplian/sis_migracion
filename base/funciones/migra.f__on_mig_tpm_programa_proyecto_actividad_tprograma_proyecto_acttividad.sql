@@ -1,8 +1,19 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_programa_proyecto_actividad_tprograma_proyecto_acttividad (
-						  v_operacion varchar,p_id_prog_pory_acti int4,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_actividad int4,p_id_programa int4,p_id_proyecto int4,p_id_usuario_mod int4,p_id_usuario_reg int4)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_programa_proyecto_actividad_tprograma_proyecto_a (
+  v_operacion varchar,
+  p_id_prog_pory_acti integer,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_actividad integer,
+  p_id_programa integer,
+  p_id_proyecto integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  February 5, 2013, 4:30 pm
@@ -40,7 +51,18 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_programa_proyecto_actividad_tpro
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						                    --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tprograma_proyecto_acttividad 
+                                   where id_prog_pory_acti=p_id_prog_pory_acti) THEN
+                                             
+                                    raise exception 'No existe el registro que desea modificar';
+                                                  
+                                 END IF; 
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  PARAM.tprograma_proyecto_acttividad  
 						                SET						 estado_reg=p_estado_reg
 						 ,fecha_mod=p_fecha_mod
@@ -55,7 +77,17 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_programa_proyecto_actividad_tpro
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tprograma_proyecto_acttividad 
+                                   where id_prog_pory_acti=p_id_prog_pory_acti) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                 END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              PARAM.tprograma_proyecto_acttividad
  
 						              						 WHERE id_prog_pory_acti=p_id_prog_pory_acti;
@@ -70,11 +102,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_programa_proyecto_actividad_tpro
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

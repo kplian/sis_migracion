@@ -1,8 +1,20 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_financiador_tfinanciador (
-						  v_operacion varchar,p_codigo_financiador varchar,p_id_financiador int4,p_descripcion_financiador text,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_financiador_actif int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nombre_financiador varchar)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_financiador_tfinanciador (
+  v_operacion varchar,
+  p_codigo_financiador varchar,
+  p_id_financiador integer,
+  p_descripcion_financiador text,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_financiador_actif integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_nombre_financiador varchar
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  January 30, 2013, 1:26 pm
@@ -42,7 +54,18 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_financiador_tfinanciador (
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						              
+                                     --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tfinanciador 
+                                   where id_financiador=p_id_financiador) THEN
+                                             
+                                    raise exception 'No existe el registro que desea modificar';
+                                                  
+                                 END IF;
+                                
+                                
+                                 UPDATE 
 						                  PARAM.tfinanciador  
 						                SET						 codigo_financiador=p_codigo_financiador
 						 ,descripcion_financiador=p_descripcion_financiador
@@ -58,7 +81,17 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_financiador_tfinanciador (
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						          --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tfinanciador 
+                                   where id_financiador=p_id_financiador) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                 END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              PARAM.tfinanciador
  
 						              						 WHERE id_financiador=p_id_financiador;
@@ -73,11 +106,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_financiador_tfinanciador (
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

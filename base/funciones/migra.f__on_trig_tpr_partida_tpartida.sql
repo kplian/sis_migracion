@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_tpartida (
   v_operacion varchar,
   p_id_partida integer,
@@ -82,7 +84,20 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                     --chequear si ya existe el registro si no sacar un error
+                               IF  not EXISTS(select 1 
+                                 from  PRE.tpartida
+                                 where id_partida=p_id_partida) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea modificar';
+                                                            
+                               END IF;    
+                                       
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  PRE.tpartida  
 						                SET						 id_partida_fk=p_id_partida_fk
 						 ,cod_ascii=p_cod_ascii
@@ -108,7 +123,18 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						             --chequear si ya existe el registro si no sacar un error
+                               IF  not EXISTS(select 1 
+                                 from  PRE.tpartida
+                                 where id_partida=p_id_partida) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea eliminar';
+                                                            
+                               END IF;
+                               
+                               
+                               
+                                DELETE FROM 
 						              PRE.tpartida
  
 						              						 WHERE id_partida=p_id_partida;

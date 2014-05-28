@@ -1,4 +1,6 @@
-﻿CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_institucion_tinstitucion (
   v_operacion varchar,
   p_codigo varchar,
   p_id_institucion integer,
@@ -94,7 +96,19 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						              
+                                  --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tinstitucion 
+                                   where id_institucion=p_id_institucion) THEN
+                                             
+                                    raise exception 'No existe el registro que desea modificar';
+                                                  
+                                 END IF;
+                                
+                                
+                                
+                                 UPDATE 
 						                  PARAM.tinstitucion  
 						                SET						 codigo=p_codigo
 						 ,id_persona=p_id_persona
@@ -124,7 +138,18 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						          --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tinstitucion 
+                                   where id_institucion=p_id_institucion) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                 END IF;
+                                 
+                                 
+                                 
+                                 DELETE FROM 
 						              PARAM.tinstitucion
  
 						              						 WHERE id_institucion=p_id_institucion;

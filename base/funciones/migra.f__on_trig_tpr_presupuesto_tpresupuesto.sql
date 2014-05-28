@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_presupuesto_tpresupuesto (
   v_operacion varchar,
   p_id_presupuesto integer,
@@ -73,7 +75,20 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						              
+                                --chequear si ya existe el registro si no sacar un error
+                               IF  not EXISTS(select 1 
+                                 from  PRE.tpresupuesto 
+                                 where id_presupuesto=p_id_presupuesto) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea modificar';
+                                                            
+                               END IF;
+                                
+                                
+                                
+                                
+                                 UPDATE 
 						                  PRE.tpresupuesto  
 						                SET			id_centro_costo=p_id_centro_costo			 
                          ,cod_act=p_cod_act
@@ -96,7 +111,18 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         
+                                 --chequear si ya existe el registro si no sacar un error
+                               IF  not EXISTS(select 1 
+                                 from  PRE.tpresupuesto 
+                                 where id_presupuesto=p_id_presupuesto) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea eliminar';
+                                                            
+                               END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              PRE.tpresupuesto
  
 						              						 WHERE id_presupuesto=p_id_presupuesto;

@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_presupuesto_tpresup_part
 
 /*
 						Function:  Para migracion de la tabla param.tgestion
-						Fecha Creacion:  February 4, 2014, 11:29 am
+						Fecha Creacion:  May 28, 2014, 3:22 pm
 						Autor: autogenerado (ADMINISTRADOR DEL SISTEMA )
 						
 						*/
@@ -21,18 +21,12 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_presupuesto_tpresup_part
 						id_presup_partida,
 						id_partida,
 						id_presupuesto,
-						id_usuario_reg,
-						id_centro_costo,
-						estado_reg,
-						fecha_reg)
+						id_usuario_reg)
 				VALUES (
 						p_id_presup_partida,
 						p_id_partida,
 						p_id_presupuesto,
-						p_id_usuario_reg,
-						p_id_presupuesto,
-						'activo',
-						now()::date);
+						p_id_usuario_reg);
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
@@ -40,7 +34,6 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_partida_presupuesto_tpresup_part
 						                  PRE.tpresup_partida  
 						                SET						 id_partida=p_id_partida
 						 ,id_presupuesto=p_id_presupuesto
-						 ,id_centro_costo=p_id_presupuesto
 						 ,id_usuario_reg=p_id_usuario_reg
 						 WHERE id_presup_partida=p_id_presup_partida;
 

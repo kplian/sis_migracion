@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_auxiliar_tauxiliar (
   v_operacion varchar,
   p_id_auxiliar integer,
@@ -25,7 +27,8 @@ $body$
 						
 						    if(v_operacion = 'INSERT') THEN
 						
-						          INSERT INTO 
+						        
+                                 INSERT INTO 
 						            CONTA.tauxiliar (
 						id_auxiliar,
 						id_empresa,
@@ -49,28 +52,47 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                       IF  not EXISTS(select 1 
+                                           from conta.tauxiliar 
+                                           where id_auxiliar=p_id_auxiliar) THEN
+                                       
+                                            raise exception 'No existe el registro que desea modificar';
+                                            
+                                        END IF;
+                                       
+                                       UPDATE 
 						                  CONTA.tauxiliar  
-						                SET						 id_empresa=p_id_empresa
-						 ,codigo_auxiliar=p_codigo_auxiliar
-						 ,estado_reg=p_estado_reg
-						 ,fecha_mod=p_fecha_mod
-						 ,fecha_reg=p_fecha_reg
-						 ,id_usuario_mod=p_id_usuario_mod
-						 ,id_usuario_reg=p_id_usuario_reg
-						 ,nombre_auxiliar=p_nombre_auxiliar
-						 WHERE id_auxiliar=p_id_auxiliar;
+						                SET						 
+                                          id_empresa=p_id_empresa
+                                         ,codigo_auxiliar=p_codigo_auxiliar
+                                         ,estado_reg=p_estado_reg
+                                         ,fecha_mod=p_fecha_mod
+                                         ,fecha_reg=p_fecha_reg
+                                         ,id_usuario_mod=p_id_usuario_mod
+                                         ,id_usuario_reg=p_id_usuario_reg
+                                         ,nombre_auxiliar=p_nombre_auxiliar
+                                         WHERE id_auxiliar=p_id_auxiliar;
 
 						       
-						       ELSEIF  v_operacion = 'DELETE' THEN
+						  ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						        IF  not EXISTS(select 1 
+                                           from conta.tauxiliar 
+                                           where id_auxiliar=p_id_auxiliar) THEN
+                                       
+                                            raise exception 'No existe el registro que  desea eliminar';
+                                            
+                                END IF;
+                               
+                               
+                                DELETE FROM 
 						              CONTA.tauxiliar
- 
-						              						 WHERE id_auxiliar=p_id_auxiliar;
+                                WHERE id_auxiliar=p_id_auxiliar;
 
 						       
-						       END IF;  
+						   END IF;  
 						  
 						 return 'true';
 						

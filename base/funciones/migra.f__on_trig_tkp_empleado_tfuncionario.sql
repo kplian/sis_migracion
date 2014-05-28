@@ -79,7 +79,15 @@ $body$
                             from segu.tpersona p 
                             where p.id_persona = p_id_persona;
                                 
-                                
+                           
+                          --chequear si ya existe el auxiliar si no sacar un error
+                         IF  not EXISTS(select 1 
+                             from  ORGA.tfuncionario  
+                             where id_funcionario=p_id_funcionario) THEN
+                                       
+                              raise exception 'No existe el registro que desea modificar';
+                                            
+                          END IF;  
                                 
                                 
 						  UPDATE 
@@ -99,7 +107,18 @@ $body$
 
 			 ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         
+                                 --chequear si ya existe el auxiliar si no sacar un error
+                               IF  not EXISTS(select 1 
+                                   from  ORGA.tfuncionario  
+                                   where id_funcionario=p_id_funcionario) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              ORGA.tfuncionario	
                                  WHERE id_funcionario=p_id_funcionario;
 

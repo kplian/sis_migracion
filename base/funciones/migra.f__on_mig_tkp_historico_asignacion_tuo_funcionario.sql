@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_historico_asignacion_tuo_funcionario (
   v_operacion varchar,
   p_id_uo_funcionario integer,
@@ -55,7 +57,20 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                     from  ORGA.tuo_funcionario  
+                                     where id_uo_funcionario=p_id_uo_funcionario) THEN
+                                               
+                                      raise exception 'No existe el registro que desea modificar';
+                                                    
+                                  END IF;
+                                       
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  ORGA.tuo_funcionario  
 						                SET						 id_funcionario=p_id_funcionario
 						 ,id_uo=p_id_uo
@@ -71,7 +86,16 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         IF  not EXISTS(select 1 
+                                     from  ORGA.tuo_funcionario  
+                                     where id_uo_funcionario=p_id_uo_funcionario) THEN
+                                               
+                                      raise exception 'No existe el registro que desea eliminar';
+                                                    
+                                  END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              ORGA.tuo_funcionario
  
 						              						 WHERE id_uo_funcionario=p_id_uo_funcionario;

@@ -1,8 +1,18 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_cuenta_auxiliar_tcuenta_auxiliar (
-						  v_operacion varchar,p_id_cuenta_auxiliar int4,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_auxiliar int4,p_id_cuenta int4,p_id_usuario_mod int4,p_id_usuario_reg int4)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_cuenta_auxiliar_tcuenta_auxiliar (
+  v_operacion varchar,
+  p_id_cuenta_auxiliar integer,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_auxiliar integer,
+  p_id_cuenta integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  October 29, 2013, 5:53 pm
@@ -38,7 +48,19 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_cuenta_auxiliar_tcuenta_auxiliar
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                       IF  not EXISTS(select 1 
+                                           from conta.tcuenta_auxiliar 
+                                           where id_cuenta_auxiliar=p_id_cuenta_auxiliar) THEN
+                                       
+                                            raise exception 'No existe el registro que desea modificar';
+                                            
+                                        END IF;
+                                       
+                                       UPDATE 
 						                  CONTA.tcuenta_auxiliar  
 						                SET						 estado_reg=p_estado_reg
 						 ,fecha_mod=p_fecha_mod
@@ -52,7 +74,18 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_cuenta_auxiliar_tcuenta_auxiliar
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         --chequear si ya existe el auxiliar si no sacar un error
+                                       IF  not EXISTS(select 1 
+                                           from conta.tcuenta_auxiliar 
+                                           where id_cuenta_auxiliar=p_id_cuenta_auxiliar) THEN
+                                       
+                                            raise exception 'No existe el registro que desea eliminar';
+                                            
+                                        END IF;
+                                 
+                                 
+                                 
+                                 DELETE FROM 
 						              CONTA.tcuenta_auxiliar
  
 						              						 WHERE id_cuenta_auxiliar=p_id_cuenta_auxiliar;
@@ -67,11 +100,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tct_cuenta_auxiliar_tcuenta_auxiliar
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

@@ -1,8 +1,20 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_fina_regi_prog_proy_acti_tep (
-						  v_operacion varchar,p_id_ep int4,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_financiador int4,p_id_prog_pory_acti int4,p_id_regional int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_sw_presto int4)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_fina_regi_prog_proy_acti_tep (
+  v_operacion varchar,
+  p_id_ep integer,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_financiador integer,
+  p_id_prog_pory_acti integer,
+  p_id_regional integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_sw_presto integer
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  February 5, 2013, 4:41 pm
@@ -42,7 +54,19 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_fina_regi_prog_proy_acti_tep (
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tep 
+                                   where id_ep=p_id_ep) THEN
+                                             
+                                    raise exception 'No existe el registro que desea modificar';
+                                                  
+                                 END IF; 
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  PARAM.tep  
 						                SET						 estado_reg=p_estado_reg
 						 ,fecha_mod=p_fecha_mod
@@ -58,10 +82,18 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_fina_regi_prog_proy_acti_tep (
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tep 
+                                   where id_ep=p_id_ep) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                 END IF;
+                                 
+                                 DELETE FROM 
 						              PARAM.tep
- 
-						              						 WHERE id_ep=p_id_ep;
+                                 WHERE id_ep=p_id_ep;
 
 						       
 						       END IF;  
@@ -73,11 +105,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_fina_regi_prog_proy_acti_tep (
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

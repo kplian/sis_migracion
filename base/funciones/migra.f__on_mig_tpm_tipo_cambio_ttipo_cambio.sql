@@ -1,8 +1,22 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_tipo_cambio_ttipo_cambio (
-						  v_operacion varchar,p_id_tipo_cambio int4,p_compra numeric,p_estado_reg varchar,p_fecha date,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_moneda int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_observaciones varchar,p_oficial numeric,p_venta numeric)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_tipo_cambio_ttipo_cambio (
+  v_operacion varchar,
+  p_id_tipo_cambio integer,
+  p_compra numeric,
+  p_estado_reg varchar,
+  p_fecha date,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_moneda integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_observaciones varchar,
+  p_oficial numeric,
+  p_venta numeric
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  March 8, 2013, 10:54 am
@@ -46,7 +60,20 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_tipo_cambio_ttipo_cambio (
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       
+                                       
+                                 --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.ttipo_cambio 
+                                   where id_tipo_cambio=p_id_tipo_cambio) THEN
+                                             
+                                    raise exception 'No existe el registro que desea modificar';
+                                                  
+                                 END IF;     
+                                       
+                                       
+                                       UPDATE 
 						                  PARAM.ttipo_cambio  
 						                SET						 compra=p_compra
 						 ,estado_reg=p_estado_reg
@@ -64,7 +91,17 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_tipo_cambio_ttipo_cambio (
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						        --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.ttipo_cambio 
+                                   where id_tipo_cambio=p_id_tipo_cambio) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                 END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              PARAM.ttipo_cambio
  
 						              						 WHERE id_tipo_cambio=p_id_tipo_cambio;
@@ -79,11 +116,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_tipo_cambio_ttipo_cambio (
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

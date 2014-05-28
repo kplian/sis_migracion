@@ -1,14 +1,13 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_presupuesto_tcentro_costo (
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_asignacion_estructura_tpm_frppa_tgrupo_ep (
   v_operacion varchar,
-  p_id_centro_costo integer,
+  p_id_grupo_ep integer,
   p_estado_reg varchar,
   p_fecha_mod timestamp,
   p_fecha_reg timestamp,
   p_id_ep integer,
-  p_id_gestion integer,
-  p_id_uo integer,
+  p_id_grupo integer,
   p_id_usuario_mod integer,
   p_id_usuario_reg integer
 )
@@ -16,7 +15,7 @@ RETURNS text AS
 $body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
-						Fecha Creacion:  February 15, 2013, 6:17 pm
+						Fecha Creacion:  April 24, 2013, 4:46 pm
 						Autor: autogenerado (ADMINISTRADOR DEL SISTEMA )
 						
 						*/
@@ -28,72 +27,68 @@ $body$
 						    if(v_operacion = 'INSERT') THEN
 						
 						          INSERT INTO 
-						            PARAM.tcentro_costo (
-						id_centro_costo,
+						            PARAM.tgrupo_ep (
+						id_grupo_ep,
 						estado_reg,
 						fecha_mod,
 						fecha_reg,
 						id_ep,
-						id_gestion,
-						id_uo,
+						id_grupo,
 						id_usuario_mod,
 						id_usuario_reg)
 				VALUES (
-						p_id_centro_costo,
+						p_id_grupo_ep,
 						p_estado_reg,
 						p_fecha_mod,
 						p_fecha_reg,
 						p_id_ep,
-						p_id_gestion,
-						p_id_uo,
+						p_id_grupo,
 						p_id_usuario_mod,
 						p_id_usuario_reg);
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						              
-                                
-                              --chequear si ya existe el registro si no sacar un error
+						               
+                                       
+                               --chequear si ya existe el registro si no sacar un error
                                IF  not EXISTS(select 1 
-                                 from  PARAM.tcentro_costo
-                                 where id_centro_costo=p_id_centro_costo) THEN
+                                 from  PARAM.tgrupo_ep  
+                                 where id_grupo_ep=p_id_grupo_ep) THEN
                                                        
                                   raise exception 'No existe el registro que desea modificar';
                                                             
-                               END IF;
-                                
-                                
-                                
-                                
-                                 UPDATE 
-						                  PARAM.tcentro_costo  
+                               END IF; 
+                                       
+                                       
+                                       
+                                       UPDATE 
+						                  PARAM.tgrupo_ep  
 						                SET						 estado_reg=p_estado_reg
 						 ,fecha_mod=p_fecha_mod
 						 ,fecha_reg=p_fecha_reg
 						 ,id_ep=p_id_ep
-						 ,id_gestion=p_id_gestion
-						 ,id_uo=p_id_uo
+						 ,id_grupo=p_id_grupo
 						 ,id_usuario_mod=p_id_usuario_mod
 						 ,id_usuario_reg=p_id_usuario_reg
-						 WHERE id_centro_costo=p_id_centro_costo;
+						 WHERE id_grupo_ep=p_id_grupo_ep;
 
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         --chequear si ya existe el registro si no sacar un error
+						         
+                               --chequear si ya existe el registro si no sacar un error
                                IF  not EXISTS(select 1 
-                                 from  PARAM.tcentro_costo
-                                 where id_centro_costo=p_id_centro_costo) THEN
+                                 from  PARAM.tgrupo_ep  
+                                 where id_grupo_ep=p_id_grupo_ep) THEN
                                                        
                                   raise exception 'No existe el registro que desea eliminar';
                                                             
                                END IF;
                                  
-                                 
                                  DELETE FROM 
-						              PARAM.tcentro_costo
+						              PARAM.tgrupo_ep
  
-						              						 WHERE id_centro_costo=p_id_centro_costo;
+						              						 WHERE id_grupo_ep=p_id_grupo_ep;
 
 						       
 						       END IF;  

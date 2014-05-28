@@ -1,8 +1,20 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_periodo_tperiodo (
-						  v_operacion varchar,p_id_periodo int4,p_id_gestion int4,p_estado_reg varchar,p_fecha_fin date,p_fecha_ini date,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_usuario_mod int4,p_id_usuario_reg int4,p_periodo int4)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_periodo_tperiodo (
+  v_operacion varchar,
+  p_id_periodo integer,
+  p_id_gestion integer,
+  p_estado_reg varchar,
+  p_fecha_fin date,
+  p_fecha_ini date,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_periodo integer
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  March 20, 2013, 3:28 pm
@@ -42,7 +54,19 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_periodo_tperiodo (
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tperiodo 
+                                   where id_periodo=p_id_periodo) THEN
+                                             
+                                    raise exception 'No existe el registro que desea modificar';
+                                                  
+                                 END IF; 
+                                       
+                                       
+                                       UPDATE 
 						                  PARAM.tperiodo  
 						                SET						 id_gestion=p_id_gestion
 						 ,estado_reg=p_estado_reg
@@ -58,7 +82,17 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_periodo_tperiodo (
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						               --chequear si ya existe el auxiliar si no sacar un error
+                                 IF  not EXISTS(select 1 
+                                   from  PARAM.tperiodo 
+                                   where id_periodo=p_id_periodo) THEN
+                                             
+                                    raise exception 'No existe el registro que desea eliminar';
+                                                  
+                                 END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              PARAM.tperiodo
  
 						              						 WHERE id_periodo=p_id_periodo;
@@ -73,11 +107,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tpm_periodo_tperiodo (
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

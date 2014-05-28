@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_lugar_tlugar (
   v_operacion varchar,
   p_id_lugar integer,
@@ -93,21 +95,35 @@ $body$
 
 						end if;						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						              
+                                 --chequear si ya existe el registro si no sacar un error
+                              
+                        
+                              IF  not EXISTS(select 1 
+                                 from  PARAM.tlugar  
+                                 where id_lugar=p_id_lugar) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea modificar';
+                                                            
+                               END IF; 
+                                
+                                
+                                
+                                 UPDATE 
 						                  PARAM.tlugar  
-						                SET						 id_lugar_fk=p_id_lugar_fk
-						 ,codigo=p_codigo
-						 ,codigo_largo=p_codigo_largo
-						 ,estado_reg=p_estado_reg
-						 ,fecha_mod=p_fecha_mod
-						 ,fecha_reg=p_fecha_reg
-						 ,id_usuario_mod=p_id_usuario_mod
-						 ,id_usuario_reg=p_id_usuario_reg
-						 ,nombre=p_nombre
-						 ,sw_impuesto=p_sw_impuesto
-						 ,sw_municipio=p_sw_municipio
-						 ,tipo=p_tipo
-						 WHERE id_lugar=p_id_lugar;
+						                SET	  id_lugar_fk=p_id_lugar_fk
+                                             ,codigo=p_codigo
+                                             ,codigo_largo=p_codigo_largo
+                                             ,estado_reg=p_estado_reg
+                                             ,fecha_mod=p_fecha_mod
+                                             ,fecha_reg=p_fecha_reg
+                                             ,id_usuario_mod=p_id_usuario_mod
+                                             ,id_usuario_reg=p_id_usuario_reg
+                                             ,nombre=p_nombre
+                                             ,sw_impuesto=p_sw_impuesto
+                                             ,sw_municipio=p_sw_municipio
+                                             ,tipo=p_tipo
+                                             WHERE id_lugar=p_id_lugar;
                          
                          create temp table codigos(
                         	  id_lugar int4,
@@ -142,7 +158,19 @@ $body$
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						           --chequear si ya existe el registro si no sacar un error
+                              
+                        
+                              IF  not EXISTS(select 1 
+                                 from  PARAM.tlugar  
+                                 where id_lugar=p_id_lugar) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea eliminar';
+                                                            
+                               END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              PARAM.tlugar
  
 						              						 WHERE id_lugar=p_id_lugar;

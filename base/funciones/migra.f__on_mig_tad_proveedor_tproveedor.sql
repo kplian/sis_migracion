@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tad_proveedor_tproveedor (
   v_operacion varchar,
   p_id_proveedor integer,
@@ -63,35 +65,54 @@ $body$
                         p_rotulo_comercial);
 
 						       
-							    ELSEIF  v_operacion = 'UPDATE' THEN
-                                --raise exception 'llega%',p_rotulo_comercial;
-						               UPDATE 
-						                  PARAM.tproveedor  
-						                SET						 id_institucion=p_id_institucion
-						 ,id_persona=p_id_persona
-						 ,codigo=p_codigo
-						 ,estado_reg=p_estado_reg
-						 ,fecha_mod=p_fecha_mod
-						 ,fecha_reg=p_fecha_reg
-						 ,id_lugar=p_id_lugar
-						 ,id_usuario_mod=p_id_usuario_mod
-						 ,id_usuario_reg=p_id_usuario_reg
-						 ,nit=p_nit
-						 ,numero_sigma=p_numero_sigma
-						 ,tipo=p_tipo
-                         ,rotulo_comercial=p_rotulo_comercial
-						 WHERE id_proveedor=p_id_proveedor;
+				 ELSEIF  v_operacion = 'UPDATE' THEN
+                          
+                 
+                 
+                          IF  not EXISTS(select 1 
+                                           from PARAM.tproveedor 
+                                           where id_proveedor=p_id_proveedor) THEN
+                                       
+                                            raise exception 'No existe el registro quw  desea modificar';
+                                            
+                          END IF;
+                          
+                          --raise exception 'llega%',p_rotulo_comercial;
+						  UPDATE PARAM.tproveedor  
+						     SET						 
+                            	id_institucion=p_id_institucion
+                               ,id_persona=p_id_persona
+                               ,codigo=p_codigo
+                               ,estado_reg=p_estado_reg
+                               ,fecha_mod=p_fecha_mod
+                               ,fecha_reg=p_fecha_reg
+                               ,id_lugar=p_id_lugar
+                               ,id_usuario_mod=p_id_usuario_mod
+                               ,id_usuario_reg=p_id_usuario_reg
+                               ,nit=p_nit
+                               ,numero_sigma=p_numero_sigma
+                               ,tipo=p_tipo
+                               ,rotulo_comercial=p_rotulo_comercial
+                               WHERE id_proveedor=p_id_proveedor;
 
 						       
-						       ELSEIF  v_operacion = 'DELETE' THEN
+						 ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						        
+                                IF  not EXISTS(select 1 
+                                           from PARAM.tproveedor 
+                                           where id_proveedor=p_id_proveedor) THEN
+                                       
+                                            raise exception 'No existe el registro que   desea eliminsr';
+                                            
+                                END IF;
+                                
+                                DELETE FROM 
 						              PARAM.tproveedor
- 
-						              						 WHERE id_proveedor=p_id_proveedor;
+                             	 WHERE id_proveedor=p_id_proveedor;
 
 						       
-						       END IF;  
+						 END IF;  
 						  
 						 return 'true';
 						

@@ -1,8 +1,25 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_unidad_organizacional_tuo (
-						  v_operacion varchar,p_id_uo int4,p_cargo_individual varchar,p_codigo varchar,p_correspondencia varchar,p_descripcion varchar,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_gerencia varchar,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nodo_base varchar,p_nombre_cargo varchar,p_nombre_unidad varchar,p_presupuesta varchar)
-						RETURNS text AS
-						$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_unidad_organizacional_tuo (
+  v_operacion varchar,
+  p_id_uo integer,
+  p_cargo_individual varchar,
+  p_codigo varchar,
+  p_correspondencia varchar,
+  p_descripcion varchar,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_gerencia varchar,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_nodo_base varchar,
+  p_nombre_cargo varchar,
+  p_nombre_unidad varchar,
+  p_presupuesta varchar
+)
+RETURNS text AS
+$body$
 /*
 						Function:  Para migracion de la tabla param.tgestion
 						Fecha Creacion:  February 25, 2013, 6:38 pm
@@ -52,7 +69,18 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_unidad_organizacional_tuo (
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                 IF  not EXISTS(select 1 
+                                     from  ORGA.tuo  
+                                     where id_uo=p_id_uo) THEN
+                                               
+                                      raise exception 'No existe el registro que desea modificar';
+                                                    
+                                  END IF;
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  ORGA.tuo  
 						                SET						 cargo_individual=p_cargo_individual
 						 ,codigo=p_codigo
@@ -73,7 +101,18 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_unidad_organizacional_tuo (
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         
+                                 IF  not EXISTS(select 1 
+                                     from  ORGA.tuo  
+                                     where id_uo=p_id_uo) THEN
+                                               
+                                      raise exception 'No existe el registro que desea eliminar';
+                                                    
+                                  END IF;
+                                 
+                                 
+                                 
+                                 DELETE FROM 
 						              ORGA.tuo
  
 						              						 WHERE id_uo=p_id_uo;
@@ -88,11 +127,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_unidad_organizacional_tuo (
 						--WHEN exception_name THEN
 						--  statements;
 						END;
-						$BODY$
-
-
-						LANGUAGE 'plpgsql'
-						VOLATILE
-						CALLED ON NULL INPUT
-						SECURITY INVOKER
-						COST 100;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

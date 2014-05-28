@@ -434,6 +434,16 @@ class ACTTablaMig extends ACTbase{
 			 $texto_archivo=$texto_archivo."\t\t\t\tVALUES (\n".$valores."
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
+						               
+						               IF  not EXISTS(select 1 
+                                           from ".$this->EsquemaDes.".".$this->NameTablaDes."\n 
+                                           where ". $data['columna']."=p_".$data['columna'].") THEN
+                                       
+                                            raise exception 'No existe el registro que  desea modificar';
+                                            
+                                       END IF;
+						               
+						               
 						               UPDATE 
 						                  ".$this->EsquemaDes.".".$this->NameTablaDes."  
 						                SET"; 
@@ -466,6 +476,16 @@ class ACTTablaMig extends ACTbase{
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
+						         
+						         IF  not EXISTS(select 1 
+                                           from ".$this->EsquemaDes.".".$this->NameTablaDes."\n 
+                                           where ". $data['columna']."=p_".$data['columna'].") THEN
+                                       
+                                            raise exception 'No existe el registro que  desea eliminar';
+                                            
+                                END IF;
+						         
+						         
 						         DELETE FROM 
 						              ".$this->EsquemaDes.".".$this->NameTablaDes."\n 
 						              ".$valores."

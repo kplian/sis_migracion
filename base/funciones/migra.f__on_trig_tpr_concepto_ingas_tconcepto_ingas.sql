@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_concepto_ingas_tconcepto_ingas (
   v_operacion varchar,
   p_id_concepto_ingas integer,
@@ -148,7 +150,19 @@ $body$
                                     p_id_usuario_reg);
 						       
 		ELSEIF  v_operacion = 'UPDATE' THEN
-        			select id_concepto_ingas_pxp
+        			
+        
+                     --chequear si ya existe el auxiliar si no sacar un error
+                     IF  not EXISTS(select 1 
+                       from  migra.tconcepto_ids
+                       where id_concepto_ingas = p_id_concepto_ingas) THEN
+                                             
+                        raise exception 'No existe el registro que desea modificar';
+                                                  
+                     END IF;
+                    
+                    
+                    select id_concepto_ingas_pxp
                     into v_id_concepto_ingas_pxp
                     from migra.tconcepto_ids
                     where id_concepto_ingas = p_id_concepto_ingas;
@@ -203,7 +217,18 @@ $body$
 					
                 	       ELSEIF  v_operacion = 'DELETE' THEN
                             	
-                                select id_concepto_ingas_pxp
+                               --chequear si ya existe el auxiliar si no sacar un error
+                               IF  not EXISTS(select 1 
+                                 from  migra.tconcepto_ids
+                                 where id_concepto_ingas = p_id_concepto_ingas) THEN
+                                                       
+                                  raise exception 'No existe el registro que desea eliminar';
+                                                            
+                               END IF;
+                           
+                           
+                           
+                                 select id_concepto_ingas_pxp
                                 into v_id_concepto_ingas
                                 from migra.tconcepto_ids
                                 where id_concepto_ingas = p_id_concepto_ingas;

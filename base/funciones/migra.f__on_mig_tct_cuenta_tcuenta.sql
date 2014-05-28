@@ -115,7 +115,19 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               UPDATE 
+						               
+                                       --chequear si ya existe el auxiliar si no sacar un error
+                                       IF  not EXISTS(select 1 
+                                           from conta.tcuenta 
+                                           where id_cuenta=p_id_cuenta) THEN
+                                       
+                                            raise exception 'No existe el registro que desea modificar';
+                                            
+                                        END IF;
+                                       
+                                       
+                                       
+                                       UPDATE 
 						                  CONTA.tcuenta  
 						                SET						 cuenta_flujo_sigma=p_cuenta_flujo_sigma
 						 ,cuenta_sigma=p_cuenta_sigma
@@ -148,15 +160,25 @@ $body$
 						 WHERE id_cuenta=p_id_cuenta;
 
 						       
-						       ELSEIF  v_operacion = 'DELETE' THEN
+						 ELSEIF  v_operacion = 'DELETE' THEN
 						       
-						         DELETE FROM 
+						         --chequear si ya existe el auxiliar si no sacar un error
+                                       IF  not EXISTS(select 1 
+                                           from conta.tcuenta 
+                                           where id_cuenta=p_id_cuenta) THEN
+                                       
+                                            raise exception 'No existe el registro que desea eliminar';
+                                            
+                                        END IF;
+                                 
+                                 
+                                 DELETE FROM 
 						              CONTA.tcuenta
  
 						              						 WHERE id_cuenta=p_id_cuenta;
 
 						       
-						       END IF;  
+						 END IF;  
 						  
 						 return 'true';
 						
