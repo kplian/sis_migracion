@@ -11,6 +11,15 @@ v_resp  varchar[];
   
 BEGIN
  
+   IF  EXISTS(select 1 FROM 
+                migracion.tmig_migracion 
+              WHERE  migracion = 'falla')  THEN
+   
+   
+    raise exception 'Existe una falla que debe ser resuelta';
+   END IF;
+
+
       FOR g_registros in (
               SELECT 
                 id_migracion,
@@ -24,11 +33,8 @@ BEGIN
                 migracion.tmig_migracion 
               WHERE  migracion is NULL) LOOP
           
-        
-            for g_registros_aux in execute (g_registros.consulta) LOOP
-              v_resp= g_registros_aux.res;
-            END LOOP;
-        
+        	
+        	v_resp = migracion.f_ejecutar(g_registros.consulta);
         
             IF v_resp[1]= 'TRUE' THEN
             
@@ -47,21 +53,18 @@ BEGIN
                  
                 WHERE 
                   id_migracion = g_registros.id_migracion;
-           END IF; 
-        
-        
-        
+                  
+                EXIT;
+           END IF;  
+           
+        	
         END LOOP;
 
 
 		RETURN TRUE;
 
 
---EXCEPTION
---WHEN OTHERS THEN
 
---	RETURN FALSE;
-  
 END;
 $body$
 LANGUAGE 'plpgsql'
