@@ -98,7 +98,7 @@ BEGIN
 			             ELSE
 					  
 			               PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
-			                v_res_cone=(select dblink_disconnect(v_cadena_cnx));
+			                v_res_cone=(select dblink_disconnect());
 			             END IF;
 			            
 			            v_respuesta[1]='TRUE';

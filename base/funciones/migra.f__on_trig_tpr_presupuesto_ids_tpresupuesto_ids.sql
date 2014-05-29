@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_presupuesto_ids_tpresupuesto_ids (
   v_operacion varchar,
   p_id_presupuesto_uno integer,
@@ -22,7 +20,7 @@ $body$
 						    if(v_operacion = 'INSERT') THEN
 						
 						          INSERT INTO 
-						            PARAM.tpresupuesto_ids (
+						            pre.tpresupuesto_ids (
 						id_presupuesto_uno,
 						id_presupuesto_dos,
 						sw_cambio_gestion)
@@ -33,39 +31,17 @@ $body$
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
-						              
-                                     --chequear si ya existe el registro si no sacar un error
-                               IF  not EXISTS(select 1 
-                                 from  PARAM.tpresupuesto_ids
-                                 where id_presupuesto_uno=p_id_presupuesto_uno) THEN
-                                                       
-                                  raise exception 'No existe el registro que desea modificar';
-                                                            
-                               END IF;
-                                
-                                
-                                
-                                
-                                 UPDATE 
-						                  PARAM.tpresupuesto_ids  
+						               UPDATE 
+						                  pre.tpresupuesto_ids  
 						                SET						 id_presupuesto_dos=p_id_presupuesto_dos
 						 ,sw_cambio_gestion=p_sw_cambio_gestion
 						 WHERE id_presupuesto_uno=p_id_presupuesto_uno;
 
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
-						             --chequear si ya existe el registro si no sacar un error
-                               IF  not EXISTS(select 1 
-                                 from  PARAM.tpresupuesto_ids
-                                 where id_presupuesto_uno=p_id_presupuesto_uno) THEN
-                                                       
-                                  raise exception 'No existe el registro que desea eliminar';
-                                                            
-                               END IF;
-                                 
-                                 
-                                 DELETE FROM 
-						              PARAM.tpresupuesto_ids
+						       
+						         DELETE FROM 
+						              pre.tpresupuesto_ids
  
 						              						 WHERE id_presupuesto_uno=p_id_presupuesto_uno;
 

@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_libro_bancos_tts_libro_bancos (
   v_operacion varchar,
   p_nro_cuenta varchar,
@@ -141,19 +139,7 @@ BEGIN
 
                 
 		ELSEIF  v_operacion = 'UPDATE' THEN
-						  
-                           --chequear si ya existe el registro si no sacar un error
-                            IF  not EXISTS(select 1 
-                               from  MIGRA.tts_libro_bancos  
-                               where id_libro_bancos=p_id_libro_bancos) THEN
-                                                                             
-                                raise exception 'No existe el registro que desea modificar';
-                                                                                  
-                             END IF; 
-                          
-                          
-                          
-                          select cb.id_cuenta_bancaria
+						  select cb.id_cuenta_bancaria
                           into v_id_cuenta_bancaria
                           from tes.tcuenta_bancaria cb
                           where cb.nro_cuenta = p_nro_cuenta and cb.estado_reg = 'activo';
@@ -193,7 +179,7 @@ BEGIN
 						UPDATE tes.tcuenta_bancaria_mov SET 
 						id_usuario_mod = 1,
 						fecha_mod = now(),
-						estado_reg = p_estado,
+						estado_reg = p_estado_reg,
 						tipo_mov = v_tipo_mov,
 						descripcion = p_detalle,
                         id_cuenta_bancaria_mov_fk=p_id_libro_bancos_fk,
@@ -205,18 +191,7 @@ BEGIN
 						       
 		ELSEIF  v_operacion = 'DELETE' THEN
 						       
-					--chequear si ya existe el registro si no sacar un error
-                            IF  not EXISTS(select 1 
-                               from  MIGRA.tts_libro_bancos  
-                               where id_libro_bancos=p_id_libro_bancos) THEN
-                                                                             
-                                raise exception 'No existe el registro que desea modificar';
-                                                                                  
-                             END IF;	        
-        
-        
-        
-                                 DELETE FROM 
+						         DELETE FROM 
 						         MIGRA.tts_libro_bancos
 						         WHERE id_libro_bancos=p_id_libro_bancos;
 						         
