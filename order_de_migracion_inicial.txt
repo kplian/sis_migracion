@@ -48,6 +48,8 @@ SELECT * FROM migracion.f_mig_ini_tkp_empleado_tfuncionario();
 SELECT * FROM migracion.f_mig_ini_tkp_unidad_organizacional_tuo();
 SELECT * FROM migracion.f_mig_ini_tkp_estructura_organizacional_testructura_uo();
 SELECT * FROM migracion.f_mig_ini_tkp_historico_asignacion_tuo_funcionario();
+SELECT * FROM migracion.f_mig_ini_tkp_jerarquia_aprobacion_ttemporal_jerarquia_aprobacion();
+SELECT * FROM migracion.f_mig_ini_tkp_cargo_ttemporal_cargo();
 
 
 

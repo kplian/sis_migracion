@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tkp_escala_salarial2
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_escala_salarial2 FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_escala_salarial2_tescala_salarial();

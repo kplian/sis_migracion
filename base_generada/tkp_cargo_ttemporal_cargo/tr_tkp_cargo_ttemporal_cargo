@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tkp_cargo
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_cargo FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_cargo_ttemporal_cargo();

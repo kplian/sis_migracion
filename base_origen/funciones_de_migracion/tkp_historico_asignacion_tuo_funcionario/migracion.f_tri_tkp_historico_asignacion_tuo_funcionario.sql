@@ -17,10 +17,10 @@ DECLARE
 		   IF(TG_OP = 'INSERT' or  TG_OP ='UPDATE' ) THEN
 		   
 			 v_consulta =  'SELECT migracion.f_trans_tkp_historico_asignacion_tuo_funcionario (
-                  '''||TG_OP::varchar||''','||COALESCE(NEW.id_historico_asignacion::varchar,'NULL')||','||COALESCE(NEW.id_empleado::varchar,'NULL')||','||COALESCE(NEW.id_unidad_organizacional::varchar,'NULL')||','||COALESCE(NEW.id_usuario_mod::varchar,'NULL')||','||COALESCE(NEW.id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||NEW.estado_reg::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_asignacion::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_finalizacion::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_registro::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_ultima_mod::varchar||'''','NULL')||') as res';				  
+                  '''||TG_OP::varchar||''','||COALESCE(NEW.id_historico_asignacion::varchar,'NULL')||','||COALESCE(NEW.id_empleado::varchar,'NULL')||','||COALESCE(NEW.id_unidad_organizacional::varchar,'NULL')||','||COALESCE(NEW.id_usuario_mod::varchar,'NULL')||','||COALESCE(NEW.id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||NEW.estado_reg::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_asignacion::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_finalizacion::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_registro::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_ultima_mod::varchar||'''','NULL')|| ','||COALESCE(NEW.id_item::varchar,'NULL')||','||COALESCE(''''||NEW.nro_resolucion_memo::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_memo::varchar||'''','NULL')||','||COALESCE(''''||NEW.motivo_retiro::varchar||'''','NULL')||') as res';				  
 		  ELSE 
 		      v_consulta =  ' SELECT migracion.f_trans_tkp_historico_asignacion_tuo_funcionario (
-		              '''||TG_OP::varchar||''','||OLD.id_historico_asignacion||',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) as res';
+		              '''||TG_OP::varchar||''','||OLD.id_historico_asignacion||',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) as res';
 		       
 		   END IF;
 		   --------------------------------------

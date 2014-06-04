@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tkp_jerarquia_aprobacion
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_jerarquia_aprobacion FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_jerarquia_aprobacion_ttemporal_jerarquia_aprobacion();

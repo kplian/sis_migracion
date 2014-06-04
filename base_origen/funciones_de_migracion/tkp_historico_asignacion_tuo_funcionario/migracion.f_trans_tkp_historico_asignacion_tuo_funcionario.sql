@@ -9,7 +9,11 @@ CREATE OR REPLACE FUNCTION migracion.f_trans_tkp_historico_asignacion_tuo_funcio
   p_fecha_asignacion date,
   p_fecha_finalizacion date,
   p_fecha_registro date,
-  p_fecha_ultima_mod timestamp
+  p_fecha_ultima_mod timestamp,
+  p_id_item integer,
+  p_nro_resolucion_memo varchar,
+  p_fecha_memo date,
+  p_motivo_retiro varchar
 )
 RETURNS varchar [] AS
 $body$
@@ -35,6 +39,10 @@ DECLARE
 			v_fecha_reg timestamp;
 			v_id_usuario_mod int4;
 			v_id_usuario_reg int4;
+			v_nro_documento_asignacion varchar;
+			v_id_cargo integer;
+			v_fecha_documento_asignacion date;
+			v_observaciones_finalizacion varchar;
 BEGIN
 			
 			
@@ -50,7 +58,15 @@ BEGIN
 			v_id_uo_funcionario=p_id_historico_asignacion::int4;
 			v_id_funcionario=p_id_empleado::int4;
 			v_id_uo=p_id_unidad_organizacional::int4;
+			v_id_cargo=p_id_item::int4;
 			v_estado_reg=convert(case when p_estado = 'eliminado' then 'inactivo' else 'activo' end::varchar, 'LATIN1', 'UTF8');
+			v_estado_reg=convert(case when p_estado = 'eliminado' then 'inactivo' else 'activo' end::varchar, 'LATIN1', 'UTF8');
+			v_nro_documento_asignacion = convert(p_nro_resolucion_memo::varchar, 'LATIN1', 'UTF8');
+			v_fecha_documento_asignacion = p_fecha_memo::date;
+			v_observaciones_finalizacion = convert(case when p_motivo_retiro = 'RETIRO' then 'retiro'
+														when p_motivo_retiro = 'TRANSFERENCIA' then 'transferencia'
+														when p_motivo_retiro = 'PROMOCION' then 'promocion'  
+													else 'fin contrato' end::varchar, 'LATIN1', 'UTF8');
 			v_fecha_asignacion=p_fecha_asignacion::date;
 			v_fecha_finalizacion=p_fecha_finalizacion::date;
 			v_fecha_mod=p_fecha_ultima_mod::timestamp;
@@ -62,7 +78,7 @@ BEGIN
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tkp_historico_asignacion_tuo_funcionario (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo_funcionario::varchar,'NULL')||','||COALESCE(v_id_funcionario::varchar,'NULL')||','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_finalizacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo_funcionario::varchar,'NULL')||','||COALESCE(v_id_funcionario::varchar,'NULL')||','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_finalizacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(v_id_cargo::varchar,'NULL')||','||COALESCE(''''||v_nro_documento_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_documento_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_observaciones_finalizacion::varchar||'''','NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink

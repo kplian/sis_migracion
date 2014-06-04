@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tkp_tipo_contrato
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_tipo_contrato FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_tipo_contrato_ttipo_contrato();

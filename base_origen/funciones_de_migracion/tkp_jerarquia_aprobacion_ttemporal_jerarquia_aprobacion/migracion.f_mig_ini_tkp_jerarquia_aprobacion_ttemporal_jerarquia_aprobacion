@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tkp_historico_asignacion_tuo_funcionario()
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tkp_jerarquia_aprobacion_ttemporal_jerarquia_aprobacion()
 						RETURNS boolean AS
 						$BODY$
 
@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tkp_historico_asignacion_tuo_func
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tuo_funcionario'',''ORGA'',''eliminar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''ttemporal_jerarquia_aprobacion'',''ORGA'',''eliminar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());
@@ -37,41 +37,20 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tkp_historico_asignacion_tuo_func
 						   --consulta los registro de la tabla origen
 						    FOR g_registros in (
 						        SELECT 
-						id_historico_asignacion,
-						id_empleado,
-						id_unidad_organizacional,
-						id_usuario_mod,
-						id_usuario_reg,
-						estado_reg,
-						fecha_asignacion,
-						fecha_finalizacion,
-						fecha_registro,
-						fecha_ultima_mod,
-						id_item,
-						fecha_memo,
-						nro_resolucion_memo,
-						motivo_retiro
-						
+						numero_nivel,
+						id_jerarquia_aprobacion,
+						estado,
+						nombre_nivel
 FROM 
-						          KARD.tkp_historico_asignacion) LOOP
+						          KARD.tkp_jerarquia_aprobacion) LOOP
 						        
 						        -- inserta en el destino
 						      
-						            v_cadena_resp = migracion.f_trans_tkp_historico_asignacion_tuo_funcionario(
-						            'INSERT',g_registros.id_historico_asignacion
-					,g_registros.id_empleado
-					,g_registros.id_unidad_organizacional
-					,g_registros.id_usuario_mod
-					,g_registros.id_usuario_reg
-					,g_registros.estado_reg
-					,g_registros.fecha_asignacion
-					,g_registros.fecha_finalizacion
-					,g_registros.fecha_registro
-					,g_registros.fecha_ultima_mod
-					,g_registros.id_item
-					,g_registros.nro_resolucion_memo
-					,g_registros.fecha_memo
-					,g_registros.motivo_retiro
+						            v_cadena_resp = migracion.f_trans_tkp_jerarquia_aprobacion_ttemporal_jerarquia_aprobacion(
+						            'INSERT',g_registros.numero_nivel
+					,g_registros.id_jerarquia_aprobacion
+					,g_registros.estado
+					,g_registros.nombre_nivel
 					);	
 					            IF v_cadena_resp[1] = 'FALSE' THEN
 					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
@@ -87,7 +66,7 @@ FROM
 						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
 									                 
 						     ELSE
-						       v_consulta = 'select pxp.f_add_remove_foraneas(''tuo_funcionario'',''ORGA'',''insertar'')';                   
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''ttemporal_jerarquia_aprobacion'',''ORGA'',''insertar'')';                   
 						       raise notice '%',v_consulta;
 						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
 						        v_res_cone=(select dblink_disconnect());

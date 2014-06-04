@@ -11,7 +11,11 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_historico_asignacion_tuo_funcion
   p_fecha_mod timestamp,
   p_fecha_reg timestamp,
   p_id_usuario_mod integer,
-  p_id_usuario_reg integer
+  p_id_usuario_reg integer,
+  p_id_cargo integer,
+  p_nro_documento_asignacion varchar,
+  p_fecha_documento_asignacion date,
+  p_observaciones_finalizacion varchar
 )
 RETURNS text AS
 $body$
@@ -42,7 +46,12 @@ $body$
 						fecha_mod,
 						fecha_reg,
 						id_usuario_mod,
-						id_usuario_reg)
+						id_usuario_reg,
+						id_cargo,
+						nro_documento_asignacion,
+						fecha_documento_asignacion,
+						observaciones_finalizacion
+						)
 				VALUES (
 						p_id_uo_funcionario,
 						p_id_funcionario,
@@ -53,7 +62,11 @@ $body$
 						p_fecha_mod,
 						p_fecha_reg,
 						p_id_usuario_mod,
-						p_id_usuario_reg);
+						p_id_usuario_reg,
+						p_id_cargo,
+						p_nro_documento_asignacion,
+						p_fecha_documento_asignacion,
+						p_observaciones_finalizacion);
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
@@ -81,6 +94,10 @@ $body$
 						 ,fecha_reg=p_fecha_reg
 						 ,id_usuario_mod=p_id_usuario_mod
 						 ,id_usuario_reg=p_id_usuario_reg
+						 ,id_cargo = p_id_cargo
+						 ,nro_documento_asignacion = p_nro_documento_asignacion
+						 ,fecha_documento_asignacion = p_fecha_documento_asignacion
+						 ,observaciones_finalizacion = p_observaciones_finalizacion
 						 WHERE id_uo_funcionario=p_id_uo_funcionario;
 
 						       

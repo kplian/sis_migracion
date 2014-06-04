@@ -105,13 +105,24 @@ BEGIN
 			v_tipo_pres=convert(p_tipo_pres::varchar, 'LATIN1', 'UTF8');
 
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino tcentro_costo
-			      
-  			          v_consulta = 'select migra.f__on_trig_tpr_presupuesto_tcentro_costo (
+                if (v_operacion = 'DELETE') then
+                	v_consulta = 'select migra.f__on_trig_tpr_presupuesto_tpresupuesto (
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_presupuesto::varchar,'NULL')||','||COALESCE(v_id_centro_costo::varchar,'NULL')||
+                           ','||COALESCE(''''||v_cod_act::varchar||'''','NULL')||','||COALESCE(''''||v_cod_fin::varchar||'''','NULL')||
+                           ','||COALESCE(''''||v_cod_prg::varchar||'''','NULL')||','||COALESCE(''''||v_cod_pry::varchar||'''','NULL')||
+                           ','||COALESCE(''''||v_estado_pres::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||
+                           ','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||
+                           ','||COALESCE(v_id_categoria_prog::varchar,'NULL')||','||COALESCE(v_id_concepto_colectivo::varchar,'NULL')||
+                           ','||COALESCE(v_id_fuente_financiamiento::varchar,'NULL')||','||COALESCE(v_id_parametro::varchar,'NULL')||
+                           ','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||
+                           ','||COALESCE(''''||v_tipo_pres::varchar||'''','NULL')||')';	
+                else
+                    v_consulta = 'select migra.f__on_trig_tpr_presupuesto_tcentro_costo (
 			               '''||v_operacion::varchar||''','||COALESCE(v_id_centro_costo::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||
                            ','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_ep::varchar,'NULL')||','||COALESCE(v_id_gestion::varchar,'NULL')||','||COALESCE(v_id_uo::varchar,'NULL')||
                            ','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||')';
-
-								        
+				end if;						      
+  			          	        
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
@@ -130,10 +141,14 @@ BEGIN
 			             END IF;
 			            
 			            v_respuesta[1]='TRUE';
-
+				if (v_operacion = 'DELETE') then
+                	v_consulta = 'select migra.f__on_trig_tpr_presupuesto_tcentro_costo (
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_centro_costo::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||
+                           ','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_ep::varchar,'NULL')||','||COALESCE(v_id_gestion::varchar,'NULL')||','||COALESCE(v_id_uo::varchar,'NULL')||
+                           ','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||')';
+                else
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino tpresupuesto
-                                        
-                        v_consulta = 'select migra.f__on_trig_tpr_presupuesto_tpresupuesto (
+                   v_consulta = 'select migra.f__on_trig_tpr_presupuesto_tpresupuesto (
 			               '''||v_operacion::varchar||''','||COALESCE(v_id_presupuesto::varchar,'NULL')||','||COALESCE(v_id_centro_costo::varchar,'NULL')||
                            ','||COALESCE(''''||v_cod_act::varchar||'''','NULL')||','||COALESCE(''''||v_cod_fin::varchar||'''','NULL')||
                            ','||COALESCE(''''||v_cod_prg::varchar||'''','NULL')||','||COALESCE(''''||v_cod_pry::varchar||'''','NULL')||
@@ -142,7 +157,10 @@ BEGIN
                            ','||COALESCE(v_id_categoria_prog::varchar,'NULL')||','||COALESCE(v_id_concepto_colectivo::varchar,'NULL')||
                            ','||COALESCE(v_id_fuente_financiamiento::varchar,'NULL')||','||COALESCE(v_id_parametro::varchar,'NULL')||
                            ','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||
-                           ','||COALESCE(''''||v_tipo_pres::varchar||'''','NULL')||')';
+                           ','||COALESCE(''''||v_tipo_pres::varchar||'''','NULL')||')';	
+                
+               end if;      
+                        
 			    
                 --probar la conexion con dblink
 			          v_resp =  (SELECT dblink_connect(v_cadena_cnx));
