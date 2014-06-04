@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_historico_asignacion_tuo_funcionario (
   v_operacion varchar,
   p_id_uo_funcionario integer,
@@ -15,7 +13,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_historico_asignacion_tuo_funcion
   p_id_cargo integer,
   p_nro_documento_asignacion varchar,
   p_fecha_documento_asignacion date,
-  p_observaciones_finalizacion varchar
+  p_observaciones_finalizacion varchar,
+  p_id_oficina integer
 )
 RETURNS text AS
 $body$
@@ -67,6 +66,9 @@ $body$
 						p_nro_documento_asignacion,
 						p_fecha_documento_asignacion,
 						p_observaciones_finalizacion);
+                        
+                        update orga.tcargo set id_oficina = p_id_oficina
+                        where id_cargo = p_id_cargo;
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN

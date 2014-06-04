@@ -1,22 +1,3 @@
-CREATE OR REPLACE FUNCTION migracion.f_trans_tkp_historico_asignacion_tuo_funcionario (
-  v_operacion varchar,
-  p_id_historico_asignacion integer,
-  p_id_empleado integer,
-  p_id_unidad_organizacional integer,
-  p_id_usuario_mod integer,
-  p_id_usuario_reg integer,
-  p_estado varchar,
-  p_fecha_asignacion date,
-  p_fecha_finalizacion date,
-  p_fecha_registro date,
-  p_fecha_ultima_mod timestamp,
-  p_id_item integer,
-  p_nro_resolucion_memo varchar,
-  p_fecha_memo date,
-  p_motivo_retiro varchar
-)
-RETURNS varchar [] AS
-$body$
 DECLARE
 			 
 			g_registros record;
@@ -43,6 +24,7 @@ DECLARE
 			v_id_cargo integer;
 			v_fecha_documento_asignacion date;
 			v_observaciones_finalizacion varchar;
+            v_id_oficina integer;
 BEGIN
 			
 			
@@ -73,12 +55,16 @@ BEGIN
 			v_fecha_reg=p_fecha_registro::timestamp;
 			v_id_usuario_mod=p_id_usuario_mod::int4;
 			v_id_usuario_reg=p_id_usuario_reg::int4;
- 
+ 			
+            select id_oficina into v_id_oficina
+            from kard.tkp_empleado
+            where id_empleado = p_id_empleado;
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tkp_historico_asignacion_tuo_funcionario (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo_funcionario::varchar,'NULL')||','||COALESCE(v_id_funcionario::varchar,'NULL')||','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_finalizacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(v_id_cargo::varchar,'NULL')||','||COALESCE(''''||v_nro_documento_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_documento_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_observaciones_finalizacion::varchar||'''','NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo_funcionario::varchar,'NULL')||','||COALESCE(v_id_funcionario::varchar,'NULL')||','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_finalizacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(v_id_cargo::varchar,'NULL')||','||COALESCE(''''||v_nro_documento_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_documento_asignacion::varchar||'''','NULL')||','||
+                           COALESCE(''''||v_observaciones_finalizacion::varchar||'''','NULL')||','||COALESCE(v_id_oficina::varchar,'NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
@@ -113,8 +99,3 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
-$body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER;
