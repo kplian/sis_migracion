@@ -55,6 +55,7 @@ DECLARE
 			v_nombre_unidad varchar;
 			v_presupuesta varchar;
             v_padre int4;
+            v_id_nivel	int4;
 BEGIN
 			
 			
@@ -92,12 +93,16 @@ BEGIN
             else
             	v_presupuesta=convert('no'::varchar, 'LATIN1', 'UTF8');
  			end if;
-
+			select uo.id_nivel_organizacional into v_id_nivel
+            from kard.tkp_unidad_organizacional uo 
+            where uo.id_unidad_organizacional = p_id_unidad_organizacional;
+            
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tkp_unidad_organizacional_tuo (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_cargo_individual::varchar||'''','NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_correspondencia::varchar||'''','NULL')||','||COALESCE(''''||v_descripcion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(''''||v_gerencia::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nodo_base::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_cargo::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_unidad::varchar||'''','NULL')||','||COALESCE(''''||v_presupuesta::varchar||'''','NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_cargo_individual::varchar||'''','NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_correspondencia::varchar||'''','NULL')||','||COALESCE(''''||v_descripcion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(''''||v_gerencia::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||
+                           ','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nodo_base::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_cargo::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_unidad::varchar||'''','NULL')||','||COALESCE(''''||v_presupuesta::varchar||'''','NULL')||','||COALESCE(v_id_nivel::varchar,'NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
