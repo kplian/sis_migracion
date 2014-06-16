@@ -80,6 +80,8 @@ DECLARE
     v_id_libro_bancos integer;
     v_id_cuenta_bancaria_endesis integer;
     v_nro_cuenta_banco varchar;
+    
+    g_nombre_funcion varchar;
 
 BEGIN
 	
@@ -145,7 +147,7 @@ BEGIN
             
         end if;
     
-     
+      
       
     	insert into migracion.tct_comprobante
         values(
@@ -199,7 +201,7 @@ BEGIN
         );
     
     end loop;
-    
+   
     
     
     
@@ -374,7 +376,7 @@ BEGIN
             v_momento_cbte, 
             v_rec.fecha, 
             v_rec.glosa1, 
-            v_rec.glosa1, 
+            '', 
             v_rec.beneficiario, 
             v_rec.glosa2, 
             v_rec.glosa2, 
@@ -452,7 +454,7 @@ BEGIN
         
     
     end loop;
-    
+   
     ------------------------
     --GSS-14-02-2014- Insercion en tabla intermedia -Inicio
     -----------------------
@@ -478,6 +480,12 @@ BEGIN
 
     --Respuesta
     return 'Comprobante generado!'::varchar;
+	
+    EXCEPTION
+    
+	WHEN OTHERS THEN
+        g_nombre_funcion = 'migracion.f_migrar_cbte_pxp';
+        raise exception ' % - (%)',SQLERRM,g_nombre_funcion ;
 
 END;
 $body$

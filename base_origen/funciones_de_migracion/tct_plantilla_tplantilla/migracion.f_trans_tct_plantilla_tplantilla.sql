@@ -1,8 +1,15 @@
 CREATE OR REPLACE FUNCTION migracion.f_trans_tct_plantilla_tplantilla (
-			  v_operacion varchar,p_id_plantilla int4,p_desc_plantilla varchar,p_nro_linea numeric,p_sw_compro numeric,p_sw_tesoro numeric,p_tipo numeric,p_tipo_plantilla numeric)
-			RETURNS varchar [] AS
-			$BODY$
-
+  v_operacion varchar,
+  p_id_plantilla integer,
+  p_desc_plantilla varchar,
+  p_nro_linea numeric,
+  p_sw_compro numeric,
+  p_sw_tesoro numeric,
+  p_tipo numeric,
+  p_tipo_plantilla numeric
+)
+RETURNS varchar [] AS
+$body$
 DECLARE
 			 
 			g_registros record;
@@ -31,7 +38,11 @@ BEGIN
 			
 			          --funcion para obtener cadena de conexion
 			          v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
-			          
+			select *
+            into g_registros
+            from sci.tct_plantilla
+            where p_tipo_plantilla =  p_tipo_plantilla;
+                     
 			          
 			           ---------------------------------------
 			           --previamente se tranforman los datos  (descomentar)
@@ -39,9 +50,9 @@ BEGIN
 			
 			v_id_plantilla=p_tipo_plantilla::int4;
 			v_desc_plantilla=convert(p_desc_plantilla::varchar, 'LATIN1', 'UTF8');
-			v_estado_reg=convert('activo'::varchar, 'LATIN1', 'UTF8');
-			v_fecha_mod=NULL::timestamp;
-			v_fecha_reg=now()::timestamp;
+			v_estado_reg=convert(g_registros.estado_reg::varchar, 'LATIN1', 'UTF8');
+			v_fecha_mod=g_registros.fecha_mod::timestamp;
+			v_fecha_reg=g_registros.fecha_reg::timestamp;
 			v_id_usuario_mod=NULL::int4;
 			v_id_usuario_reg=1::int4;
 			v_nro_linea=p_nro_linea::numeric;
@@ -50,11 +61,9 @@ BEGIN
             else 
             	v_sw_compro=convert('no'::varchar, 'LATIN1', 'UTF8');
             end if;
-            if p_sw_tesoro=1 then
-				v_sw_tesoro=convert('si'::varchar, 'LATIN1', 'UTF8');
-            else 
-            	v_sw_tesoro=convert('no'::varchar, 'LATIN1', 'UTF8');
-            end if;
+            
+            v_sw_tesoro=convert(g_registros.sw_obl_pago::varchar, 'LATIN1', 'UTF8');
+            
             v_tipo=p_tipo::numeric;
  
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
@@ -96,9 +105,8 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
-			$BODY$
-
+$body$
 LANGUAGE 'plpgsql'
-			VOLATILE
-			CALLED ON NULL INPUT
-			SECURITY INVOKER;
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

@@ -1,0 +1,107 @@
+CREATE OR REPLACE FUNCTION migracion.f_trans_tkp_descuento_bono_tdescuento_bono (
+			  v_operacion varchar,p_id_descuento_bono int4,p_id_empleado int4,p_id_moneda int4,p_id_tipo_descuento_bono int4,p_cuotas varchar,p_estado_reg varchar,p_fecha_fin date,p_fecha_ini date,p_fecha_reg date,p_monto_faltante numeric,p_monto_total numeric,p_num_cuotas int4,p_valor_por_cuota numeric)
+			RETURNS varchar [] AS
+			$BODY$
+
+DECLARE
+			 
+			g_registros record;
+			v_consulta varchar;
+			v_res_cone  varchar;
+			v_cadena_cnx varchar;
+			v_cadena_con varchar;
+			resp boolean;
+			v_resp varchar;
+			v_respuesta varchar[];
+			
+			g_registros_resp record;
+			v_id_descuento_bono int4;
+			v_id_funcionario int4;
+			v_id_moneda int4;
+			v_id_tipo_columna int4;
+			v_estado_reg varchar;
+			v_fecha_fin date;
+			v_fecha_ini date;
+			v_fecha_mod timestamp;
+			v_fecha_reg timestamp;
+			v_id_usuario_ai int4;
+			v_id_usuario_mod int4;
+			v_id_usuario_reg int4;
+			v_monto_total numeric;
+			v_num_cuotas int4;
+			v_usuario_ai varchar;
+			v_valor_por_cuota numeric;
+BEGIN
+			
+			
+			          --funcion para obtener cadena de conexion
+			          v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+			          
+			          
+			           ---------------------------------------
+			           --previamente se tranforman los datos  (descomentar)
+			           ---------------------------------------
+
+			           /*
+			           			v_id_descuento_bono=p_id_descuento_bono::int4;
+			v_id_funcionario=p_id_empleado::int4;
+			v_id_moneda=p_id_moneda::int4;
+			v_id_tipo_columna=p_::int4;
+			v_estado_reg=convert(p_estado_reg::varchar, 'LATIN1', 'UTF8');
+			v_fecha_fin=p_fecha_fin::date;
+			v_fecha_ini=p_fecha_ini::date;
+			v_fecha_mod=p_::timestamp;
+			v_fecha_reg=p_fecha_reg::timestamp;
+			v_id_usuario_ai=p_::int4;
+			v_id_usuario_mod=p_::int4;
+			v_id_usuario_reg=p_::int4;
+			v_monto_total=p_monto_faltante::numeric;
+			v_num_cuotas=p_num_cuotas::int4;
+			v_usuario_ai=convert(p_::varchar, 'LATIN1', 'UTF8');
+			v_valor_por_cuota=p_valor_por_cuota::numeric;
+ */   
+			    --cadena para la llamada a la funcion de insercion en la base de datos destino
+			      
+			        
+			          v_consulta = 'select migra.f__on_trig_tkp_descuento_bono_tdescuento_bono (
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_descuento_bono::varchar,'NULL')||','||COALESCE(v_id_funcionario::varchar,'NULL')||','||COALESCE(v_id_moneda::varchar,'NULL')||','||COALESCE(v_id_tipo_columna::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_fin::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_ini::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_ai::varchar,'NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(v_monto_total::varchar,'NULL')||','||COALESCE(v_num_cuotas::varchar,'NULL')||','||COALESCE(''''||v_usuario_ai::varchar||'''','NULL')||','||COALESCE(v_valor_por_cuota::varchar,'NULL')||')';
+			          --probar la conexion con dblink
+			          
+					   --probar la conexion con dblink
+			          v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+			            
+			             IF(v_resp!='OK') THEN
+			            
+			             	--modificar bandera de fallo  
+			                 raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+			                 
+			             ELSE
+					  
+			         
+			               PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+			                v_res_cone=(select dblink_disconnect());
+			             END IF;
+			            
+			            v_respuesta[1]='TRUE';
+                       
+			           RETURN v_respuesta;
+			EXCEPTION
+			   WHEN others THEN
+			   
+			    v_res_cone=(select dblink_disconnect());
+			     v_respuesta[1]='FALSE';
+                 v_respuesta[2]=SQLERRM;
+                 v_respuesta[3]=SQLSTATE;
+                 v_respuesta[4]=v_consulta;
+                 
+    
+                 
+                 RETURN v_respuesta;
+			
+			END;
+			$BODY$
+
+LANGUAGE 'plpgsql'
+			VOLATILE
+			CALLED ON NULL INPUT
+			SECURITY INVOKER;

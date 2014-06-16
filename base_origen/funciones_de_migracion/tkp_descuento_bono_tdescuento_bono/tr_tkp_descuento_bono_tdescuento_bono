@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tkp_descuento_bono
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_descuento_bono FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_descuento_bono_tdescuento_bono();
