@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION migra.ft_ts_libro_bancos_endesis_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -107,18 +109,55 @@ BEGIN
         
     		--Sentencia de la consulta
 			v_consulta:='SELECT
-            			id_libro_bancos, id_cuenta_bancaria, fecha, a_favor, detalle,
-						observaciones, nro_liquidacion, nro_comprobante,
-						nro_cheque, tipo, importe_deposito, importe_cheque,
-                        saldo, origen, estado, usr_reg,
-						fecha_reg, usr_mod, fecha_mod,
-						fk_libro_bancos, fecha_cheque_literal, emparejado, origen_cbte
-						FROM tesoro.f_tts_libro_bancos_sel(18, ''172.17.45.12'', ''00:19:d1:09:22:7e'',
-						''TS_LBRBANSAL_SEL'', NULL, 200, 0,
+            			id_libro_bancos, 
+                        id_cuenta_bancaria, 
+                        fecha, 
+                        a_favor, 
+                        detalle,
+						observaciones,
+                        nro_liquidacion, 
+                        nro_comprobante,
+						nro_cheque, 
+                        tipo, 
+                        importe_deposito, 
+                        importe_cheque,
+                        saldo, 
+                        origen, 
+                        estado, 
+                        usr_reg,  --16
+						fecha_reg, 
+                        usr_mod, 
+                        fecha_mod,
+						fk_libro_bancos, 
+                        fecha_cheque_literal, 
+                        emparejado, 
+                        origen_cbte
+                        
+                        
+						FROM tesoro.f_tts_libro_bancos_sel(
+                        18, 
+                        ''172.17.45.12'', 
+                        ''00:19:d1:09:22:7e'',
+						''TS_LBRBANSAL_SEL'',
+                         NULL, 
+                         200, 
+                         0,
 						''fecha desc, id_libro_bancos desc,fecha desc, id_libro_bancos desc,fecha desc, id_libro_bancos desc'',
 						''desc'',
 						''LBRBAN.id_cuenta_bancaria = ' || v_id_cuenta_bancaria ||' AND LBRBAN.tipo = ''''deposito'''' AND LBRBAN.fk_libro_bancos is null'',
-						''%'', ''%'', ''%'', ''%'', ''%'', NULL, NULL, NULL, NULL, NULL) AS (
+						''%'', 
+                        ''%'', 
+                        ''%'', 
+                        ''%'', 
+                        ''%'', 
+                        NULL, 
+                        NULL, 
+                        NULL, 
+                        NULL, 
+                        NULL,
+                        NULL) 
+                        
+                        AS (
                         id_libro_bancos int4,
                         id_cuenta_bancaria int4,
                         fecha date,
@@ -142,8 +181,9 @@ BEGIN
                         fecha_cheque_literal text, 
                         emparejado varchar,
                         origen_cbte varchar)';
-                        raise notice 'aasdds: %',v_consulta;
-             for v_rec in (select *
+                        
+                         
+              for v_rec in (select *
                           from dblink(v_consulta,true)
                           as (
                           id_libro_bancos int4,
@@ -158,17 +198,23 @@ BEGIN
                           tipo varchar,
                           importe_deposito numeric,
                           importe_cheque numeric,
-                          saldo numeric,
-                          origen varchar,
-                          estado varchar,
+                          saldo numeric, 
+                          origen varchar, 
+                          estado varchar, 
                           usr_reg varchar,
-                          fecha_reg timestamp,
-                          usr_mod varchar,
+                          fecha_reg timestamp, 
+                          usr_mod varchar, 
                           fecha_mod timestamp,
-                          fk_libro_bancos int4,
-                          fecha_cheque_literal text,
+                          fk_libro_bancos int4, 
+                          fecha_cheque_literal text, 
                           emparejado varchar,
-                          origen_cbte varchar)) loop
+                          origen_cbte varchar/*,
+                          notificado varchar,
+                          id_comprobante_libro_bancos int4,
+                          desc_comprobante_libro_bancos varchar,
+                          id_finalidad int4,
+                          desc_finalidad varchar,
+                          color varchar*/)) loop
                               
             	return next v_rec;
 			end loop;

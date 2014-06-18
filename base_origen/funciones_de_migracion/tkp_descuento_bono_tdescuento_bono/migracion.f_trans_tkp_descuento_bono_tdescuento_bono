@@ -69,7 +69,9 @@ BEGIN
             if (v_tipo_columna = 'SUBLACT') then
             	v_tipo_columna = 'SUBLAC';
             elsif (v_tipo_columna = 'RETJUD') then
-            	v_tipo_columna = 'SUBLACT';
+            	v_tipo_columna = 'RETJUD';
+            ELSE
+            	v_tipo_columna = 'NO_REGISTRAR';
             end if;
 			v_tipo_columna=convert(v_tipo_columna::varchar, 'LATIN1', 'UTF8');
 			v_estado_reg=convert(p_estado_reg::varchar, 'LATIN1', 'UTF8');

@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tkp_afp
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_afp FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_afp_tafp();
