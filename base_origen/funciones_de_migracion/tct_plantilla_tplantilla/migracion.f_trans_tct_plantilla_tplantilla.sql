@@ -62,7 +62,7 @@ BEGIN
             	v_sw_compro=convert('no'::varchar, 'LATIN1', 'UTF8');
             end if;
             
-            v_sw_tesoro=convert(g_registros.sw_obl_pago::varchar, 'LATIN1', 'UTF8');
+            v_sw_tesoro=convert(g_registros.sw_obligacion_pago::varchar, 'LATIN1', 'UTF8');
             
             v_tipo=p_tipo::numeric;
  
