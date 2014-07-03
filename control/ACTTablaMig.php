@@ -431,13 +431,17 @@ class ACTTablaMig extends ACTbase{
 				}
 			  }
 			  
-			 $texto_archivo=$texto_archivo."\t\t\t\tVALUES (\n".$valores."
-						       
-							    ELSEIF  v_operacion = 'UPDATE' THEN
-						               
-						               IF  not EXISTS(select 1 
+			 $texto_validacion = $texto_archivo."\t\t\t\tVALUES (\n".$valores."
+                               
+                                ELSEIF  v_operacion = 'UPDATE' THEN
+                                       
+                                       IF  not EXISTS(select 1 
                                            from ".$this->EsquemaDes.".".$this->NameTablaDes."\n 
-                                           where ". $data['columna']."=p_".$data['columna'].") THEN
+                                           "; 
+                                        
+                                        
+			  
+			 $texto_temp=") THEN
                                        
                                             raise exception 'No existe el registro que  desea modificar';
                                             
@@ -459,27 +463,30 @@ class ACTTablaMig extends ACTbase{
 			  	   $cont++;
 			  	   
 			  		if($data[checks]!='PK' &&  ($cont==1 || $sw_ini==0)){
-			  			$texto_archivo=$texto_archivo."\t\t\t\t\t\t ". $data['columna']."=p_".$data['columna']."\n";	
+			  			$texto_temp=$texto_temp."\t\t\t\t\t\t ". $data['columna']."=p_".$data['columna']."\n";	
 			  		    $sw_ini=1;
 					}
 					elseif($data[checks]!='PK' && $sw_ini=1 ){
-						$texto_archivo=$texto_archivo."\t\t\t\t\t\t ,". $data['columna']."=p_".$data['columna']."\n";	
+						$texto_temp=$texto_temp."\t\t\t\t\t\t ,". $data['columna']."=p_".$data['columna']."\n";	
 			  		}
 					elseif($data[checks]=='PK'){
 							
 			  			$valores="\t\t\t\t\t\t WHERE ". $data['columna']."=p_".$data['columna'].";\n";
+			  			$valores_temp="\t\t\t\t\t\t WHERE ". $data['columna']."=p_".$data['columna']."";
 			  			
 			  		}
 			}
-			  
-			$texto_archivo=$texto_archivo.$valores."
+			
+			$texto_archivo=$texto_archivo.$texto_validacion.$valores_temp;
+			
+			$texto_archivo=$texto_archivo.$texto_validacion.$valores."
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
 						         
 						         IF  not EXISTS(select 1 
                                            from ".$this->EsquemaDes.".".$this->NameTablaDes."\n 
-                                           where ". $data['columna']."=p_".$data['columna'].") THEN
+                                           .$valores_temp.") THEN
                                        
                                             raise exception 'No existe el registro que  desea eliminar';
                                             
