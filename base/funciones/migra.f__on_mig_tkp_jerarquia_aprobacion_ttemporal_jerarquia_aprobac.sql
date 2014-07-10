@@ -1,0 +1,117 @@
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_jerarquia_aprobacion_ttemporal_jerarquia_aprobac (
+  v_operacion varchar,
+  p_id_temporal_jerarquia_aprobacion integer,
+  p_estado varchar,
+  p_estado_reg varchar,
+  p_fecha_mod timestamp,
+  p_fecha_reg timestamp,
+  p_id_usuario_ai integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_nombre varchar,
+  p_numero integer,
+  p_usuario_ai varchar
+)
+RETURNS text AS
+$body$
+/*
+						Function:  Para migracion de la tabla param.tgestion
+						Fecha Creacion:  June 2, 2014, 5:52 pm
+						Autor: autogenerado (JAIME RIVERA ROJAS)
+						
+						*/
+						
+						DECLARE
+						
+						BEGIN
+						
+						    if(v_operacion = 'INSERT') THEN
+						
+						          INSERT INTO 
+						            ORGA.ttemporal_jerarquia_aprobacion (
+						id_temporal_jerarquia_aprobacion,
+						estado,
+						estado_reg,
+						fecha_mod,
+						fecha_reg,
+						id_usuario_ai,
+						id_usuario_mod,
+						id_usuario_reg,
+						nombre,
+						numero,
+						usuario_ai)
+				VALUES (
+						p_id_temporal_jerarquia_aprobacion,
+						p_estado,
+						p_estado_reg,
+						p_fecha_mod,
+						p_fecha_reg,
+						p_id_usuario_ai,
+						p_id_usuario_mod,
+						p_id_usuario_reg,
+						p_nombre,
+						p_numero,
+						p_usuario_ai);
+
+						       
+							    ELSEIF  v_operacion = 'UPDATE' THEN
+						               
+						               IF  not EXISTS(select 1 
+                                           from ORGA.ttemporal_jerarquia_aprobacion
+ 
+                                           where id_temporal_jerarquia_aprobacion=p_id_temporal_jerarquia_aprobacion) THEN
+                                       
+                                            raise exception 'No existe el registro que  desea modificar';
+                                            
+                                       END IF;
+						               
+						               
+						               UPDATE 
+						                  ORGA.ttemporal_jerarquia_aprobacion  
+						                SET						 estado=p_estado
+						 ,estado_reg=p_estado_reg
+						 ,fecha_mod=p_fecha_mod
+						 ,fecha_reg=p_fecha_reg
+						 ,id_usuario_ai=p_id_usuario_ai
+						 ,id_usuario_mod=p_id_usuario_mod
+						 ,id_usuario_reg=p_id_usuario_reg
+						 ,nombre=p_nombre
+						 ,numero=p_numero
+						 ,usuario_ai=p_usuario_ai
+						 WHERE id_temporal_jerarquia_aprobacion=p_id_temporal_jerarquia_aprobacion;
+
+						       
+						       ELSEIF  v_operacion = 'DELETE' THEN
+						       
+						         
+						         IF  not EXISTS(select 1 
+                                           from ORGA.ttemporal_jerarquia_aprobacion
+ 
+                                           where id_temporal_jerarquia_aprobacion=p_id_temporal_jerarquia_aprobacion) THEN
+                                       
+                                            raise exception 'No existe el registro que  desea eliminar';
+                                            
+                                END IF;
+						         
+						         
+						         DELETE FROM 
+						              ORGA.ttemporal_jerarquia_aprobacion
+ 
+						              						 WHERE id_temporal_jerarquia_aprobacion=p_id_temporal_jerarquia_aprobacion;
+
+						       
+						       END IF;  
+						  
+						 return 'true';
+						
+						-- statements;
+						--EXCEPTION
+						--WHEN exception_name THEN
+						--  statements;
+						END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

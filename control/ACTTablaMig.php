@@ -431,7 +431,7 @@ class ACTTablaMig extends ACTbase{
 				}
 			  }
 			  
-			 $texto_validacion = $texto_archivo."\t\t\t\tVALUES (\n".$valores."
+			 $texto_validacion = "\t\t\t\tVALUES (\n".$valores."
                                
                                 ELSEIF  v_operacion = 'UPDATE' THEN
                                        
@@ -479,14 +479,13 @@ class ACTTablaMig extends ACTbase{
 			
 			$texto_archivo=$texto_archivo.$texto_validacion.$valores_temp;
 			
-			$texto_archivo=$texto_archivo.$texto_validacion.$valores."
+			$texto_archivo=$texto_archivo.$texto_temp.$valores."
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
 						         
 						         IF  not EXISTS(select 1 
-                                           from ".$this->EsquemaDes.".".$this->NameTablaDes."\n 
-                                           .$valores_temp.") THEN
+                                           from ".$this->EsquemaDes.".".$this->NameTablaDes."\n".$valores_temp.") THEN
                                        
                                             raise exception 'No existe el registro que  desea eliminar';
                                             

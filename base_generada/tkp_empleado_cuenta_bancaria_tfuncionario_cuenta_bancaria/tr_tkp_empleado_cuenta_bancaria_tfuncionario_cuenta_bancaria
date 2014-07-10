@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tkp_empleado_cuenta_bancaria
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON KARD.tkp_empleado_cuenta_bancaria FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tkp_empleado_cuenta_bancaria_tfuncionario_cuenta_bancaria();
