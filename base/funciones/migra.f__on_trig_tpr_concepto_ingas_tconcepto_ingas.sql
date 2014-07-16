@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_concepto_ingas_tconcepto_ingas (
   v_operacion varchar,
   p_id_concepto_ingas integer,
@@ -247,8 +245,9 @@ $body$
 						       
                                 IF (not exists(select 1 from pre.tconcepto_partida  cp where cp.id_concepto_ingas = v_id_concepto_ingas)) THEN
                            
-                                   DELETE FROM 
+                                   update
                                         param.tconcepto_ingas
+                                        set estado_reg = 'inactivo'
                                     WHERE id_concepto_ingas=v_id_concepto_ingas;
                                   
                                 END IF;  
