@@ -132,7 +132,8 @@ BEGIN
                     v_rec.id_ep::integer,
                     NULL::integer,
                     NULL::varchar,
-                    (v_desc||'  '||v_rec.desc_ingas||' - '||v_rec.descripcion)::text,
+                    convert((v_desc||'  '||v_rec.desc_ingas||' - '||v_rec.descripcion)::varchar,'UTF8', 'LATIN1'),
+                    
                     '[INTRODUCIR DESCRIPCION]'::varchar, --10
                     v_vida_util::integer,
                     v_vida_util::integer,
@@ -155,7 +156,7 @@ BEGIN
                     NULL::varchar,
                     1::numeric,--30
                     'registrado'::varchar,
-                    v_rec.observaciones::varchar,
+                    convert(v_rec.observaciones::varchar,'UTF8', 'LATIN1'),
                     NULL::integer, 
                     NULL::integer, 
                     v_rec.id_moneda::integer, 
@@ -163,7 +164,7 @@ BEGIN
                     NULL::integer, 
                     NULL::date, 
                     NULL::varchar,
-                    v_rec.numero_oc::varchar, --40
+                    convert(v_rec.numero_oc::varchar,'UTF8', 'LATIN1'),
                     1::integer,
                     v_rec.precio_compra::numeric, 
                     v_rec.precio_compra::numeric, 
