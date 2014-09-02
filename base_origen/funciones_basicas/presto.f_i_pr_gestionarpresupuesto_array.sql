@@ -12,7 +12,8 @@ CREATE OR REPLACE FUNCTION presto.f_i_pr_gestionarpresupuesto_array (
   pr_id_servicio integer [],
   pr_id_concepto_ingas integer [],
   pr_columna_relacion varchar [],
-  pr_fk_llave integer []
+  pr_fk_llave integer [],
+  pr_id_int_comprobante integer
 )
 RETURNS numeric [] AS
 $body$
@@ -49,8 +50,24 @@ v_id_comprobante  integer;
  v_columna_relacion  varchar;
  v_fk_llave  integer;
  
+ --gvc 29-07-2014
+ g_id_partida_ejecucion_devengado integer;
+ g_estado_com_eje	numeric;
+ 
 BEGIN
 
+--determinar el comprobante correspondiente al intermediario
+
+IF pr_id_int_comprobante is NOT NULL THEN
+
+  select 
+  c.id_comprobante
+  into
+  v_id_comprobante
+  from sci.tct_comprobante c
+  where c.id_int_comprobante = pr_id_int_comprobante;
+
+END IF;
 
   
 
@@ -70,7 +87,6 @@ FOR v_i IN 1..v_size LOOP
            v_id_devengado  =NULL;
            v_id_solicitud_compra  =NULL;
            v_id_cuenta_doc_rendicion  =NULL;
-           v_id_comprobante  =NULL;
            v_columna_relacion  =NULL;
            v_fk_llave  =NULL;
  
@@ -93,9 +109,7 @@ FOR v_i IN 1..v_size LOOP
              
                 v_id_cuenta_doc_rendicion = pr_fk_llave[v_i];
              
-             ELSEIF pr_columna_relacion[v_i] = 'id_comprobante' THEN 
              
-                v_id_comprobante = pr_fk_llave[v_i];
              
              ELSE 
              
@@ -110,8 +124,71 @@ FOR v_i IN 1..v_size LOOP
  
       --  raise exception 'ante de la segunda  %',pr_fecha[v_i]::date;
    
-       raise notice '>>>>>>  paso %',v_i;
-       v_rescom:=presto.f_i_pr_gestionarpresupuesto(
+ 	--obtenemos el estado_com_eje del id_partida_ejecucion origen
+    select pe.estado_com_eje
+    into g_estado_com_eje
+    from presto.tpr_partida_ejecucion pe
+    where pe.id_partida_ejecucion = pr_id_partida_ejecucion[v_i];
+       
+                                        
+     --si el id_partida_ejecucion es del comprometido y se solicita hacer el pago  
+ 	   if(g_estado_com_eje = 1 and pr_sw_momento[v_i] = 4 )then
+       
+           raise notice '>>>>>>  paso %',v_i;
+           --registramos el devengado
+           v_rescom:=presto.f_i_pr_gestionarpresupuesto(
+                                                      pr_id_presupuesto[v_i],
+                                                      pr_id_partida[v_i],
+                                                      pr_id_moneda[v_i],
+                                                      pr_monto_total[v_i],
+                                                      -- NULL,
+                                                      --now()::date,
+                                                      pr_fecha[v_i]::date,
+                                                      pr_id_partida_ejecucion[v_i],
+                                                      pr_sw_momento[v_i] - 1::numeric,     --3, --pr_sw_momento[v_i],  --DEVENGADO
+                                                      pr_id_item[v_i],
+                                                      pr_id_servicio[v_i],
+                                                      pr_id_concepto_ingas[v_i],
+                                                      v_id_cuenta_doc,
+                                                      v_id_devengado,
+                                                      v_id_solicitud_compra,
+                                                      v_id_cuenta_doc_rendicion,                   --id_cuenta_doc_rendicion
+                                                      v_id_comprobante,
+                                                      v_columna_relacion,
+                                                      v_fk_llave
+                                            );
+                                            
+           --obtenemos el id_partida_ejecucion del devengado      
+           g_id_partida_ejecucion_devengado = v_rescom[1];                           
+                                            
+           raise notice '>>>>>>  paso %',v_i;
+           
+           --registramos el pagado
+           v_rescom:=presto.f_i_pr_gestionarpresupuesto(
+                                                      pr_id_presupuesto[v_i],
+                                                      pr_id_partida[v_i],
+                                                      pr_id_moneda[v_i],
+                                                      pr_monto_total[v_i],
+                                                     -- NULL,
+                                                       --now()::date,
+                                                      pr_fecha[v_i]::date,
+                                                      g_id_partida_ejecucion_devengado, --pr_id_partida_ejecucion[v_i],
+                                                      pr_sw_momento[v_i],
+                                                      pr_id_item[v_i],
+                                                      pr_id_servicio[v_i],
+                                                      pr_id_concepto_ingas[v_i],
+                                                      v_id_cuenta_doc,
+                                                      v_id_devengado,
+                                                      v_id_solicitud_compra,
+                                                      v_id_cuenta_doc_rendicion,                   --id_cuenta_doc_rendicion
+                                                      v_id_comprobante,
+                                                      v_columna_relacion,
+                                                      v_fk_llave
+                                            );
+      else                                      
+      
+      		raise notice '>>>>>>  paso %',v_i;
+       		v_rescom:=presto.f_i_pr_gestionarpresupuesto(
                                                   pr_id_presupuesto[v_i],
                                                   pr_id_partida[v_i],
                                                   pr_id_moneda[v_i],
@@ -131,8 +208,11 @@ FOR v_i IN 1..v_size LOOP
                                                   v_id_comprobante,
                                                   v_columna_relacion,
                                                   v_fk_llave
-                                        );
-     
+                                        );                                      
+                                            
+      end if;
+ 
+ 
     -- 1.2)  almacena resultado en el array de respuesta
 
    v_resp[v_i]=v_rescom[1];
