@@ -23,6 +23,7 @@ CREATE OR REPLACE FUNCTION migracion.f_migrar_cbte_pxp (
   p_id_cuenta integer [],
   p_id_auxiliar integer [],
   p_id_centro_costo integer [],
+  p_id_orden_trabajo integer [],
   p_id_partida integer [],
   p_id_partida_ejecucion integer [],
   p_glosa varchar [],
@@ -85,6 +86,7 @@ DECLARE
 
 BEGIN
 	
+
 	v_id_comprobante = -1;
     v_mensaje_verif='';
     v_id_subsistema=9;
@@ -197,7 +199,8 @@ BEGIN
             v_nro_cheque,
             p_tipo[i],
             v_id_libro_bancos,
-            v_id_cuenta_bancaria_endesis
+            v_id_cuenta_bancaria_endesis,
+            p_id_orden_trabajo[i]
         );
     
     end loop;
@@ -232,6 +235,7 @@ BEGIN
 				  id_cuenta,
 				  id_auxiliar,
 				  id_centro_costo,
+                  id_orden_trabajo,
 				  id_partida,
 				 -- id_partida_ejecucion,
 				  glosa,
@@ -274,6 +278,7 @@ BEGIN
 				  id_cuenta,
 				  id_auxiliar,
 				  id_centro_costo,
+                  id_orden_trabajo,
 				  id_partida,
 				  --id_partida_ejecucion,
 				  glosa,
@@ -369,7 +374,8 @@ BEGIN
             origen, 
             id_moneda, 
             tipo_cambio,
-            id_int_comprobante
+            id_int_comprobante,
+            nro_tramite
             ) values(
             v_id_comprobante, 
             v_id_parametro, 
@@ -391,7 +397,8 @@ BEGIN
             v_origen, 
             v_rec.id_moneda, 
             v_rec.tipo_cambio,
-            v_rec.id_int_comprobante
+            v_rec.id_int_comprobante,
+            v_rec.nro_tramite
             );
         end if;
         
@@ -412,7 +419,7 @@ BEGIN
                             v_rec.id_auxiliar,--ct_id_auxiliar integer, 
                             v_id_comprobante,--ct_id_comprobante integer, 
                             NULL,--ct_id_oec integer, 
-                            NULL,--ct_id_orden_trabajo integer, 
+                            v_rec.id_orden_trabajo,--ct_id_orden_trabajo integer, 
                             v_rec.id_partida,--ct_id_partida integer, 
                             v_rec.id_cuenta,--ct_id_cuenta integer, 
                             v_rec.id_centro_costo,--ct_id_presupuesto integer, 

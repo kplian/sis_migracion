@@ -26,6 +26,7 @@ DECLARE
     va_id_cuenta integer[]; 
     va_id_auxiliar integer[]; 
     va_id_centro_costo integer[];
+    va_id_orden_trabajo integer[];
     va_id_partida integer[];
     va_id_partida_ejecucion integer[];
     va_id_int_transaccion_fk integer[];
@@ -129,6 +130,7 @@ BEGIN
                   tra.id_cuenta, 
                   tra.id_auxiliar, 
                   tra.id_centro_costo,
+                  tra.id_orden_trabajo,
                   tra.id_partida,
                   tra.id_partida_ejecucion,
                   tra.id_int_transaccion_fk, 
@@ -157,6 +159,7 @@ BEGIN
         va_id_cuenta[v_cont]=v_dat.id_cuenta;
         va_id_auxiliar[v_cont]=v_dat.id_auxiliar;
         va_id_centro_costo[v_cont]=v_dat.id_centro_costo;
+        va_id_orden_trabajo[v_cont]=v_dat.id_orden_trabajo;
         va_id_partida[v_cont]=v_dat.id_partida;
         va_id_partida_ejecucion[v_cont]=v_dat.id_partida_ejecucion;
         va_id_int_transaccion_fk[v_cont]=v_dat.id_int_transaccion_fk;
@@ -183,7 +186,7 @@ BEGIN
         raise exception 'DEPTO no puede estar vacio revise la relacion de deptos en el esquema de migracion %',v_rec.id_depto;
     END IF;
     
-    
+   
     
     --Forma la llamada para enviar los datos del comprobante al servidor destino
     v_sql:='select migracion.f_migrar_cbte_pxp('||
@@ -209,6 +212,9 @@ BEGIN
                 '||COALESCE(('array['|| array_to_string(va_id_cuenta, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['|| array_to_string(va_id_auxiliar, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['|| array_to_string(va_id_centro_costo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
+                
+                '||COALESCE(('array['|| pxp.f_iif(array_to_string(va_id_orden_trabajo, ',')='','null',array_to_string(va_id_orden_trabajo, ','))||']::integer[]')::varchar,'NULL::integer[]')||',
+                
                 '||COALESCE(('array['|| array_to_string(va_id_partida, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
                 '||COALESCE(('array['|| pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','))||']::integer[]')::varchar,'NULL::integer[]')||',
                 '||COALESCE(('array['''|| array_to_string(va_glosa, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
@@ -233,7 +239,7 @@ BEGIN
                 raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
                 raise notice '=========================****:%',v_sql;
 
-  
+ 
    
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
@@ -251,7 +257,7 @@ BEGIN
     --Ejecuta la función remotamente
     perform * from dblink(v_sql, true) as (respuesta varchar);
     
-    
+   
 
 	--Cierra la conexión abierta
 	perform dblink_disconnect();
