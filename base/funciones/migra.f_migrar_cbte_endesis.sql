@@ -148,7 +148,7 @@ BEGIN
                   coalesce(tra.id_cuenta_bancaria,-1) as id_cuenta_bancaria,
                   coalesce(tra.nombre_cheque_trans,'S/N') as nombre_cheque_trans,
                   coalesce(tra.nro_cheque,-1) as nro_cheque,
-                  'cheque'::varchar as tipo,
+                  tra.forma_pago::varchar as tipo,
                   coalesce(tra.id_cuenta_bancaria_mov,-1) as id_libro_bancos
                   from conta.tint_transaccion tra
                   inner join param.tcentro_costo cco
