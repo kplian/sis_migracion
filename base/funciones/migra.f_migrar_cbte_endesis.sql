@@ -47,6 +47,9 @@ DECLARE
     va_nro_cheque integer[];
     va_tipo varchar[];
     va_id_libro_bancos integer[];
+    
+    v_glosa1 varchar;
+    v_glosa2 varchar;
 
 BEGIN
 
@@ -163,7 +166,6 @@ BEGIN
         va_id_partida[v_cont]=v_dat.id_partida;
         va_id_partida_ejecucion[v_cont]=v_dat.id_partida_ejecucion;
         va_id_int_transaccion_fk[v_cont]=v_dat.id_int_transaccion_fk;
-        va_glosa[v_cont]=COALESCE(v_dat.glosa,'--');
         va_importe_debe[v_cont]=v_dat.importe_debe;
         va_importe_haber[v_cont]=v_dat.importe_haber;
         va_importe_recurso[v_cont]=v_dat.importe_recurso;
@@ -176,6 +178,10 @@ BEGIN
         va_nro_cheque[v_cont]=v_dat.nro_cheque;
         va_tipo[v_cont]=v_dat.tipo;
         va_id_libro_bancos[v_cont]=v_dat.id_libro_bancos;
+        va_glosa[v_cont]=COALESCE(v_dat.glosa,'--');
+        --quita caracteres espcilaes que no tienen representacion en LATIN9
+        va_glosa[v_cont]=translate(va_glosa[v_cont], '•', '-');
+        va_glosa[v_cont]=translate(va_glosa[v_cont], '–', '-');
         
         v_cont = v_cont + 1;
    	end loop;
@@ -186,7 +192,18 @@ BEGIN
         raise exception 'DEPTO no puede estar vacio revise la relacion de deptos en el esquema de migracion %',v_rec.id_depto;
     END IF;
     
+   --quita caracteres espcilaes que no tienen representacion en LATIN9
+   v_glosa1 = translate(v_rec.glosa1, '•', '-');
+   v_glosa1 = translate(v_glosa1, '–', '-');
+   v_glosa2 = translate(v_rec.glosa2, '•', '-');
+   v_glosa2 = translate(v_glosa2, '–', '-');
    
+   
+   
+   --raise exception 'xxx % :::::   %',v_glosa1, v_glosa2;
+   
+   --v_glosa1 = v_rec.glosa1;
+   --v_glosa2 = v_rec.glosa2;
     
     --Forma la llamada para enviar los datos del comprobante al servidor destino
     v_sql:='select migracion.f_migrar_cbte_pxp('||
@@ -199,8 +216,8 @@ BEGIN
                 v_rec.id_periodo ||','||
                 ''''||coalesce(v_rec.nro_cbte,'') ||''','||
                 ''''||coalesce(v_rec.momento,'') ||''','||
-                ''''||coalesce(v_rec.glosa1,'') ||''','||
-                ''''||coalesce(v_rec.glosa2,'') ||''','||
+                ''''||coalesce(trim(v_glosa1),'') ||''','||
+                ''''||coalesce(trim(v_glosa2),'') ||''','||
                 ''''||coalesce(v_rec.beneficiario,'') ||''','||
                 coalesce(v_tipo_cambio,0) ||','||
                 'null' ||','|| --id_funcionario_firma1
@@ -217,7 +234,7 @@ BEGIN
                 
                 '||COALESCE(('array['|| array_to_string(va_id_partida, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
                 '||COALESCE(('array['|| pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','))||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['''|| array_to_string(va_glosa, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
+                '||COALESCE(('array['''||array_to_string(va_glosa, ''',''') ||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
                 '||COALESCE(('array['|| array_to_string(va_importe_debe, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',
                 '||COALESCE(('array['|| array_to_string(va_importe_haber, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',
                 '||COALESCE(('array['|| array_to_string(va_importe_recurso, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',

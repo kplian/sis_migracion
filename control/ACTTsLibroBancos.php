@@ -14,7 +14,20 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->objParam->defecto('dir_ordenacion','asc');
 		
 		if($this->objParam->getParametro('id_cuenta_bancaria')!=''){
-			$this->objParam->addFiltro("id_cuenta_bancaria_pxp = ".$this->objParam->getParametro('id_cuenta_bancaria'));	
+			$this->objParam->addFiltro("id_cuenta_bancaria = ".$this->objParam->getParametro('id_cuenta_bancaria'));	
+		}
+		
+		if($this->objParam->getParametro('mycls')=='TsLibroBancosDeposito'){
+			$this->objParam->addFiltro("id_libro_bancos_fk is null");	
+			$this->objParam->addFiltro("tipo=''deposito''");
+		}
+		if($this->objParam->getParametro('mycls')=='TsLibroBancosCheque'){
+			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
+			$this->objParam->addFiltro("tipo=''cheque''");
+		}
+		if($this->objParam->getParametro('mycls')=='TsLibroBancosDepositoExtra'){
+			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
+			$this->objParam->addFiltro("tipo=''deposito''");
 		}
 		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){

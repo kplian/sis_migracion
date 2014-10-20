@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migracion.f_trans_tpr_concepto_ingas_tconcepto_ingas (
   v_operacion varchar,
   p_id_concepto_ingas integer,
@@ -46,6 +44,7 @@ DECLARE
             v_activo_fijo varchar;
            
             v_almacenable varchar;
+            v_concepto		record;
             
 BEGIN
 			
@@ -53,6 +52,9 @@ BEGIN
 			          --funcion para obtener cadena de conexion
 			          v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
 			          
+                      select * into v_concepto
+                      from presto.tpr_concepto_ingas
+                      where id_concepto_ingas = p_id_concepto_ingas;
 			          
 			           ---------------------------------------
 			           --previamente se tranforman los datos  (descomentar)
@@ -61,7 +63,11 @@ BEGIN
 
 			v_id_concepto_ingas=p_id_concepto_ingas::int4;
 			v_desc_ingas=convert(p_desc_ingas::varchar, 'LATIN1', 'UTF8');
-			v_estado_reg=convert('activo'::varchar, 'LATIN1', 'UTF8');
+            if (v_concepto.estado = 'activo') then
+				v_estado_reg=convert('activo'::varchar, 'LATIN1', 'UTF8');
+            else
+            	v_estado_reg=convert('inactivo'::varchar, 'LATIN1', 'UTF8');
+            end if;
 			v_fecha_mod=NULL::timestamp;
 			v_fecha_reg=p_fecha_reg::timestamp;
 			v_id_item=p_id_item::int4;
