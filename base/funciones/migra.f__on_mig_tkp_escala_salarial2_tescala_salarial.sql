@@ -83,7 +83,7 @@ $body$
                                        
                                        select * into v_reg_old 
                                         from orga.tescala_salarial
-                                        where id_escala_salarial = v_parametros.id_escala_salarial;
+                                        where id_escala_salarial = p_id_escala_salarial;
 						              if (v_reg_old.haber_basico != p_haber_basico) then
                                           if (p_fecha_ini is null) then
                                               raise exception 'Si cambia el haber básico, debe definir la fecha desde la que se aplicará el cambio';
