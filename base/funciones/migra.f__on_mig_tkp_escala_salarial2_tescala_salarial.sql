@@ -27,7 +27,8 @@ $body$
 						*/
 						
 						DECLARE
-						
+							v_reg_old 		record;
+							v_secuencia		integer;
 						BEGIN
 						
 						    if(v_operacion = 'INSERT') THEN
@@ -79,26 +80,39 @@ $body$
                                             raise exception 'No existe el registro que  desea modificar';
                                             
                                        END IF;
+                                       
+                                       select * into v_reg_old 
+                                        from orga.tescala_salarial
+                                        where id_escala_salarial = v_parametros.id_escala_salarial;
+						              if (v_reg_old.haber_basico != p_haber_basico) then
+                                          if (p_fecha_ini is null) then
+                                              raise exception 'Si cambia el haber básico, debe definir la fecha desde la que se aplicará el cambio';
+                                          end if;
+                                          select nextval('orga.tescala_salarial_migracion_seq') into v_secuencia;
+                                          insert into orga.tescala_salarial (id_escala_salarial,
+                                                  aprobado , 			haber_basico,			nombre,
+                                                  nro_casos,			codigo,					id_categoria_salarial,
+                                                  fecha_ini,			fecha_fin,				estado_reg,id_escala_padre) 
+                                          values (v_secuencia ,v_reg_old.aprobado ,v_reg_old.haber_basico,	v_reg_old.nombre,
+                                                  v_reg_old.nro_casos,v_reg_old.codigo,		v_reg_old.id_categoria_salarial,
+                                                  v_reg_old.fecha_ini,(p_fecha_ini - interval '1 day'), 'inactivo',p_id_escala_salarial);
+                                      end if;
+                                      --Sentencia de la modificacion
+                                      update orga.tescala_salarial set
+                                      aprobado = p_aprobado,
+                                      haber_basico = p_haber_basico,
+                                      nombre = p_nombre,
+                                      nro_casos = p_nro_casos,
+                                      id_usuario_mod = p_id_usuario_mod,
+                                      fecha_mod = now()
+                                      where id_escala_salarial=p_id_escala_salarial;
+                          			
+                                      if (p_fecha_ini is not null and v_reg_old.haber_basico != p_haber_basico) then
+                                          update orga.tescala_salarial set
+                                          fecha_ini = p_fecha_ini
+                                          where id_escala_salarial=p_id_escala_salarial;
+                                      end if; 			               
 						               
-						               
-						               UPDATE 
-						                  ORGA.tescala_salarial  
-						                SET						 id_categoria_salarial=p_id_categoria_salarial
-						 ,aprobado=p_aprobado
-						 ,codigo=p_codigo
-						 ,estado_reg=p_estado_reg
-						 ,fecha_fin=p_fecha_fin
-						 ,fecha_ini=p_fecha_ini
-						 ,fecha_mod=p_fecha_mod
-						 ,fecha_reg=p_fecha_reg
-						 ,haber_basico=p_haber_basico
-						 ,id_usuario_ai=p_id_usuario_ai
-						 ,id_usuario_mod=p_id_usuario_mod
-						 ,id_usuario_reg=p_id_usuario_reg
-						 ,nombre=p_nombre
-						 ,nro_casos=p_nro_casos
-						 ,usuario_ai=p_usuario_ai
-						 WHERE id_escala_salarial=p_id_escala_salarial;
 
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN

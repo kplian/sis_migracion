@@ -1,8 +1,19 @@
 CREATE OR REPLACE FUNCTION migracion.f_trans_tkp_escala_salarial2_tescala_salarial (
-			  v_operacion varchar,p_id_escala_salarial int4,p_id_categoria_salarial int4,p_id_moneda int4,p_id_usuario_reg int4,p_estado varchar,p_fecha_alta date,p_fecha_aplicacion_modificacion date,p_fecha_baja date,p_haber_basico numeric,p_nombre varchar,p_nro_casos int4)
-			RETURNS varchar [] AS
-			$BODY$
-
+  v_operacion varchar,
+  p_id_escala_salarial integer,
+  p_id_categoria_salarial integer,
+  p_id_moneda integer,
+  p_id_usuario_reg integer,
+  p_estado varchar,
+  p_fecha_alta date,
+  p_fecha_aplicacion_modificacion date,
+  p_fecha_baja date,
+  p_haber_basico numeric,
+  p_nombre varchar,
+  p_nro_casos integer
+)
+RETURNS varchar [] AS
+$body$
 DECLARE
 			 
 			g_registros record;
@@ -49,11 +60,8 @@ BEGIN
 			v_codigo=convert(upper(substring(p_nombre from 1 for 5))::varchar, 'LATIN1', 'UTF8');
 			v_estado_reg=convert(p_estado::varchar, 'LATIN1', 'UTF8');
 			v_fecha_fin=p_fecha_baja::date;
-			if ( p_fecha_alta is null) then
-				v_fecha_ini='01-01-2008'::date;
-			else
-				v_fecha_ini=p_fecha_alta::date;
-			end if;
+			v_fecha_ini=p_fecha_aplicacion_modificacion::date;
+			
 			
 			v_fecha_mod=now()::timestamp;
 			v_fecha_reg=now()::timestamp;
@@ -104,9 +112,8 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
-			$BODY$
-
+$body$
 LANGUAGE 'plpgsql'
-			VOLATILE
-			CALLED ON NULL INPUT
-			SECURITY INVOKER;
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;
