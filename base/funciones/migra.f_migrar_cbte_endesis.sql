@@ -176,7 +176,7 @@ BEGIN
         va_id_cuenta_bancaria[v_cont]=v_dat.id_cuenta_bancaria;
         va_nombre_cheque_trans[v_cont]=v_dat.nombre_cheque_trans;
         va_nro_cheque[v_cont]=v_dat.nro_cheque;
-        va_tipo[v_cont]=v_dat.tipo;
+        va_tipo[v_cont]= COALESCE(v_dat.tipo,'');
         va_id_libro_bancos[v_cont]=v_dat.id_libro_bancos;
         va_glosa[v_cont]=COALESCE(v_dat.glosa,'--');
         --quita caracteres espcilaes que no tienen representacion en LATIN9
@@ -205,6 +205,8 @@ BEGIN
    --v_glosa1 = v_rec.glosa1;
    --v_glosa2 = v_rec.glosa2;
     
+   
+   
     --Forma la llamada para enviar los datos del comprobante al servidor destino
     v_sql:='select migracion.f_migrar_cbte_pxp('||
                 v_rec.id_int_comprobante ||','|| --p_id_int_comprobante,
@@ -252,6 +254,8 @@ BEGIN
                 '||COALESCE(('array['|| array_to_string(va_nro_cheque, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
                 '||COALESCE(('array['''|| array_to_string(va_tipo, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
                 '||COALESCE(('array['|| array_to_string(va_id_libro_bancos, ',')||']::integer[]')::varchar,'NULL::integer[]')||')'; 
+                
+                
                 
                 raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
                 raise notice '=========================****:%',v_sql;
