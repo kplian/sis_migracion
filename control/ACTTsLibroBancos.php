@@ -23,12 +23,18 @@ class ACTTsLibroBancos extends ACTbase{
 		}
 		if($this->objParam->getParametro('mycls')=='TsLibroBancosCheque'){
 			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
-			$this->objParam->addFiltro("tipo=''cheque''");
+			$this->objParam->addFiltro("tipo in (''cheque'',''debito_automatico'',''transferencia_carta'')");
 		}
 		if($this->objParam->getParametro('mycls')=='TsLibroBancosDepositoExtra'){
 			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
 			$this->objParam->addFiltro("tipo=''deposito''");
 		}
+		
+		if($this->objParam->getParametro('m_nro_cheque')!=''){
+			$this->objParam->addFiltro("nro_cheque= (Select max (lb.nro_cheque) 
+													From tes.tts_libro_bancos lb 
+													Where lb.id_cuenta_bancaria=".$this->objParam->getParametro('m_id_cuenta_bancaria').") ");	
+		}		
 		
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);

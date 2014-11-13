@@ -1,89 +1,203 @@
-<?php
+ï»¿<?php
 /**
-*@package pXP
-*@file TsLibroBancosDeposito.php
-*@author  Gonzalo Sarmiento Sejas
-*@date 16-10-2014 15:10:17
-*@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
-*/
-
+ *@package   pXP
+ *@file      TsLibroBancosDeposito.php
+ *@author    Gonzalo Sarmiento Sejas
+ *@date      13-11-2012 01:30:22
+ *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
-	
-	constructor:function(config){
-		this.maestro=config.maestro;
-    	//llama al constructor de la clase padre
-		Phx.vista.TsLibroBancosDeposito.superclass.constructor.call(this,config);
-		this.init();
+	Phx.vista.TsLibroBancosDeposito = Ext.extend(Phx.gridInterfaz, {
 		
-		this.load({params:{
-						start:0, 
-						limit:this.tam_pag, 
-						id_cuenta_bancaria: this.id_cuenta_bancaria,
-						mycls:this.mycls}});
-		this.grid.getTopToolbar().disable();
-		this.grid.getBottomToolbar().disable();
-		//this.load({params:{start:0, limit:this.tam_pag}})
-	},
+		constructor : function(config) {
+			this.maestro = config.maestro;
+			Phx.vista.TsLibroBancosDeposito.superclass.constructor.call(this, config);
+			this.init();
+			this.iniciarEventos();
+			this.store.baseParams={
+					id_cuenta_bancaria : this.id_cuenta_bancaria,
+					mycls:this.mycls};
+			this.load({
+				params : {
+					start : 0,
+					limit : 50
+				}
+			});
+			this.Atributos[1].valorInicial = this.id_cuenta_bancaria;
 			
-	Atributos:[
-		{
-			//configuracion del componente
-			config:{
-					labelSeparator:'',
-					inputType:'hidden',
-					name: 'id_libro_bancos'
-			},
-			type:'Field',
-			form:true 
+			this.addButton('btnClonar',
+				{
+					text: 'Clonar',
+					iconCls: 'bdocuments',
+					disabled: false,
+					handler: this.clonar,
+					tooltip: '<b>Clonar</b><br/>Clonar Registro'
+				}
+			);
+			
+			this.addButton('btnReporteDeposito',
+				{
+					text: 'Reporte Deposito',
+					iconCls: 'bexcel',
+					disabled: false,
+					handler: this.reporteDeposito,
+					tooltip: '<b>Reporte Deposito</b><br/>Reporte Completo Deposito'
+				}
+			);
+			
+			this.addButton('fin_registro',
+				{	text:'Siguiente',
+					iconCls: 'badelante',
+					disabled:true,
+					handler:this.fin_registro,
+					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador comprometera presupuesto</p>'
+				}
+			);
 		},
-		{
-			//configuracion del componente
-			config:{
-					labelSeparator:'',
-					inputType:'hidden',
-					name: 'id_cuenta_bancaria'
+		Atributos : [{
+			config : {
+				labelSeparator : '',
+				inputType : 'hidden',
+				name : 'id_libro_bancos'
 			},
-			type:'Field',
-			form:true 
-		},
-		{
+			type : 'Field',
+			form : true
+		}, {
+			config : {
+				labelSeparator : '',
+				inputType : 'hidden',
+				name : 'id_cuenta_bancaria'
+			},
+			type : 'Field',
+			form : true
+		}, {
 			config:{
 				name: 'fecha',
-				fieldLabel: 'fecha',
+				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
-							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
 			},
-				type:'DateField',
-				filters:{pfiltro:'lban.fecha',type:'date'},
-				id_grupo:1,
-				grid:true,
-				form:true
+			type:'DateField',
+			filters:{pfiltro:'lban.fecha',type:'date'},
+			id_grupo:1,
+			grid:true,
+			form:true
 		},
 		{
 			config:{
 				name: 'a_favor',
-				fieldLabel: 'a_favor',
+				fieldLabel: 'A Favor',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
 				maxLength:100
 			},
-				type:'TextField',
-				filters:{pfiltro:'lban.a_favor',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
+			type:'TextField',
+			filters:{pfiltro:'lban.a_favor',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'detalle',
+				fieldLabel: 'Detalle',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:200
+			},
+			type:'TextArea',
+			filters:{pfiltro:'lban.detalle',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'observaciones',
+				fieldLabel: 'Observaciones',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:200
+			},
+			type:'TextArea',
+			filters:{pfiltro:'lban.observaciones',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'nro_liquidacion',
+				fieldLabel: 'Nro Liquidacion',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:20
+			},
+			type:'TextField',
+			filters:{pfiltro:'lban.nro_liquidacion',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'nro_comprobante',
+				fieldLabel: 'Nro Comprobante',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:20
+			},
+			type:'TextField',
+			filters:{pfiltro:'lban.nro_comprobante',type:'string'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name:'tipo',
+				fieldLabel:'Tipo',
+				allowBlank:false,
+				emptyText:'Tipo...',
+				typeAhead: true,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode: 'local',
+				valueField: 'estilo',
+				gwidth: 100,
+				store:new Ext.data.ArrayStore({
+                            fields: ['variable', 'valor'],
+                            data : [ ['deposito','DepÃ³sito']
+                                    ]
+                                    }),
+				valueField: 'variable',
+				displayField: 'valor'
+			},
+			type:'ComboBox',
+			valorInicial:'deposito',
+			id_grupo:1,
+			filters:{	
+					 type: 'list',
+					  pfiltro:'lban.tipo',
+					 options: ['deposito'],	
+				},
+			grid:true,
+			form:true
 		},
 		{
 			config:{
 				name: 'nro_cheque',
-				fieldLabel: 'nro_cheque',
+				fieldLabel: 'Nro Cheque',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -98,7 +212,7 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'importe_deposito',
-				fieldLabel: 'importe_deposito',
+				fieldLabel: 'Importe Deposito',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
@@ -107,73 +221,38 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_deposito',type:'numeric'},
 				id_grupo:1,
+				valorInicial:0,
 				grid:true,
 				form:true
-		},
+		},				
 		{
 			config:{
-				name: 'nro_liquidacion',
-				fieldLabel: 'nro_liquidacion',
-				allowBlank: true,
-				anchor: '80%',
+				name:'origen',
+				fieldLabel:'Origen',
+				allowBlank:false,
+				emptyText:'Tipo...',
+				typeAhead: true,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode: 'local',
+				valueField: 'estilo',
 				gwidth: 100,
-				maxLength:20
+				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU']
 			},
-				type:'TextField',
-				filters:{pfiltro:'lban.nro_liquidacion',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'detalle',
-				fieldLabel: 'detalle',
-				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:-5
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.detalle',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'origen',
-				fieldLabel: 'origen',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:20
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.origen',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'observaciones',
-				fieldLabel: 'observaciones',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:-5
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.observaciones',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
+			type:'ComboBox',
+			id_grupo:1,
+			filters:{	
+					 type: 'list',
+					  pfiltro:'lban.origen',
+					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU'],	
+				},
+			grid:true,
+			form:true
+		},		
 		{
 			config:{
 				name: 'importe_cheque',
-				fieldLabel: 'importe_cheque',
+				fieldLabel: 'Importe Cheque',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
@@ -182,6 +261,7 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
 				id_grupo:1,
+				valorInicial:0,
 				grid:true,
 				form:true
 		},
@@ -190,7 +270,7 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 				name: 'id_libro_bancos_fk',
 				fieldLabel: 'id_libro_bancos_fk',
 				allowBlank: true,
-				emptyText: 'Elija una opción...',
+				emptyText: 'Elija una opciÃ³n...',
 				store: new Ext.data.JsonStore({
 					url: '../../sis_/control/Clase/Metodo',
 					id: 'id_',
@@ -231,7 +311,7 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'estado',
-				fieldLabel: 'estado',
+				fieldLabel: 'Estado',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
@@ -241,27 +321,12 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 				filters:{pfiltro:'lban.estado',type:'string'},
 				id_grupo:1,
 				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'nro_comprobante',
-				fieldLabel: 'nro_comprobante',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:20
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.nro_comprobante',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
+				form:false
+		},		
 		{
 			config:{
 				name: 'indice',
-				fieldLabel: 'indice',
+				fieldLabel: 'Indice',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -271,7 +336,7 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 				filters:{pfiltro:'lban.indice',type:'numeric'},
 				id_grupo:1,
 				grid:true,
-				form:true
+				form:false
 		},
 		{
 			config:{
@@ -287,26 +352,11 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
-		},
-		{
-			config:{
-				name: 'tipo',
-				fieldLabel: 'tipo',
-				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:20
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.tipo',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
+		},		
 		{
 			config:{
 				name: 'fecha_reg',
-				fieldLabel: 'Fecha creación',
+				fieldLabel: 'Fecha creaciÃ³n',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -364,15 +414,13 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
-		}
-	],
-	tam_pag:50,	
-	title:'Depósitos',
-	ActSave:'../../sis_migracion/control/TsLibroBancos/insertarTsLibroBancos',
+		}],
+		title : 'Depositos',
+		ActSave:'../../sis_migracion/control/TsLibroBancos/insertarTsLibroBancos',
 	ActDel:'../../sis_migracion/control/TsLibroBancos/eliminarTsLibroBancos',
 	ActList:'../../sis_migracion/control/TsLibroBancos/listarTsLibroBancos',
-	id_store:'id_libro_bancos',
-	fields: [
+	id_store : 'id_libro_bancos',
+		fields: [
 		{name:'id_libro_bancos', type: 'numeric'},
 		{name:'id_cuenta_bancaria', type: 'numeric'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
@@ -398,40 +446,69 @@ Phx.vista.TsLibroBancosDeposito=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},
 		
 	],
-	sortInfo:{
-		field: 'id_libro_bancos',
-		direction: 'ASC'
-	},
-	bdel:false,
-	bsave:false,
-	bnew:false,
-	bedit:false,
-	loadValoresIniciales:function(){
-		Phx.vista.TsLibroBancosDeposito.superclass.loadValoresIniciales.call(this);
-		this.Cmp.id_cuenta_bancaria.setValue(this.maestro.id_cuenta_bancaria);		
-	},
-	onReloadPage:function(m){
-		this.maestro=m;						
-		this.store.baseParams={id_cuenta_bancaria:this.maestro.id_cuenta_bancaria};
-		this.load({params:{start:0, limit:this.tam_pag}});			
-	},
-	tabsouth:[
-            { 
-                 url:'../../../sis_migracion/vista/ts_libro_bancos_cheques/TsLibroBancosCheque.php',
-                 title:'Cheques', 
-                 height:'50%',
-                 cls:'TsLibroBancosCheque'
-            },
-            {
-                  //carga la interface de registro inicial  
-                  url:'../../../sis_migracion/vista/ts_libro_bancos_depositos_extra/TsLibroBancosDepositoExtra.php',
-                  title:'Depositos Extra', 
-                  height:'50%',
-                  cls:'TsLibroBancosDepositoExtra'
-            }
-    
-       ]
-})
+		sortInfo : {
+			field : 'id_libro_bancos',
+			direction : 'ASC'
+		},
+		bdel : true,
+		bsave : false,
+		
+		iniciarEventos:function(){
+		
+			this.cmpTipo = this.getComponente('tipo');		
+			this.cmpNroCheque = this.getComponente('nro_cheque');
+			this.cmpImporteCheque = this.getComponente('importe_cheque');
+			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
+			
+			this.ocultarComponente(this.cmpNroCheque);
+			this.ocultarComponente(this.cmpImporteCheque);
+			this.ocultarComponente(this.cmpIdLibroBancosFk);
+			this.cmpTipo.disable();
+		},
+		
+		clonar:function(){
+			var data = this.getSelectedData();
+			this.onButtonNew();
+			
+			this.cmpAFavor = this.getComponente('a_favor');
+			this.cmpObservaciones = this.getComponente('observaciones');
+			this.cmpDetalle = this.getComponente('detalle');		
+			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
+			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
+			
+			this.cmpTipo.setValue(data.tipo);
+			this.cmpAFavor.setValue(data.a_favor);
+			this.cmpObservaciones.setValue(data.observaciones);
+			this.cmpDetalle.setValue(data.detalle);
+			this.cmpNroLiquidacion.setValue(data.nro_liquidacion);
+			this.cmpIdLibroBancosFk.setValue(data.id_libro_bancos_fk);
+		},
+		
+		reporteDeposito : function(){
+			var data = this.getSelectedData();
+			var NumSelect=this.sm.getCount();
+			
+			if(NumSelect != 0)
+			{		
+				var data='id='+ data.id_libro_bancos;  			
+				//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);				
+			}
+			else
+			{
+				Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+			}
+		},
+
+		tabsouth:[{
+			url : '../../../sis_migracion/vista/ts_libro_bancos_cheques/TsLibroBancosCheque.php',
+			title : 'Cheques',
+			height: '50%',
+			cls : 'TsLibroBancosCheque'
+		}, {
+			url : '../../../sis_migracion/vista/ts_libro_bancos_depositos_extra/TsLibroBancosDepositoExtra.php',
+			title : 'Depositos Extra',
+			height: '50%',
+			cls : 'TsLibroBancosDepositoExtra'
+		}]
+	}); 
 </script>
-		
-		

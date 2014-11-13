@@ -49,7 +49,7 @@ $body$
 				VALUES (
 						p_id_funcionario_afp,
 						p_id_afp,
-						p_estado_reg,
+						'activo',
 						p_fecha_fin,
 						p_fecha_ini,
 						p_fecha_mod,
@@ -77,8 +77,7 @@ $body$
 						               
 						               UPDATE 
 						                  PLANI.tfuncionario_afp  
-						                SET						 id_afp=p_id_afp
-						 ,estado_reg=p_estado_reg
+						                SET						 id_afp=p_id_afp						 
 						 ,fecha_fin=p_fecha_fin
 						 ,fecha_ini=p_fecha_ini
 						 ,fecha_mod=p_fecha_mod

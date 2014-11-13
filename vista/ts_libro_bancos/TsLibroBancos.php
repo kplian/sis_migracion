@@ -19,7 +19,46 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.init();
 		this.grid.getTopToolbar().disable();
 		this.grid.getBottomToolbar().disable();
-		//this.load({params:{start:0, limit:this.tam_pag}})
+		this.iniciarEventos();
+		
+		this.addButton('btnClonar',
+			{
+				text: 'Clonar',
+				iconCls: 'bdocuments',
+				disabled: false,
+				handler: this.clonar,
+				tooltip: '<b>Clonar</b><br/>Clonar Registro'
+			}
+		);
+		
+		this.addButton('btnCheque',
+			{
+				text: 'Cheque',
+				iconCls: 'bprintcheck',
+				disabled: false,
+				handler: this.imprimirCheque,
+				tooltip: '<b>Cheque</b><br/>Imprimir cheque'
+			}
+		);
+		
+		this.addButton('btnMemoramdum',
+			{
+				text: 'Memo',
+				iconCls: 'bword',
+				disabled: false,
+				handler: this.memoramdum,
+				tooltip: '<b>Memo</b><br/>Imprimir memoramdum de asignacion de fondo'
+			}
+		);
+		
+		this.addButton('fin_registro',
+			{	text:'Siguiente',
+				iconCls: 'badelante',
+				disabled:true,
+				handler:this.fin_registro,
+				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador comprometera presupuesto</p>'
+			}
+		);
 	},
 			
 	Atributos:[
@@ -46,7 +85,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'fecha',
-				fieldLabel: 'fecha',
+				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
@@ -62,7 +101,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'a_favor',
-				fieldLabel: 'a_favor',
+				fieldLabel: 'A favor de',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
@@ -76,38 +115,38 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
-				name: 'nro_cheque',
-				fieldLabel: 'nro_cheque',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:4
-			},
-				type:'NumberField',
-				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'importe_deposito',
-				fieldLabel: 'importe_deposito',
+				name: 'detalle',
+				fieldLabel: 'Detalle',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:1310722
+				maxLength:200
 			},
-				type:'NumberField',
-				filters:{pfiltro:'lban.importe_deposito',type:'numeric'},
+				type:'TextArea',
+				filters:{pfiltro:'lban.detalle',type:'string'},
 				id_grupo:1,
 				grid:true,
 				form:true
-		},
+		},		
+		{
+			config:{
+				name: 'observaciones',
+				fieldLabel: 'Observaciones',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:25
+			},
+				type:'TextArea',
+				filters:{pfiltro:'lban.observaciones',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},		
 		{
 			config:{
 				name: 'nro_liquidacion',
-				fieldLabel: 'nro_liquidacion',
+				fieldLabel: 'Nro Liquidacion',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -121,45 +160,78 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
-				name: 'detalle',
-				fieldLabel: 'detalle',
-				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:-5
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.detalle',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'origen',
-				fieldLabel: 'origen',
+				name: 'nro_comprobante',
+				fieldLabel: 'Nro Comprobante',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
 				maxLength:20
 			},
 				type:'TextField',
-				filters:{pfiltro:'lban.origen',type:'string'},
+				filters:{pfiltro:'lban.nro_comprobante',type:'string'},
 				id_grupo:1,
 				grid:true,
 				form:true
 		},
 		{
 			config:{
-				name: 'observaciones',
-				fieldLabel: 'observaciones',
+				name:'tipo',
+				fieldLabel:'Tipo',
+				allowBlank:false,
+				emptyText:'Tipo...',
+				typeAhead: true,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode: 'local',
+				valueField: 'estilo',
+				gwidth: 100,
+				store:new Ext.data.ArrayStore({
+                            fields: ['variable', 'valor'],
+                            data : [ ['cheque','Cheque'],
+									 ['deposito','Depósito'],
+									 ['debito_automatico','Débito Automativo'],
+									 ['transferencia_carta','Transferencia con Carta']
+                                    ]
+                                    }),
+				valueField: 'variable',
+				displayField: 'valor'
+			},
+			type:'ComboBox',
+			id_grupo:1,
+			filters:{	
+					 type: 'list',
+					  pfiltro:'lban.tipo',
+					 options: ['Cheque','Depósito','Débito Automativo','Transferencia con Carta'],	
+				},
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'nro_cheque',
+				fieldLabel: 'Nro Cheque',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:-5
+				maxLength:6
 			},
-				type:'TextField',
-				filters:{pfiltro:'lban.observaciones',type:'string'},
+				type:'NumberField',
+				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
+				name: 'importe_deposito',
+				fieldLabel: 'Importe Debe',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1310722
+			},
+				type:'NumberField',
+				filters:{pfiltro:'lban.importe_deposito',type:'numeric'},
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -167,7 +239,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'importe_cheque',
-				fieldLabel: 'importe_cheque',
+				fieldLabel: 'Importe Haber',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
@@ -179,6 +251,30 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				grid:true,
 				form:true
 		},
+		{
+			config:{
+				name:'origen',
+				fieldLabel:'Origen',
+				allowBlank:false,
+				emptyText:'Tipo...',
+				typeAhead: true,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode: 'local',
+				valueField: 'estilo',
+				gwidth: 100,
+				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU']
+			},
+			type:'ComboBox',
+			id_grupo:1,
+			filters:{	
+					 type: 'list',
+					  pfiltro:'lban.origen',
+					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU'],	
+				},
+			grid:true,
+			form:true
+		},		
 		{
 			config: {
 				name: 'id_libro_bancos_fk',
@@ -235,22 +331,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				filters:{pfiltro:'lban.estado',type:'string'},
 				id_grupo:1,
 				grid:true,
-				form:true
-		},
-		{
-			config:{
-				name: 'nro_comprobante',
-				fieldLabel: 'nro_comprobante',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:20
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.nro_comprobante',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
+				form:false
 		},
 		{
 			config:{
@@ -265,7 +346,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				filters:{pfiltro:'lban.indice',type:'numeric'},
 				id_grupo:1,
 				grid:true,
-				form:true
+				form:false
 		},
 		{
 			config:{
@@ -281,21 +362,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
-		},
-		{
-			config:{
-				name: 'tipo',
-				fieldLabel: 'tipo',
-				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:20
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.tipo',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:true
 		},
 		{
 			config:{
@@ -393,17 +459,192 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		
 	],
 	sortInfo:{
-		field: 'id_libro_bancos',
-		direction: 'ASC'
+		field: 'fecha',
+		direction: 'DESC'
 	},
-	bdel:false,
+	bdel:true,
 	bsave:false,
-	bnew:false,
-	bedit:false,
+	bnew:true,
+	bedit:true,
+	
 	loadValoresIniciales:function(){
 		Phx.vista.TsLibroBancos.superclass.loadValoresIniciales.call(this);
 		this.Cmp.id_cuenta_bancaria.setValue(this.maestro.id_cuenta_bancaria);		
 	},
+	
+	onButtonNew:function(){
+		Phx.vista.TsLibroBancos.superclass.onButtonNew.call(this); 	    
+		this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
+	},
+		
+	clonar:function(){
+		
+		var data = this.getSelectedData();
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect != 0)
+		{
+			this.onButtonNew();
+			
+			this.cmpAFavor = this.getComponente('a_favor');
+			this.cmpObservaciones = this.getComponente('observaciones');
+			this.cmpDetalle = this.getComponente('detalle');		
+			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
+			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');	
+			
+			this.cmpTipo.setValue(data.tipo);
+			this.cmpAFavor.setValue(data.a_favor);
+			this.cmpObservaciones.setValue(data.observaciones);
+			this.cmpDetalle.setValue(data.detalle);
+			this.cmpNroLiquidacion.setValue(data.nro_liquidacion);
+			this.cmpIdLibroBancosFk.setValue(data.id_libro_bancos_fk);
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item a clonar.');
+		}
+	},
+	
+	memoramdum : function(){
+		var data = this.getSelectedData();
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect != 0)
+		{		
+			var data='id='+ data.id_libro_bancos;  			
+			//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);				
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+		}
+	},
+	
+	imprimirCheque : function(){
+		var SelectionsRecord = this.getSelectedData();
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect!=0)
+		{
+			if(confirm('¿Está seguro de imprimir el cheque?'))
+			{
+				var data='a_favor='+SelectionsRecord.a_favor;			
+				data=data+'&importe_cheque='+SelectionsRecord.importe_cheque;	
+				data=data+'&fecha_cheque_literal='+SelectionsRecord.fecha_cheque_literal;	
+				
+				//Despliegue el mensaje de procesando				
+				Phx.CP.loadingShow();
+				
+				Ext.Ajax.request({
+					url:'../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+					params:{id_libro_bancos: SelectionsRecord.id_libro_bancos,
+							estado:'impreso'},
+					success:this.successImprimirCheque,
+					failure: this.conexionFailure,
+					timeout:this.timeout,
+					scope:this
+				});
+				/*
+				//Llamada asíncrona para ejecutar la acción posterior a la impresión del cheque
+				Ext.Ajax.request({
+					url:direccion+'../../../../sis_tesoreria/control/libro_bancos/ActionCambiarEstado.php',
+					params:{
+							//tipo:SelectionsRecord.data.tipo,
+							id_libro_bancos:SelectionsRecord.data.id_libro_bancos,
+							estado:'impreso'							
+					},
+					method:'POST',
+					success: function(result, request)
+					{
+								window.open(direccion+'../../../../sis_tesoreria/control/libro_bancos/ActionPDFReporteCheque.php?'+data);
+								//window.open(direccion+'../../../../sis_tesoreria/control/avance/reporte/ActionPDFCheque.php?'+data);
+								Ext.MessageBox.hide();
+								ClaseMadre_actualizar();
+					},
+					failure:ClaseMadre_conexionFailure,
+					timeout:100000
+				});*/
+			}
+		}
+		else
+		{
+			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
+		}
+	},
+	
+	successImprimirCheque:function(resp){
+            
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		if(!reg.ROOT.error){
+			
+			this.reload();
+		   
+		}else{
+			
+			alert('ocurrio un error durante el proceso')
+		}
+	},
+		
+	iniciarEventos:function(){
+		
+		this.cmpTipo = this.getComponente('tipo');		
+		this.cmpNroCheque = this.getComponente('nro_cheque');
+		this.cmpImporteDeposito = this.getComponente('importe_deposito');
+		this.cmpImporteCheque = this.getComponente('importe_cheque');
+	    this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
+		
+		this.ocultarComponente(this.cmpNroCheque);
+		this.ocultarComponente(this.cmpImporteDeposito);
+		this.ocultarComponente(this.cmpImporteCheque);
+		this.ocultarComponente(this.cmpIdLibroBancosFk);
+		
+		 this.cmpTipo.on('select',function(com,dat){
+		 
+              switch(dat.data.variable){
+				case 'cheque':
+					this.mostrarComponente(this.cmpNroCheque);
+					this.cmpImporteDeposito.setValue(0.00);
+					this.ocultarComponente(this.cmpImporteDeposito);
+					this.cmpImporteCheque.setValue(0.00);
+					this.mostrarComponente(this.cmpImporteCheque);
+					
+					//
+					this.store.baseParams={m_id_cuenta_bancaria:this.maestro.id_cuenta_bancaria, m_nro_cheque:'si'};
+					this.load({params:{start:0, limit:this.tam_pag}, 
+					   callback : function (r) {                        
+							if (r.length > 0 ) {                     
+								this.scope.cmpNroCheque.setValue(r[0].data.nro_cheque + 1);
+							}				
+						}, scope : this
+					});					
+					//
+					break;
+				case  'deposito':
+					this.ocultarComponente(this.cmpNroCheque);
+					this.cmpImporteDeposito.setValue(0.00);
+					this.mostrarComponente(this.cmpImporteDeposito);
+					this.cmpImporteCheque.setValue(0.00);
+					this.ocultarComponente(this.cmpImporteCheque);
+					break;
+				case  'debito_automatico':
+					this.ocultarComponente(this.cmpNroCheque);
+					this.cmpImporteDeposito.setValue(0.00);
+					this.ocultarComponente(this.cmpImporteDeposito);
+					this.cmpImporteCheque.setValue(0.00);
+					this.mostrarComponente(this.cmpImporteCheque);
+					break;	
+				case 'transferencia_carta':
+					this.ocultarComponente(this.cmpNroCheque);
+					this.cmpImporteDeposito.setValue(0.00);
+					this.ocultarComponente(this.cmpImporteDeposito);
+					this.cmpImporteCheque.setValue(0.00);
+					this.mostrarComponente(this.cmpImporteCheque);
+					break;
+			  }
+          },this);
+	},	
+	
 	onReloadPage:function(m){
 		this.maestro=m;						
 		this.store.baseParams={id_cuenta_bancaria:this.maestro.id_cuenta_bancaria};

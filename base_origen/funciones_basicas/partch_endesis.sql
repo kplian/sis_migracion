@@ -112,4 +112,8 @@ ALTER TABLE sci.tct_comprobante
   ADD CONSTRAINT tct_comprobante_chk CHECK ((((((((((((((((((((((((((((origen)::text = 'alta_activo_fijo'::text) OR ((origen)::text = 'depreciacion_activo_fijo'::text)) OR ((origen)::text = 'devengado_diario'::text)) OR ((origen)::text = 'fv_facturacion_mesual'::text)) OR ((origen)::text = 'devengado_pago'::text)) OR ((origen)::text = 'devengado_reg'::text)) OR ((origen)::text = 'duplicado'::text)) OR ((origen)::text = 'finalizacion'::text)) OR ((origen)::text = 'planilla_devengado'::text)) OR ((origen)::text = 'planilla_pago'::text)) OR ((origen)::text = 'plan_pago_anticipo'::text)) OR ((origen)::text = 'plan_pago_devengado'::text)) OR ((origen)::text = 'plan_pago_pago'::text)) OR ((origen)::text = 'rendicion'::text)) OR ((origen)::text = 'reposicion'::text)) OR ((origen)::text = 'solicitud'::text)) OR ((origen)::text = 'sucursal'::text)) OR ((origen)::text = 'kp_planilla_diario_pre'::text)) OR ((origen)::text = 'actualizacion'::text)) OR ((origen)::text = 'kp_planilla_anticipo'::text)) OR ((origen)::text = 'activo_fijo'::text)) OR ((origen)::text = 'kp_planilla_diario_costo'::text)) OR (origen IS NULL)) OR ((origen)::text = 'cierre_apertura'::text)) OR ((origen)::text = 'kp_planilla_obligacion'::text)) OR ((origen)::text = 'comprobante_apertura'::text)) OR ((origen)::text = 'pxp'::text)); 
  
  
- 
+
+--------------- SQL ---------------
+
+ALTER TABLE migracion.tct_comprobante
+  ALTER COLUMN beneficiario TYPE VARCHAR(500);

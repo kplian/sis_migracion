@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tct_comprobante_libro_bancos
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON SCI.tct_comprobante_libro_bancos FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tct_comprobante_libro_bancos_tcomprobante_libro_bancos();

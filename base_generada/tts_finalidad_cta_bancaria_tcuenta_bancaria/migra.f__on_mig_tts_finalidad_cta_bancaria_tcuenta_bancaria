@@ -1,12 +1,12 @@
-CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_empleado_cuenta_bancaria_tfuncionario_cuenta_bancaria (
-						  v_operacion varchar,p_id_funcionario_cuenta_bancaria int4,p_id_funcionario int4,p_id_institucion int4,p_estado_reg varchar,p_fecha_fin date,p_fecha_ini date,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_usuario_ai int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nro_cuenta varchar,p_usuario_ai varchar)
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_finalidad_cta_bancaria_tcuenta_bancaria (
+						  v_operacion varchar,p_id_cuenta_bancaria int4,p_id_moneda int4,p_id_proveedor int4,p_estado varchar,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_usuario_ai int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nombre_banco varchar,p_nro_cuenta_bancaria varchar,p_usuario_ai varchar)
 						RETURNS text AS
 						$BODY$
 
 /*
 						Function:  Para migracion de la tabla param.tgestion
-						Fecha Creacion:  July 10, 2014, 5:27 pm
-						Autor: autogenerado (JAIME RIVERA ROJAS)
+						Fecha Creacion:  October 31, 2014, 9:47 am
+						Autor: autogenerado (GONZALO JOSE SARMIENTO SEJAS)
 						
 						*/
 						
@@ -17,42 +17,42 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_empleado_cuenta_bancaria_tfuncio
 						    if(v_operacion = 'INSERT') THEN
 						
 						          INSERT INTO 
-						            ORGA.tfuncionario_cuenta_bancaria (
-						id_funcionario_cuenta_bancaria,
-						id_funcionario,
-						id_institucion,
+						            TES.tcuenta_bancaria (
+						id_cuenta_bancaria,
+						id_moneda,
+						id_proveedor,
+						estado,
 						estado_reg,
-						fecha_fin,
-						fecha_ini,
 						fecha_mod,
 						fecha_reg,
 						id_usuario_ai,
 						id_usuario_mod,
 						id_usuario_reg,
-						nro_cuenta,
+						nombre_banco,
+						nro_cuenta_bancaria,
 						usuario_ai)
 				VALUES (
-						p_id_funcionario_cuenta_bancaria,
-						p_id_funcionario,
-						p_id_institucion,
-						'activo',
-						p_fecha_fin,
-						p_fecha_ini,
+						p_id_cuenta_bancaria,
+						p_id_moneda,
+						p_id_proveedor,
+						p_estado,
+						p_estado_reg,
 						p_fecha_mod,
 						p_fecha_reg,
 						p_id_usuario_ai,
 						p_id_usuario_mod,
 						p_id_usuario_reg,
-						p_nro_cuenta,
+						p_nombre_banco,
+						p_nro_cuenta_bancaria,
 						p_usuario_ai);
 
                                
                                 ELSEIF  v_operacion = 'UPDATE' THEN
                                        
                                        IF  not EXISTS(select 1 
-                                           from ORGA.tfuncionario_cuenta_bancaria
+                                           from TES.tcuenta_bancaria
  
-                                           						 WHERE id_funcionario_cuenta_bancaria=p_id_funcionario_cuenta_bancaria) THEN
+                                           						 WHERE id_cuenta_bancaria=p_id_cuenta_bancaria) THEN
                                        
                                             raise exception 'No existe el registro que  desea modificar';
                                             
@@ -60,27 +60,28 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_empleado_cuenta_bancaria_tfuncio
 						               
 						               
 						               UPDATE 
-						                  ORGA.tfuncionario_cuenta_bancaria  
-						                SET						 id_funcionario=p_id_funcionario
-						 ,id_institucion=p_id_institucion
-						 ,fecha_fin=p_fecha_fin
-						 ,fecha_ini=p_fecha_ini
+						                  TES.tcuenta_bancaria  
+						                SET						 id_moneda=p_id_moneda
+						 ,id_proveedor=p_id_proveedor
+						 ,estado=p_estado
+						 ,estado_reg=p_estado_reg
 						 ,fecha_mod=p_fecha_mod
 						 ,fecha_reg=p_fecha_reg
 						 ,id_usuario_ai=p_id_usuario_ai
 						 ,id_usuario_mod=p_id_usuario_mod
 						 ,id_usuario_reg=p_id_usuario_reg
-						 ,nro_cuenta=p_nro_cuenta
+						 ,nombre_banco=p_nombre_banco
+						 ,nro_cuenta_bancaria=p_nro_cuenta_bancaria
 						 ,usuario_ai=p_usuario_ai
-						 WHERE id_funcionario_cuenta_bancaria=p_id_funcionario_cuenta_bancaria;
+						 WHERE id_cuenta_bancaria=p_id_cuenta_bancaria;
 
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       
 						         
 						         IF  not EXISTS(select 1 
-                                           from ORGA.tfuncionario_cuenta_bancaria
-						 WHERE id_funcionario_cuenta_bancaria=p_id_funcionario_cuenta_bancaria) THEN
+                                           from TES.tcuenta_bancaria
+						 WHERE id_cuenta_bancaria=p_id_cuenta_bancaria) THEN
                                        
                                             raise exception 'No existe el registro que  desea eliminar';
                                             
@@ -88,9 +89,9 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_empleado_cuenta_bancaria_tfuncio
 						         
 						         
 						         DELETE FROM 
-						              ORGA.tfuncionario_cuenta_bancaria
+						              TES.tcuenta_bancaria
  
-						              						 WHERE id_funcionario_cuenta_bancaria=p_id_funcionario_cuenta_bancaria;
+						              						 WHERE id_cuenta_bancaria=p_id_cuenta_bancaria;
 
 						       
 						       END IF;  

@@ -15,7 +15,7 @@ class MODTsLibroBancos extends MODbase{
 			
 	function listarTsLibroBancos(){
 		//Definicion de variables para ejecucion del procedimientp
-		$this->procedimiento='migra.ft_ts_libro_bancos_sel';
+		$this->procedimiento='tes.ft_ts_libro_bancos_sel';
 		$this->transaccion='MIG_LBAN_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 				
@@ -54,7 +54,7 @@ class MODTsLibroBancos extends MODbase{
 			
 	function insertarTsLibroBancos(){
 		//Definicion de variables para ejecucion del procedimiento
-		$this->procedimiento='migra.ft_ts_libro_bancos_ime';
+		$this->procedimiento='tes.ft_ts_libro_bancos_ime';
 		$this->transaccion='MIG_LBAN_INS';
 		$this->tipo_procedimiento='IME';
 				
@@ -86,7 +86,7 @@ class MODTsLibroBancos extends MODbase{
 			
 	function modificarTsLibroBancos(){
 		//Definicion de variables para ejecucion del procedimiento
-		$this->procedimiento='migra.ft_ts_libro_bancos_ime';
+		$this->procedimiento='tes.ft_ts_libro_bancos_ime';
 		$this->transaccion='MIG_LBAN_MOD';
 		$this->tipo_procedimiento='IME';
 				
@@ -119,7 +119,7 @@ class MODTsLibroBancos extends MODbase{
 			
 	function eliminarTsLibroBancos(){
 		//Definicion de variables para ejecucion del procedimiento
-		$this->procedimiento='migra.ft_ts_libro_bancos_ime';
+		$this->procedimiento='tes.ft_ts_libro_bancos_ime';
 		$this->transaccion='MIG_LBAN_ELI';
 		$this->tipo_procedimiento='IME';
 				
