@@ -117,3 +117,9 @@ ALTER TABLE sci.tct_comprobante
 
 ALTER TABLE migracion.tct_comprobante
   ALTER COLUMN beneficiario TYPE VARCHAR(500);
+  
+  
+--------------- SQL ---------------
+
+ALTER TABLE presto.tpr_concepto_ingas
+  ADD COLUMN sw_autorizacion VARCHAR(50)[];

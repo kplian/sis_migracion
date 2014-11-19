@@ -31,7 +31,7 @@ class ACTTsLibroBancos extends ACTbase{
 		}
 		
 		if($this->objParam->getParametro('m_nro_cheque')!=''){
-			$this->objParam->addFiltro("nro_cheque= (Select max (lb.nro_cheque) 
+			$this->objParam->addFiltro("nro_cheque= (Select max (lb.nro_cheque)
 													From tes.tts_libro_bancos lb 
 													Where lb.id_cuenta_bancaria=".$this->objParam->getParametro('m_id_cuenta_bancaria').") ");	
 		}		
@@ -56,12 +56,43 @@ class ACTTsLibroBancos extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-						
+	
+	function siguienteEstadoLibroBancos(){
+		$this->objFunc=$this->create('MODTsLibroBancos');
+		$this->res=$this->objFunc->siguienteEstadoLibroBancos($this->objParam);					
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
 	function eliminarTsLibroBancos(){
 			$this->objFunc=$this->create('MODTsLibroBancos');	
 		$this->res=$this->objFunc->eliminarTsLibroBancos($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function imprimirCheque(){
+		
+		$idSolicitud = $this->objParam->getParametro('id_solicitud');
+		$id_proceso_wf= $this->objParam->getParametro('id_proceso_wf');
+		$estado = $this->objParam->getParametro('estado');
+		
+		$nombreArchivo= 'HTMLReporteCheque.php';
+		
+		header("location: HTMLReporteCheque.php");
+		
+		if(!$create_file){
+					$mensajeExito = new Mensaje();
+					$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+													'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+					$mensajeExito->setArchivoGenerado($nombreArchivo);
+					$this->res = $mensajeExito;
+					$this->res->imprimirRespuesta($this->res->generarJson());
+		}
+		else{
+					
+			return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;  
+			
+		}
+	  }
 	
 	function listarDepositosENDESIS(){
 		$this->objParam->defecto('ordenacion','id_libro_bancos');

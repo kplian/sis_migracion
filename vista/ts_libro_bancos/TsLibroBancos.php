@@ -55,8 +55,18 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			{	text:'Siguiente',
 				iconCls: 'badelante',
 				disabled:true,
-				handler:this.fin_registro,
-				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador comprometera presupuesto</p>'
+				handler:this.sigEstado,
+				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
+			}
+		);
+		
+		this.addButton('btnChequeoDocumentosWf',
+			{
+				text: 'Documentos',
+				iconCls: 'bchecklist',
+				disabled: true,
+				handler: this.loadCheckDocumentosSolWf,
+				tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
 			}
 		);
 	},
@@ -82,6 +92,39 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			type:'Field',
 			form:true 
 		},
+		{
+            config:{
+                name: 'num_tramite',
+                fieldLabel: 'Num. Tramite',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 150,
+                maxLength:200
+            },
+            type:'TextField',
+            filters:{pfiltro:'obpg.num_tramite',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+		{
+            config:{
+                name: 'id_depto',
+                fieldLabel: 'Depto',
+                allowBlank: false,
+                anchor: '80%',
+                origen: 'DEPTO',
+                tinit: false,
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                gdisplayField:'nombre',
+                gwidth: 100
+            },
+            type:'ComboRec',
+            filters:{pfiltro:'dep.nombre',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:true
+        },
 		{
 			config:{
 				name: 'fecha',
@@ -434,9 +477,15 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	id_store:'id_libro_bancos',
 	fields: [
 		{name:'id_libro_bancos', type: 'numeric'},
+		{name:'num_tramite', type: 'string'},
 		{name:'id_cuenta_bancaria', type: 'numeric'},
+		{name:'num_tramite', type: 'string'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
 		{name:'a_favor', type: 'string'},
+		{name:'id_proceso_wf', type: 'numeric'},
+		{name:'id_estado_wf', type: 'numeric'},
+		{name:'id_depto', type: 'numeric'},
+		{name:'nombre', type: 'string'},
 		{name:'nro_cheque', type: 'numeric'},
 		{name:'importe_deposito', type: 'numeric'},
 		{name:'nro_liquidacion', type: 'string'},
@@ -456,7 +505,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		
+		{name:'id_depto', type: 'numeric'},
+		{name:'nombre', type: 'string'}
 	],
 	sortInfo:{
 		field: 'fecha',
@@ -505,6 +555,118 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		}
 	},
 	
+	preparaMenu:function(n){
+		  var data = this.getSelectedData();
+		  //var tb =this.tbar;
+		  
+		  Phx.vista.TsLibroBancosCheque.superclass.preparaMenu.call(this,n); 
+		  if (data['estado']== 'borrador'){
+			  this.getBoton('edit').enable();				  
+			  this.getBoton('del').enable();    
+			  this.getBoton('fin_registro').enable();				 
+			  this.getBoton('btnCheque').disable();
+			  this.getBoton('btnMemoramdum').disable();
+			  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
+		  }
+		  else{				  
+			  
+			   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado' || data['estado'] == 'depositado'){   
+				  this.getBoton('fin_registro').disable();
+				}					
+				else{
+				  this.getBoton('fin_registro').enable();
+				}
+				if (data['estado'] == 'impreso'){   
+				  this.getBoton('btnCheque').enable();
+				  this.getBoton('btnMemoramdum').enable();
+				}					
+				else{
+				  this.getBoton('btnCheque').disable();
+				  this.getBoton('btnMemoramdum').disable();
+				}
+				this.getBoton('edit').disable();
+				this.getBoton('del').disable();
+		   }			  
+		   
+		  if(data['num_tramite'] !== ''){
+			  //this.menuAdq.enable();		//Orden de Compra  , tendra libro de bancos tambien				  
+			  this.getBoton('btnChequeoDocumentosWf').enable();
+		  }
+		  else{
+			  //this.menuAdq.disable();				  
+			  this.getBoton('btnChequeoDocumentosWf').disable();
+		  }		  
+	 },
+	
+	sigEstado:function(){                   
+	  var rec=this.sm.getSelected();
+	  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+								'Estado de Wf',
+								{
+									modal:true,
+									width:700,
+									height:450
+								}, {data:{
+									   id_estado_wf:rec.data.id_estado_wf,
+									   id_proceso_wf:rec.data.id_proceso_wf,
+									   fecha_ini:rec.data.fecha_tentativa
+									  
+									}}, this.idContenedor,'FormEstadoWf',
+								{
+									config:[{
+											  event:'beforesave',
+											  delegate: this.onSaveWizard												  
+											}],
+									
+									scope:this
+								 });        
+			   
+	 },	   
+	
+	onSaveWizard:function(wizard,resp){
+		Phx.CP.loadingShow();
+		console.log(resp);
+		Ext.Ajax.request({
+			url:'../../sis_migracion/control/TsLibroBancos/siguienteEstadoLibroBancos',
+			params:{
+					
+				id_proceso_wf_act:  resp.id_proceso_wf_act,
+				id_estado_wf_act:   resp.id_estado_wf_act,
+				id_tipo_estado:     resp.id_tipo_estado,
+				id_funcionario_wf:  resp.id_funcionario_wf,
+				id_depto_wf:        resp.id_depto_wf,
+				obs:                resp.obs,
+				json_procesos:      Ext.util.JSON.encode(resp.procesos)
+				},
+			success:this.successWizard,
+			failure: this.conexionFailure,
+			argument:{wizard:wizard},
+			timeout:this.timeout,
+			scope:this
+		});
+	},
+	
+	successWizard:function(resp){
+		Phx.CP.loadingHide();
+		resp.argument.wizard.panel.destroy()
+		this.reload();
+	 },
+	 
+	 loadCheckDocumentosSolWf:function() {
+			var rec=this.sm.getSelected();
+			rec.data.nombreVista = this.nombreVista;
+			Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+					'Chequear documento del WF',
+					{
+						width:'90%',
+						height:500
+					},
+					rec.data,
+					this.idContenedor,
+					'DocumentoWf'
+		)
+	},
+		
 	memoramdum : function(){
 		var data = this.getSelectedData();
 		var NumSelect=this.sm.getCount();
@@ -613,8 +775,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					this.store.baseParams={m_id_cuenta_bancaria:this.maestro.id_cuenta_bancaria, m_nro_cheque:'si'};
 					this.load({params:{start:0, limit:this.tam_pag}, 
 					   callback : function (r) {                        
-							if (r.length > 0 ) {                     
-								this.scope.cmpNroCheque.setValue(r[0].data.nro_cheque + 1);
+							if (r.length > 0 ) {
+								this.scope.cmpNroCheque.setValue(parseInt(r[0].data.nro_cheque)+1);
 							}				
 						}, scope : this
 					});					

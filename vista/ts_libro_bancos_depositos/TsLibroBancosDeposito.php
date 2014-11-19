@@ -50,9 +50,9 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.addButton('fin_registro',
 				{	text:'Siguiente',
 					iconCls: 'badelante',
-					disabled:true,
-					handler:this.fin_registro,
-					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador comprometera presupuesto</p>'
+					disabled:false,
+					handler:this.sigEstado,
+					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador pasara a depositado</p>'
 				}
 			);
 		},
@@ -72,7 +72,41 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 			type : 'Field',
 			form : true
-		}, {
+		},
+		{
+            config:{
+                name: 'num_tramite',
+                fieldLabel: 'Num. Tramite',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 150,
+                maxLength:200
+            },
+            type:'TextField',
+            filters:{pfiltro:'obpg.num_tramite',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
+		{
+            config:{
+                name: 'id_depto',
+                fieldLabel: 'Depto',
+                allowBlank: false,
+                anchor: '80%',
+                origen: 'DEPTO',
+                tinit: false,
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                gdisplayField:'nombre',
+                gwidth: 100
+            },
+            type:'ComboRec',
+            filters:{pfiltro:'dep.nombre',type:'string'},
+            id_grupo:1,
+            grid:false,
+            form:true
+        },
+		{
 			config:{
 				name: 'fecha',
 				fieldLabel: 'Fecha',
@@ -422,8 +456,13 @@ header("content-type: text/javascript; charset=UTF-8");
 	id_store : 'id_libro_bancos',
 		fields: [
 		{name:'id_libro_bancos', type: 'numeric'},
+		{name:'num_tramite', type: 'string'},
 		{name:'id_cuenta_bancaria', type: 'numeric'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
+		{name:'id_proceso_wf', type: 'numeric'},
+		{name:'id_estado_wf', type: 'numeric'},
+		{name:'id_depto', type: 'numeric'},
+		{name:'nombre', type: 'string'},
 		{name:'a_favor', type: 'string'},
 		{name:'nro_cheque', type: 'numeric'},
 		{name:'importe_deposito', type: 'numeric'},
@@ -444,11 +483,12 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		
+		{name:'id_depto', type: 'numeric'},
+		{name:'nombre', type: 'string'}
 	],
 		sortInfo : {
-			field : 'id_libro_bancos',
-			direction : 'ASC'
+			field : 'fecha',
+			direction : 'DESC'
 		},
 		bdel : true,
 		bsave : false,
@@ -466,6 +506,85 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpTipo.disable();
 		},
 		
+		preparaMenu:function(n){
+			  var data = this.getSelectedData();
+			  
+			  Phx.vista.TsLibroBancosDeposito.superclass.preparaMenu.call(this,n); 
+			  if (data['estado']== 'borrador'){
+				  this.getBoton('edit').enable();				  
+				  this.getBoton('del').enable();    
+				  this.getBoton('fin_registro').enable();				 
+				  this.getBoton('btnReporteDeposito').disable();	  
+			  }
+			  else{				  
+				  
+				   if (data['estado'] == 'depositado'){   
+					  this.getBoton('fin_registro').disable();
+					  this.getBoton('btnReporteDeposito').enable();
+					}					
+					else{
+					  this.getBoton('fin_registro').enable();
+					  this.getBoton('btnReporteDeposito').disable();
+				    }
+					this.getBoton('edit').disable();
+					this.getBoton('del').disable();
+			   }	 
+		 },
+		 
+		 sigEstado:function(){                   
+		  var rec=this.sm.getSelected();
+		  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+									'Estado de Wf',
+									{
+										modal:true,
+										width:700,
+										height:450
+									}, {data:{
+										   id_estado_wf:rec.data.id_estado_wf,
+										   id_proceso_wf:rec.data.id_proceso_wf,
+										   fecha_ini:rec.data.fecha_tentativa
+										  
+										}}, this.idContenedor,'FormEstadoWf',
+									{
+										config:[{
+												  event:'beforesave',
+												  delegate: this.onSaveWizard												  
+												}],
+										
+										scope:this
+									 });        
+				   
+		 },	   
+		
+		onSaveWizard:function(wizard,resp){
+			Phx.CP.loadingShow();
+			console.log(resp);
+			Ext.Ajax.request({
+				url:'../../sis_migracion/control/TsLibroBancos/siguienteEstadoLibroBancos',
+				params:{
+						
+					id_proceso_wf_act:  resp.id_proceso_wf_act,
+					id_estado_wf_act:   resp.id_estado_wf_act,
+					id_tipo_estado:     resp.id_tipo_estado,
+					id_funcionario_wf:  resp.id_funcionario_wf,
+					id_depto_wf:        resp.id_depto_wf,
+					obs:                resp.obs,
+					json_procesos:      Ext.util.JSON.encode(resp.procesos)
+					},
+				success:this.successWizard,
+				failure: this.conexionFailure,
+				argument:{wizard:wizard},
+				timeout:this.timeout,
+				scope:this
+			});
+		},
+		
+		successWizard:function(resp){
+			Phx.CP.loadingHide();
+			resp.argument.wizard.panel.destroy()
+			this.reload();
+		 },
+		 
 		clonar:function(){
 			var data = this.getSelectedData();
 			this.onButtonNew();
