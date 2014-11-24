@@ -6,6 +6,7 @@
 *@date 01-12-2013 09:10:17
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
+include_once(dirname(__FILE__).'/../../lib/lib_general/funciones.inc.php');
 
 class ACTTsLibroBancos extends ACTbase{    
 			
@@ -71,27 +72,63 @@ class ACTTsLibroBancos extends ACTbase{
 	
 	function imprimirCheque(){
 		
-		$idSolicitud = $this->objParam->getParametro('id_solicitud');
-		$id_proceso_wf= $this->objParam->getParametro('id_proceso_wf');
-		$estado = $this->objParam->getParametro('estado');
+		$fecha_cheque_literal = $this->objParam->getParametro('fecha_cheque_literal');
+		$importe_cheque =$this->objParam->getParametro('importe_cheque');;	
+		$a_favor = $this->objParam->getParametro('a_favor');
+		$nombre_lugar = 'Cochabamba';
 		
-		$nombreArchivo= 'HTMLReporteCheque.php';
+		$fichero= 'HTMLReporteCheque.php';
+		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
 		
-		header("location: HTMLReporteCheque.php");
+		$fp=fopen($fichero_salida,w);
 		
-		if(!$create_file){
-					$mensajeExito = new Mensaje();
-					$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
-													'Se generó con éxito el reporte: '.$nombreArchivo,'control');
-					$mensajeExito->setArchivoGenerado($nombreArchivo);
-					$this->res = $mensajeExito;
-					$this->res->imprimirRespuesta($this->res->generarJson());
-		}
-		else{
-					
-			return dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo;  
+		$funciones = new funciones();
+		
+		$contenido = "<body onLoad='window.print();'>";
+		$contenido = $contenido. "<table border=0 style='line-height: 10px;'>";
+		$contenido = $contenido. "<td colspan='10'; style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='26'; style='text-align: left; width:25px; font-size:8pt'>".$nombre_lugar.", ".$fecha_cheque_literal."</td><tr>";
+		$contenido = $contenido. "<td colspan='28'; style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='3'; style='text-align: left; width:35px; font-size:8pt'>".number_format($importe_cheque,2)."</td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>".$a_favor."</td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>".$funciones->num2letrasCheque($importe_cheque).'-----'."</td><tr>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. '</body>';
+
+		fwrite($fp, $contenido);
+		fclose($fp);
 			
-		}
+		$mensajeExito = new Mensaje();
+		$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+										'Se generó con éxito el reporte: '.$fichero,'control');
+		$mensajeExito->setArchivoGenerado($fichero);
+		$this->res = $mensajeExito;
+		$this->res->imprimirRespuesta($this->res->generarJson());
 	  }
 	
 	function listarDepositosENDESIS(){

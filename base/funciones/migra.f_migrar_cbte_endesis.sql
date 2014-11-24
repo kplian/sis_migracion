@@ -162,7 +162,7 @@ BEGIN
         va_id_cuenta[v_cont]=v_dat.id_cuenta;
         va_id_auxiliar[v_cont]=v_dat.id_auxiliar;
         va_id_centro_costo[v_cont]=v_dat.id_centro_costo;
-        va_id_orden_trabajo[v_cont]=v_dat.id_orden_trabajo;
+        va_id_orden_trabajo[v_cont]=COALESCE(v_dat.id_orden_trabajo,0);
         va_id_partida[v_cont]=v_dat.id_partida;
         va_id_partida_ejecucion[v_cont]=v_dat.id_partida_ejecucion;
         va_id_int_transaccion_fk[v_cont]=v_dat.id_int_transaccion_fk;
@@ -197,6 +197,8 @@ BEGIN
    v_glosa1 = translate(v_glosa1, '–', '-');
    v_glosa2 = translate(v_rec.glosa2, '•', '-');
    v_glosa2 = translate(v_glosa2, '–', '-');
+   v_glosa2 = translate(v_glosa2, '¨', '"');
+   
    
    
    
@@ -260,7 +262,7 @@ BEGIN
                 raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
                 raise notice '=========================****:%',v_sql;
 
- 
+     -- raise exception '..  % ...',va_tipo;
    
     --Obtención de cadana de conexión
 	v_cadena_cnx =  migra.f_obtener_cadena_conexion();

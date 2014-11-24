@@ -48,6 +48,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('nombre','varchar');
 		$this->captura('id_proceso_wf','int4');
 		$this->captura('id_estado_wf','int4');
+		$this->captura('fecha_cheque_literal','text');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

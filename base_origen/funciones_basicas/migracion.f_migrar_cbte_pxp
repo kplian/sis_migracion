@@ -83,6 +83,7 @@ DECLARE
     v_nro_cuenta_banco varchar;
     
     g_nombre_funcion varchar;
+    v_insertar_libro_bancos  varchar;
 
 BEGIN
 	
@@ -192,15 +193,14 @@ BEGIN
             p_id_ep[i],
             p_momento_comprometido,
             p_momento_ejecutado,
-            p_momento_pagado,
-            
+            p_momento_pagado,            
             v_id_cuenta_bancaria,
             p_nombre_cheque[i],
             v_nro_cheque,
             p_tipo[i],
             v_id_libro_bancos,
             v_id_cuenta_bancaria_endesis,
-            p_id_orden_trabajo[i]
+            public.f_iif((p_id_orden_trabajo[i] != 0), p_id_orden_trabajo[i]::text, NULL )::integer 
         );
     
     end loop;
@@ -465,21 +465,24 @@ BEGIN
     ------------------------
     --GSS-14-02-2014- Insercion en tabla intermedia -Inicio
     -----------------------
-    select tipo, id_libro_bancos into v_tipo, v_id_libro_bancos
+    select tipo, id_libro_bancos, 'true' into v_tipo, v_id_libro_bancos, v_insertar_libro_bancos
     from migracion.tct_comprobante
     where id_int_comprobante = p_id_int_comprobante and id_cuenta_bancaria is not null;
     
-    if(v_tipo is not null)then
-    		
-            select id_comprobante, origen into v_id_comprobante, v_origen
-            from sci.tct_comprobante
-            where id_int_comprobante=p_id_int_comprobante;
-            if(v_origen='pxp')then
-              INSERT INTO sci.tct_comprobante_libro_bancos(id_comprobante,id_libro_bancos_deposito,tipo)
-              VALUES(v_id_comprobante,v_id_libro_bancos,v_tipo);    	
-            else
-              raise exception 'Este comprobante no viene de pxp, esta mal';
-            end if;
+    if(v_insertar_libro_bancos='true')then 
+        if(v_tipo is not null)then          		
+                select id_comprobante, origen into v_id_comprobante, v_origen
+                from sci.tct_comprobante
+                where id_int_comprobante=p_id_int_comprobante;
+                if(v_origen='pxp')then
+                  INSERT INTO sci.tct_comprobante_libro_bancos(id_comprobante,id_libro_bancos_deposito,tipo,id_int_comprobante)
+                  VALUES(v_id_comprobante,v_id_libro_bancos,v_tipo,p_id_int_comprobante);    	
+                else
+                  raise exception 'Este comprobante no viene de pxp, esta mal';
+                end if;
+        else
+              raise exception 'no existe tipo de transaccion bancaria';
+        end if;
     end if;
   	------------------------
     --GSS-14-02-2014- FIN

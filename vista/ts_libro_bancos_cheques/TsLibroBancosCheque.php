@@ -499,7 +499,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
 		{name:'id_depto', type: 'numeric'},
-		{name:'nombre', type: 'string'}
+		{name:'nombre', type: 'string'},
+		{name:'fecha_cheque_literal', type: 'string'}
 	],
         sortInfo : {
             field : 'fecha',
@@ -625,8 +626,10 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			if(NumSelect != 0)
 			{		
-				var data='id='+ data.id_libro_bancos;  			
-				//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);				
+				var data='id='+ data.id_libro_bancos;  
+				console.log(data);
+				//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);
+				window.open('http://172.17.45.11/Home/MemorandumFondosEnAvance?'+data);	
 			}
 			else
 			{
@@ -639,7 +642,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			var data=this.sm.getSelected().data;
 			Phx.CP.loadingShow();
 			Ext.Ajax.request({
-				url:'../../sis_tesoreria/control/TsLibroBancos/imprimirCheque',
+				url:'../../sis_migracion/control/TsLibroBancos/imprimirCheque',
 				params:{
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,
@@ -650,20 +653,6 @@ header("content-type: text/javascript; charset=UTF-8");
 				timeout:this.timeout,
 				scope:this
 			});	
-			/*
-			var rec=this.sm.getSelected();
-			var data='a_favor='+ rec.data.a_favor;			
-			data=data+'&importe_cheque='+ rec.data.importe_cheque;	
-			data=data+'&fecha_cheque_literal='+ rec.data.fecha_cheque_literal;	
-						
-			success: function(result, request)
-			{
-						window.open(direccion+'../../../../sis_tesoreria/control/libro_bancos/ActionPDFReporteCheque.php?'+data);
-						//window.open(direccion+'../../../../sis_tesoreria/control/avance/reporte/ActionPDFCheque.php?'+data);
-						Ext.MessageBox.hide();
-						ClaseMadre_actualizar();
-			},
-			*/
 		},
 		
 		sigEstado:function(){                   

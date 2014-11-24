@@ -506,7 +506,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
 		{name:'id_depto', type: 'numeric'},
-		{name:'nombre', type: 'string'}
+		{name:'nombre', type: 'string'},
+		{name:'fecha_cheque_literal', type: 'string'}
 	],
 	sortInfo:{
 		field: 'fecha',
@@ -559,7 +560,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		  var data = this.getSelectedData();
 		  //var tb =this.tbar;
 		  
-		  Phx.vista.TsLibroBancosCheque.superclass.preparaMenu.call(this,n); 
+		  Phx.vista.TsLibroBancos.superclass.preparaMenu.call(this,n); 
 		  if (data['estado']== 'borrador'){
 			  this.getBoton('edit').enable();				  
 			  this.getBoton('del').enable();    
@@ -683,49 +684,26 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	},
 	
 	imprimirCheque : function(){
-		var SelectionsRecord = this.getSelectedData();
 		var NumSelect=this.sm.getCount();
 		
 		if(NumSelect!=0)
 		{
 			if(confirm('¿Está seguro de imprimir el cheque?'))
 			{
-				var data='a_favor='+SelectionsRecord.a_favor;			
-				data=data+'&importe_cheque='+SelectionsRecord.importe_cheque;	
-				data=data+'&fecha_cheque_literal='+SelectionsRecord.fecha_cheque_literal;	
-				
-				//Despliegue el mensaje de procesando				
+				var data=this.sm.getSelected().data;
 				Phx.CP.loadingShow();
-				
 				Ext.Ajax.request({
-					url:'../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
-					params:{id_libro_bancos: SelectionsRecord.id_libro_bancos,
-							estado:'impreso'},
-					success:this.successImprimirCheque,
-					failure: this.conexionFailure,
-					timeout:this.timeout,
-					scope:this
-				});
-				/*
-				//Llamada asíncrona para ejecutar la acción posterior a la impresión del cheque
-				Ext.Ajax.request({
-					url:direccion+'../../../../sis_tesoreria/control/libro_bancos/ActionCambiarEstado.php',
-					params:{
-							//tipo:SelectionsRecord.data.tipo,
-							id_libro_bancos:SelectionsRecord.data.id_libro_bancos,
-							estado:'impreso'							
-					},
-					method:'POST',
-					success: function(result, request)
-					{
-								window.open(direccion+'../../../../sis_tesoreria/control/libro_bancos/ActionPDFReporteCheque.php?'+data);
-								//window.open(direccion+'../../../../sis_tesoreria/control/avance/reporte/ActionPDFCheque.php?'+data);
-								Ext.MessageBox.hide();
-								ClaseMadre_actualizar();
-					},
-					failure:ClaseMadre_conexionFailure,
-					timeout:100000
-				});*/
+				url:'../../sis_migracion/control/TsLibroBancos/imprimirCheque',
+				params:{
+					'a_favor':data.a_favor , 
+					'importe_cheque' : data.importe_cheque ,
+					'fecha_cheque_literal' : data.fecha_cheque_literal
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
 			}
 		}
 		else

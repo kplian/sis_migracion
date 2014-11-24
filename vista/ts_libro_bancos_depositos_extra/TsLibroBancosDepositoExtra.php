@@ -479,7 +479,7 @@ header("content-type: text/javascript; charset=UTF-8");
         bsave : false,
 
 		loadValoresIniciales:function(){
-			Phx.vista.TsLibroBancosCheque.superclass.loadValoresIniciales.call(this);
+			Phx.vista.TsLibroBancosDepositoExtra.superclass.loadValoresIniciales.call(this);
 			this.Cmp.id_cuenta_bancaria.setValue(this.maestro.id_cuenta_bancaria);		
 		},
 		
@@ -522,7 +522,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		preparaMenu:function(n){
 			  var data = this.getSelectedData();
 			  
-			  Phx.vista.TsLibroBancosDeposito.superclass.preparaMenu.call(this,n); 
+			  Phx.vista.TsLibroBancosDepositoExtra.superclass.preparaMenu.call(this,n); 
 			  if (data['estado']== 'borrador'){
 				  this.getBoton('edit').enable();				  
 				  this.getBoton('del').enable();    
