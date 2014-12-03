@@ -261,7 +261,7 @@ BEGIN
                 
                 raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
                 raise notice '=========================****:%',v_sql;
-
+	raise notice 'consulta : %', v_sql;
      -- raise exception '..  % ...',va_tipo;
    
     --Obtención de cadana de conexión
@@ -278,9 +278,9 @@ BEGIN
     
     --raise exception 'dd:%',v_sql;
     --Ejecuta la función remotamente
-    perform * from dblink(v_sql, true) as (respuesta varchar);
+   perform * from dblink(v_sql, true) as (respuesta varchar);
     
-   
+   --raise exception 'llega';
 
 	--Cierra la conexión abierta
 	perform dblink_disconnect();
