@@ -180,8 +180,10 @@ BEGIN
         va_id_libro_bancos[v_cont]=v_dat.id_libro_bancos;
         va_glosa[v_cont]=COALESCE(v_dat.glosa,'--');
         --quita caracteres espcilaes que no tienen representacion en LATIN9
-        va_glosa[v_cont]=translate(va_glosa[v_cont], '•', '-');
-        va_glosa[v_cont]=translate(va_glosa[v_cont], '–', '-');
+        va_glosa[v_cont] = translate(va_glosa[v_cont], '•', '-');
+        va_glosa[v_cont] = translate(va_glosa[v_cont], '–', '-');
+        va_glosa[v_cont] = translate(va_glosa[v_cont], '¨', '"');
+        va_glosa[v_cont] = translate(va_glosa[v_cont], '’', '');
         
         v_cont = v_cont + 1;
    	end loop;
@@ -195,9 +197,13 @@ BEGIN
    --quita caracteres espcilaes que no tienen representacion en LATIN9
    v_glosa1 = translate(v_rec.glosa1, '•', '-');
    v_glosa1 = translate(v_glosa1, '–', '-');
-   v_glosa2 = translate(v_rec.glosa2, '•', '-');
+    v_glosa2 = translate(v_glosa1, '¨', '"');
+   v_glosa2 = translate(v_glosa1, '’', '');
+  
+    v_glosa2 = translate(v_rec.glosa2, '•', '-');
    v_glosa2 = translate(v_glosa2, '–', '-');
    v_glosa2 = translate(v_glosa2, '¨', '"');
+   v_glosa2 = translate(v_glosa2, '’', '');
    
    
    
