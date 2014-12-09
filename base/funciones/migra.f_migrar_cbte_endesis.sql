@@ -186,6 +186,8 @@ BEGIN
         va_glosa[v_cont] = translate(va_glosa[v_cont], '’', '');
         va_glosa[v_cont] = translate(va_glosa[v_cont], '`', '');
         va_glosa[v_cont] = translate(va_glosa[v_cont], '´', '');
+        va_glosa[v_cont] = translate(va_glosa[v_cont], '“', '"');
+        va_glosa[v_cont] = translate(va_glosa[v_cont], '”', '"');
         
         v_cont = v_cont + 1;
    	end loop;
@@ -203,6 +205,8 @@ BEGIN
    v_glosa1 = translate(v_glosa1, '’', '');
    v_glosa1 = translate(v_glosa1, '`', '');
    v_glosa1 = translate(v_glosa1, '´', '');
+   v_glosa1 = translate(v_glosa1, '“', '"');
+   v_glosa1 = translate(v_glosa1, '”', '"');
   
    v_glosa2 = translate(v_rec.glosa2, '•', '-');
    v_glosa2 = translate(v_glosa2, '–', '-');
@@ -210,6 +214,13 @@ BEGIN
    v_glosa2 = translate(v_glosa2, '’', '');
    v_glosa2 = translate(v_glosa2, '`', '');
    v_glosa2 = translate(v_glosa2, '´', '');
+   
+   v_glosa2 = translate(v_glosa2, '“', '"');
+   v_glosa2 = translate(v_glosa2, '”', '"');
+    
+    
+   
+   
    
   
    
