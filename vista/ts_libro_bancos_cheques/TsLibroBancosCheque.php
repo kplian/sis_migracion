@@ -67,7 +67,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			);
 			
-			this.Cmp.tipo.on('select', this.onTipoSelect, this);
+			//this.Cmp.tipo.on('select', this.onTipoSelect, this);
         },
         Atributos:[
 		{
@@ -100,7 +100,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 maxLength:200
             },
             type:'TextField',
-            filters:{pfiltro:'obpg.num_tramite',type:'string'},
+            filters:{pfiltro:'lban.num_tramite',type:'string'},
             id_grupo:1,
             grid:true,
             form:false
@@ -130,8 +130,11 @@ header("content-type: text/javascript; charset=UTF-8");
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
-							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){
+					//return value?value.dateFormat('d/m/Y'):''
+					return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+				}
 			},
 				type:'DateField',
 				filters:{pfiltro:'lban.fecha',type:'date'},
@@ -224,7 +227,6 @@ header("content-type: text/javascript; charset=UTF-8");
 				triggerAction: 'all',
 				lazyRender:true,
 				mode: 'local',
-				valueField: 'estilo',
 				gwidth: 100,
 				store:new Ext.data.ArrayStore({
                             fields: ['variable', 'valor'],
@@ -273,7 +275,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_deposito',type:'numeric'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:true
 		},
 		{
@@ -290,6 +292,20 @@ header("content-type: text/javascript; charset=UTF-8");
 				id_grupo:1,
 				grid:true,
 				form:true
+		},
+		{
+			config:{
+				name: 'saldo_deposito',
+				fieldLabel: 'Saldo Depósito',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1310722
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:false
 		},
 		{
 			config:{
@@ -310,15 +326,63 @@ header("content-type: text/javascript; charset=UTF-8");
 			filters:{	
 					 type: 'list',
 					  pfiltro:'lban.origen',
-					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU']
+					 options: ['CBB','SRZ','TJA','SRE','CIJ','TDD','UYU','ENDESIS']
 				},
 			grid:true,
 			form:true
-		},	
+		},
+		{
+            config:{
+                name:'id_finalidad',
+                fieldLabel:'Finalidad',
+                allowBlank:true,
+                emptyText:'Finalidad...',
+                store: new Ext.data.JsonStore({
+                         url: '../../sis_tesoreria/control/Finalidad/listarFinalidadCuentaBancaria',
+                         id: 'id_finalidad',
+                         root: 'datos',
+                         sortInfo:{
+                            field: 'nombre_finalidad',
+                            direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_finalidad','nombre_finalidad','color'],
+                    // turn on remote sorting
+                    remoteSort: true,
+                    baseParams:{par_filtro:'nombre_finalidad'}
+                    }),
+                valueField: 'id_finalidad',
+                displayField: 'nombre_finalidad',
+                //tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>{denominacion}</p></div></tpl>',
+                hiddenName: 'id_finalidad',
+                forceSelection:true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender:true,
+                mode:'remote',
+                pageSize:10,
+                queryDelay:1000,
+                listWidth:600,
+                resizable:true,
+                anchor:'80%',
+                renderer : function(value, p, record) {
+					//return String.format(record.data['nombre_finalidad']);
+					return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+record.data['nombre_finalidad']+'</b></FONT>');
+				}
+            },
+            type:'ComboBox',
+            id_grupo:0,
+            /*filters:{   
+                        pfiltro:'nombre_finalidad',
+                        type:'string'
+                    },*/
+            grid:true,
+            form:true
+        },
 		{
 			config: {
 				name: 'id_libro_bancos_fk',
-				fieldLabel: 'Libro Bancos',
+				fieldLabel: 'Deposito Asociado',
 				allowBlank: true,
 				emptyText: 'Elija una opcion',
 				store: new Ext.data.JsonStore({
@@ -500,7 +564,11 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'usr_mod', type: 'string'},
 		{name:'id_depto', type: 'numeric'},
 		{name:'nombre', type: 'string'},
-		{name:'fecha_cheque_literal', type: 'string'}
+		{name:'fecha_cheque_literal', type: 'string'},
+		{name:'id_finalidad', type: 'numeric'},
+		{name:'nombre_finalidad', type: 'string'},
+		{name:'color', type: 'string'},
+		{name:'saldo_deposito', type: 'numeric'}
 	],
         sortInfo : {
             field : 'fecha',
@@ -515,7 +583,14 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpImporteDeposito = this.getComponente('importe_deposito');
 			this.cmpImporteCheque = this.getComponente('importe_cheque');
 			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
-			
+			this.cmpIdFinalidad = this.getComponente('id_finalidad');
+			this.cmpAFavor = this.getComponente('a_favor');
+			this.cmpObservaciones = this.getComponente('observaciones');
+			this.cmpDetalle = this.getComponente('detalle');		
+			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
+			this.cmpIdCuentaBancaria = this.getComponente('id_cuenta_bancaria');
+						
+			this.ocultarComponente(this.cmpIdFinalidad);
 			this.ocultarComponente(this.cmpNroCheque);
 			this.ocultarComponente(this.cmpImporteDeposito);
 			this.ocultarComponente(this.cmpIdLibroBancosFk);
@@ -529,6 +604,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.ocultarComponente(this.cmpImporteDeposito);
 						this.cmpImporteCheque.setValue(0.00);
 						this.mostrarComponente(this.cmpImporteCheque);
+						this.cmpNroCheque.reset();
 						break;	
 					case 'cheque':
 						this.mostrarComponente(this.cmpNroCheque);
@@ -536,16 +612,20 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.ocultarComponente(this.cmpImporteDeposito);
 						this.cmpImporteCheque.setValue(0.00);
 						this.mostrarComponente(this.cmpImporteCheque);
-						this.store.baseParams={m_id_cuenta_bancaria:this.maestro.id_cuenta_bancaria, m_nro_cheque:'si'};
-						//
-						this.load({params:{start:0, limit:this.tam_pag}, 
-						   callback : function (r) {                        
-								if (r.length > 0 ) {                     
-									this.scope.cmpNroCheque.setValue(parseInt(r[0].data.nro_cheque) + 1);
-								}				
-							}, scope : this
+						
+						var cta_bancaria = this.cmpIdCuentaBancaria.getValue();
+					
+						Ext.Ajax.request({
+							url:'../../sis_migracion/control/TsLibroBancos/listarTsLibroBancos',
+							params:{start:0, limit:this.tam_pag, m_id_cuenta_bancaria:cta_bancaria,m_nro_cheque:'si'},
+							success: function (resp){
+								var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+								this.cmpNroCheque.setValue(parseInt(reg.datos[0].nro_cheque)+1);
+							},
+							failure: this.conexionFailure,
+							timeout:this.timeout,
+							scope:this
 						});
-						//
 						break;
 					
 					case 'transferencia_carta':
@@ -554,51 +634,55 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.ocultarComponente(this.cmpImporteDeposito);
 						this.cmpImporteCheque.setValue(0.00);
 						this.mostrarComponente(this.cmpImporteCheque);
+						this.cmpNroCheque.reset();
 						break;
 				  }
 			  },this);				
-		},
+		},		
 		
 		preparaMenu:function(n){
 			  var data = this.getSelectedData();
 			  //var tb =this.tbar;
 			  
 			  Phx.vista.TsLibroBancosCheque.superclass.preparaMenu.call(this,n); 
-			  if (data['estado']== 'borrador'){
-				  this.getBoton('edit').enable();				  
-				  this.getBoton('del').enable();    
-				  this.getBoton('fin_registro').enable();				 
-				  this.getBoton('btnCheque').disable();
-				  this.getBoton('btnMemoramdum').disable();
-				  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
-			  }
-			  else{				  
-				  
-				   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
-					  this.getBoton('fin_registro').disable();
-					}					
-					else{
-					  this.getBoton('fin_registro').enable();
-				    }
-					if (data['estado'] == 'impreso'){   
-					  this.getBoton('btnCheque').enable();
-					  this.getBoton('btnMemoramdum').enable();
-					}					
-					else{
+			  if(data['id_proceso_wf'] !== null){
+				  if (data['estado']== 'borrador'){
+					  this.getBoton('edit').enable();				  
+					  this.getBoton('del').enable();    
+					  this.getBoton('fin_registro').enable();				 
 					  this.getBoton('btnCheque').disable();
 					  this.getBoton('btnMemoramdum').disable();
-				    }
-					this.getBoton('edit').disable();
-					this.getBoton('del').disable();
-			   }			  
-			   
-			  if(data['num_tramite'] !== ''){
-				  //this.menuAdq.enable();		//Orden de Compra  , tendra libro de bancos tambien				  
+					  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
+				  }
+				  else{				  
+					  
+					   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
+						  this.getBoton('fin_registro').disable();
+						}					
+						else{
+						  this.getBoton('fin_registro').enable();
+						}
+						if (data['estado'] == 'impreso'){   
+						  this.getBoton('btnCheque').enable();
+						  this.getBoton('btnMemoramdum').enable();
+						}					
+						else{
+						  this.getBoton('btnCheque').disable();
+						  this.getBoton('btnMemoramdum').disable();
+						}
+						this.getBoton('edit').disable();
+						this.getBoton('del').disable();
+				   }			  	  
 				  this.getBoton('btnChequeoDocumentosWf').enable();
 			  }
 			  else{
 				  //this.menuAdq.disable();				  
 				  this.getBoton('btnChequeoDocumentosWf').disable();
+				  this.getBoton('fin_registro').disable();
+				  this.getBoton('btnMemoramdum').disable();
+				  this.getBoton('btnCheque').disable();
+				  this.getBoton('edit').disable();
+				  this.getBoton('del').disable();
 			  }		  
 		 },
 		
@@ -606,18 +690,18 @@ header("content-type: text/javascript; charset=UTF-8");
 			var data = this.getSelectedData();
 			this.onButtonNew();
 			
-			this.cmpAFavor = this.getComponente('a_favor');
-			this.cmpObservaciones = this.getComponente('observaciones');
-			this.cmpDetalle = this.getComponente('detalle');		
-			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
-			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');	
-			
 			this.cmpTipo.setValue(data.tipo);
 			this.cmpAFavor.setValue(data.a_favor);
 			this.cmpObservaciones.setValue(data.observaciones);
 			this.cmpDetalle.setValue(data.detalle);
 			this.cmpNroLiquidacion.setValue(data.nro_liquidacion);
 			this.cmpIdLibroBancosFk.setValue(data.id_libro_bancos_fk);
+			this.cmpIdFinalidad.setValue(data.id_finalidad);
+			
+			var record = this.cmpTipo.getStore();
+			record.data.variable = data.tipo;			
+			this.cmpTipo.fireEvent('select',this,record);
+			
 		},
 		
 		memoramdum : function(){
@@ -732,13 +816,16 @@ header("content-type: text/javascript; charset=UTF-8");
 		onButtonNew:function(){
 			Phx.vista.TsLibroBancosCheque.superclass.onButtonNew.call(this); 	    
 			this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
+			this.cmpIdFinalidad.setValue(this.maestro.id_finalidad);
 		},
 		
 		onButtonEdit:function(){
 			Phx.vista.TsLibroBancosCheque.superclass.onButtonEdit.call(this);
-			var data = this.getSelectedData();
-			if(data.tipo='cheque')
+			var data = this.getSelectedData();			
+			if(data.tipo=='cheque')
 				this.mostrarComponente(this.cmpNroCheque);
+			else
+				this.ocultarComponente(this.cmpNroCheque);
 		},
 		
         onReloadPage : function(m) {

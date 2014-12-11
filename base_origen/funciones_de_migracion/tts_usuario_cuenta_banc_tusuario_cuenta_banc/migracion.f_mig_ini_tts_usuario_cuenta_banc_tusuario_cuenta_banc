@@ -1,0 +1,92 @@
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tts_usuario_cuenta_banc_tusuario_cuenta_banc (
+)
+RETURNS boolean AS
+$body$
+						DECLARE
+						 
+						g_registros record;
+						v_consulta varchar;
+						v_res_cone varchar;
+						v_cadena_cnx varchar;
+						v_resp varchar;
+						
+						v_cadena_resp varchar[];
+						
+						BEGIN
+						     --funcion para obtener cadena de conexion
+							 v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+									          
+						  
+						    --quirta llaves foraneas en el destino
+						     v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+									            
+						     IF(v_resp!='OK') THEN
+									            
+						        --modificar bandera de fallo  
+						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+									                 
+						     ELSE
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tusuario_cuenta_banc'',''TES'',''eliminar'')';                   
+						       raise notice '%',v_consulta;
+						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+						        v_res_cone=(select dblink_disconnect());
+						     END IF;
+						
+						
+						   --consulta los registro de la tabla origen
+						    FOR g_registros in (
+						        SELECT 
+						id_usuario,
+						id_usuario_cuenta_banc,
+						estado,
+						fecha_mod,
+						fecha_reg,
+						id_cuenta_bancaria,
+						id_parametro,
+						tipo_permiso,
+						usu_mod,
+						usu_reg
+FROM 
+						          TESORO.tts_usuario_cuenta_banc) LOOP
+						        
+						        -- inserta en el destino
+						      
+						            v_cadena_resp = migracion.f_trans_tts_usuario_cuenta_banc_tusuario_cuenta_banc(
+						            'INSERT',g_registros.id_usuario
+					,g_registros.id_usuario_cuenta_banc
+					,g_registros.estado
+					,g_registros.fecha_mod
+					,g_registros.fecha_reg
+					,g_registros.id_cuenta_bancaria
+					,g_registros.id_parametro
+					,g_registros.tipo_permiso
+					,g_registros.usu_mod
+					,g_registros.usu_reg
+					);	
+					            IF v_cadena_resp[1] = 'FALSE' THEN
+					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
+					            END IF; 	
+						 END LOOP;
+						
+						     --reconstruye llaves foraneas
+						     v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+									            
+						     IF(v_resp!='OK') THEN
+									            
+						        --modificar bandera de fallo  
+						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+									                 
+						     ELSE
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tusuario_cuenta_banc'',''TES'',''insertar'')';                   
+						       raise notice '%',v_consulta;
+						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+						        v_res_cone=(select dblink_disconnect());
+						     END IF;
+						
+						RETURN TRUE;
+						END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;

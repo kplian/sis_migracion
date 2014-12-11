@@ -15,7 +15,7 @@ header("content-type: text/javascript; charset=UTF-8");
             this.maestro = config.maestro;
             Phx.vista.TsLibroBancosDepositoExtra.superclass.constructor.call(this, config);
             this.init();
-            this.grid.getTopToolbar().disable();
+            //this.grid.getTopToolbar().disable();
             this.grid.getBottomToolbar().disable();
 			this.iniciarEventos();
 			this.addButton('btnClonar',
@@ -68,7 +68,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 maxLength:200
             },
             type:'TextField',
-            filters:{pfiltro:'obpg.num_tramite',type:'string'},
+            filters:{pfiltro:'lban.num_tramite',type:'string'},
             id_grupo:1,
             grid:true,
             form:false
@@ -98,8 +98,11 @@ header("content-type: text/javascript; charset=UTF-8");
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
-							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){
+					//return value?value.dateFormat('d/m/Y'):''
+					return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+				}
 			},
 				type:'DateField',
 				filters:{pfiltro:'lban.fecha',type:'date'},
@@ -225,7 +228,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'NumberField',
 				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:true
 		},
 		{
@@ -256,7 +259,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
 				id_grupo:1,
 				valorInicial:0,
-				grid:true,
+				grid:false,
 				form:true
 		},
 		{
@@ -286,7 +289,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{
 			config: {
 				name: 'id_libro_bancos_fk',
-				fieldLabel: 'Libro Bancos',
+				fieldLabel: 'Deposito Asociado',
 				allowBlank: true,
 				emptyText: 'Elija una opci??.',
 				store: new Ext.data.JsonStore({
@@ -326,6 +329,54 @@ header("content-type: text/javascript; charset=UTF-8");
 			grid: true,
 			form: true
 		},
+		{
+            config:{
+                name:'id_finalidad',
+                fieldLabel:'Finalidad',
+                allowBlank:true,
+                emptyText:'Finalidad...',
+                store: new Ext.data.JsonStore({
+                         url: '../../sis_tesoreria/control/Finalidad/listarFinalidadCuentaBancaria',
+                         id: 'id_finalidad',
+                         root: 'datos',
+                         sortInfo:{
+                            field: 'nombre_finalidad',
+                            direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_finalidad','nombre_finalidad','color'],
+                    // turn on remote sorting
+                    remoteSort: true,
+                    baseParams:{par_filtro:'nombre_finalidad'}
+                    }),
+                valueField: 'id_finalidad',
+                displayField: 'nombre_finalidad',
+                //tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>{denominacion}</p></div></tpl>',
+                hiddenName: 'id_finalidad',
+                forceSelection:true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender:true,
+                mode:'remote',
+                pageSize:10,
+                queryDelay:1000,
+                listWidth:600,
+                resizable:true,
+                anchor:'80%',
+                renderer : function(value, p, record) {
+					//return String.format(record.data['nombre_finalidad']);
+					return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+record.data['nombre_finalidad']+'</b></FONT>');
+				}
+            },
+            type:'ComboBox',
+            id_grupo:0,
+            /*filters:{   
+                        pfiltro:'nombre_finalidad',
+                        type:'string'
+                    },*/
+            grid:true,
+            form:true
+        },
 		{
 			config:{
 				name: 'estado',
@@ -469,7 +520,10 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
 		{name:'id_depto', type: 'numeric'},
-		{name:'nombre', type: 'string'}
+		{name:'nombre', type: 'string'},
+		{name:'id_finalidad', type: 'numeric'},
+		{name:'nombre_finalidad', type: 'string'},
+		{name:'color', type: 'string'}
 	],
         sortInfo : {
             field : 'fecha',
@@ -486,17 +540,12 @@ header("content-type: text/javascript; charset=UTF-8");
         onButtonNew:function(){
 			Phx.vista.TsLibroBancosDepositoExtra.superclass.onButtonNew.call(this); 	    
 			this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
+			this.cmpIdFinalidad.setValue(this.maestro.id_finalidad);
 		},
 		
 		clonar:function(){
 			var data = this.getSelectedData();
-			this.onButtonNew();
-			
-			this.cmpAFavor = this.getComponente('a_favor');
-			this.cmpObservaciones = this.getComponente('observaciones');
-			this.cmpDetalle = this.getComponente('detalle');		
-			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
-			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
+			this.onButtonNew();			
 			
 			this.cmpTipo.setValue(data.tipo);
 			this.cmpAFavor.setValue(data.a_favor);
@@ -504,15 +553,23 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpDetalle.setValue(data.detalle);
 			this.cmpNroLiquidacion.setValue(data.nro_liquidacion);
 			this.cmpIdLibroBancosFk.setValue(data.id_libro_bancos_fk);
+			this.cmpIdFinalidad.setValue(data.id_finalidad);
+			
 		},
 	
 		iniciarEventos:function(){
 			
+			this.cmpAFavor = this.getComponente('a_favor');
+			this.cmpObservaciones = this.getComponente('observaciones');
+			this.cmpDetalle = this.getComponente('detalle');		
+			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');			
 			this.cmpTipo = this.getComponente('tipo');		
 			this.cmpNroCheque = this.getComponente('nro_cheque');
 			this.cmpImporteCheque = this.getComponente('importe_cheque');
 			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
+			this.cmpIdFinalidad = this.getComponente('id_finalidad');
 			
+			this.ocultarComponente(this.cmpIdFinalidad);
 			this.ocultarComponente(this.cmpNroCheque);
 			this.ocultarComponente(this.cmpImporteCheque);
 			this.ocultarComponente(this.cmpIdLibroBancosFk);
@@ -523,22 +580,29 @@ header("content-type: text/javascript; charset=UTF-8");
 			  var data = this.getSelectedData();
 			  
 			  Phx.vista.TsLibroBancosDepositoExtra.superclass.preparaMenu.call(this,n); 
-			  if (data['estado']== 'borrador'){
-				  this.getBoton('edit').enable();				  
-				  this.getBoton('del').enable();    
-				  this.getBoton('fin_registro').enable();					  
-			  }
-			  else{				  
-				  
-				   if (data['estado'] == 'depositado'){   
-					  this.getBoton('fin_registro').disable();
-					}					
-					else{
-					  this.getBoton('fin_registro').enable();
-				    }
+			  
+			  if(data['id_proceso_wf'] !== null){			  
+				  if (data['estado']== 'borrador'){
+					  this.getBoton('edit').enable();				  
+					  this.getBoton('del').enable();    
+					  this.getBoton('fin_registro').enable();					  
+				  }
+				  else{				  
+					  
+					   if (data['estado'] == 'depositado'){   
+						  this.getBoton('fin_registro').disable();
+						}					
+						else{
+						  this.getBoton('fin_registro').enable();
+						}
+						this.getBoton('edit').disable();
+						this.getBoton('del').disable();
+				   }		
+			   }else{
+					this.getBoton('fin_registro').disable();
 					this.getBoton('edit').disable();
 					this.getBoton('del').disable();
-			   }	 
+			   }
 		 },
 		sigEstado:function(){                   
 		  var rec=this.sm.getSelected();
@@ -567,7 +631,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		
 		onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
-			console.log(resp);
+			
 			Ext.Ajax.request({
 				url:'../../sis_migracion/control/TsLibroBancos/siguienteEstadoLibroBancos',
 				params:{

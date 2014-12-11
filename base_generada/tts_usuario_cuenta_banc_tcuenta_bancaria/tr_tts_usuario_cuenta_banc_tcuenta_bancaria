@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tts_usuario_cuenta_banc
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON TESORO.tts_usuario_cuenta_banc FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tts_usuario_cuenta_banc_tcuenta_bancaria();

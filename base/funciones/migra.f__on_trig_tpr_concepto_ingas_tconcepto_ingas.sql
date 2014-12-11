@@ -33,6 +33,7 @@ $body$
                         v_tipo varchar;
                         v_id_gestion 	integer;
                         v_id_concepto_ingas_pxp	integer;
+                        v_estado_reg	varchar;
                         
                   /*
                   
@@ -73,9 +74,9 @@ $body$
                           v_desc_ingas =   trim (both  E'\t\n\r ' from upper(p_desc_ingas));
                               
                         SELECT 
-                          ci.id_concepto_ingas
+                          ci.id_concepto_ingas,estado_reg
                         into
-                          v_id_concepto_ingas
+                          v_id_concepto_ingas,v_estado_reg
                         FROM param.tconcepto_ingas ci
                         WHERE  trim(upper(ci.desc_ingas)) = v_desc_ingas;    
 						
@@ -114,7 +115,10 @@ $body$
                                           v_tipo) RETURNING id_concepto_ingas into v_id_concepto_ingas;
                                     
                                                     
-                             
+                             ELSE
+                             	update param.tconcepto_ingas set
+                                estado_reg = 'activo'
+                                where id_concepto_ingas = v_id_concepto_ingas;
                              END IF;
                              select id_gestion into v_id_gestion
                              from pre.tpartida
@@ -192,7 +196,7 @@ $body$
                  IF EXISTS( SELECT 1 FROM  pre.tconcepto_partida cp
                              WHERE cp.id_partida = p_id_partida
                                   and cp.id_concepto_ingas = v_id_concepto_ingas_pxp) THEN
-                         
+                  		       
                   ELSE   
                   
                        INSERT INTO pre.tconcepto_partida(
@@ -208,7 +212,15 @@ $body$
                             p_fecha_reg,
                             p_id_usuario_reg);      
                                   
-                  END IF;                
+                  END IF; 
+                  
+                  if p_estado_reg = 'inactivo' then
+                  	delete from pre.tconcepto_partida 
+                    where id_concepto_ingas = v_id_concepto_ingas_pxp;
+                    
+                    delete from migra.tconcepto_ids
+                    where id_concepto_ingas_pxp = v_id_concepto_ingas_pxp;
+                  end if;               
                 
                
 				

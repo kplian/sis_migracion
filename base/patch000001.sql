@@ -218,3 +218,46 @@ CREATE SEQUENCE orga.tescala_salarial_migracion_seq
   CACHE 1;
 /***********************************F-SCP-JRR-MIGRA-0-21/10/2014****************************************/
 
+
+/***********************************I-SCP-GSS-MIGRA-0-24/11/2014****************************************/
+
+ALTER TABLE migra.tts_libro_bancos
+  ADD COLUMN notificado VARCHAR(2);
+
+COMMENT ON COLUMN migra.tts_libro_bancos.notificado
+IS 'bandera con valores si o no que indica si la transaccion bancaria fue notificada';
+
+ALTER TABLE migra.tts_libro_bancos
+  ADD COLUMN id_finalidad INTEGER;
+
+COMMENT ON COLUMN migra.tts_libro_bancos.id_finalidad
+IS 'id de la tabla finalidad al cual corresponde la transaccion bancaria';
+
+ALTER TABLE migra.tts_libro_bancos
+  ADD COLUMN id_estado_wf INTEGER;
+
+COMMENT ON COLUMN migra.tts_libro_bancos.id_estado_wf
+IS 'relacion con la tabla estado_wf';
+
+ALTER TABLE migra.tts_libro_bancos
+  ADD COLUMN id_proceso_wf INTEGER;
+
+COMMENT ON COLUMN migra.tts_libro_bancos.id_proceso_wf
+IS 'relacion con la tabla proceso_wf';
+
+ALTER TABLE migra.tts_libro_bancos
+  ADD COLUMN num_tramite VARCHAR(200);
+
+COMMENT ON COLUMN migra.tts_libro_bancos.num_tramite
+IS 'numero de tramite de la transaccion bancaria';
+
+ALTER TABLE migra.tts_libro_bancos
+  ADD COLUMN id_depto INTEGER;
+
+COMMENT ON COLUMN migra.tts_libro_bancos.id_depto
+IS 'relacion con la tabla departamento';
+
+ALTER TABLE migra.tts_libro_bancos
+SET SCHEMA tes;
+
+/***********************************F-SCP-GSS-MIGRA-0-24/11/2014****************************************/

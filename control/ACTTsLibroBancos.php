@@ -7,6 +7,10 @@
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 include_once(dirname(__FILE__).'/../../lib/lib_general/funciones.inc.php');
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/ReportWriter.php');
+require_once(dirname(__FILE__).'/../../sis_tesoreria/reportes/RLibroBancos.php');
+require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
+
 
 class ACTTsLibroBancos extends ACTbase{    
 			
@@ -45,6 +49,15 @@ class ACTTsLibroBancos extends ACTbase{
 			
 			$this->res=$this->objFunc->listarTsLibroBancos($this->objParam);
 		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	function listarTsLibroBancosDepositosConSaldo(){
+		$this->objParam->defecto('ordenacion','fecha');
+		$this->objParam->defecto('dir_ordenacion','desc');
+		
+		$this->objFunc=$this->create('MODTsLibroBancos');
+		$this->res=$this->objFunc->listarTsLibroBancosDepositosConSaldo($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 				
@@ -147,6 +160,56 @@ class ACTTsLibroBancos extends ACTbase{
 			$this->res=$this->objFunc->listarDepositosENDESIS($this->objParam);
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	function reporteLibroBancos(){
+		$dataSource = new DataSource();
+		
+		$nro_cuenta = $this->objParam->getParametro('nro_cuenta');
+		$fecha_ini = $this->objParam->getParametro('fecha_ini');
+		$fecha_fin = $this->objParam->getParametro('fecha_fin');
+		$tipo = $this->objParam->getParametro('tipo');
+		$estado = $this->objParam->getParametro('estado');
+		$finalidad = $this->objParam->getParametro('finalidad');
+		
+		$this->objParam->addParametroConsulta('ordenacion','id_libro_bancos');
+        $this->objParam->addParametroConsulta('dir_ordenacion','ASC');
+        $this->objParam->addParametroConsulta('cantidad',1000);
+        $this->objParam->addParametroConsulta('puntero',0);
+		
+		$dataSource->putParameter('nro_cuenta', $nro_cuenta);
+		$dataSource->putParameter('fecha_ini', $fecha_ini);
+		$dataSource->putParameter('fecha_fin', $fecha_fin);
+		$dataSource->putParameter('tipo', $tipo);
+		$dataSource->putParameter('estado', $estado);
+		$dataSource->putParameter('finalidad', $finalidad);		
+		
+		$this->objFunc=$this->create('MODTsLibroBancos');
+		$resultLibroBancos = $this->objFunc->reporteLibroBancos($this->objParam);
+				
+		if($resultLibroBancos->getTipo()=='EXITO'){
+						
+			$datosLibroBancos = $resultLibroBancos->getDatos();
+			
+			$dataSource->setDataSet($datosLibroBancos);    
+			
+			$nombreArchivo = 'LibroBancos.pdf';
+			$reporte = new RLibroBancos();
+			
+			$reporte->setDataSource($dataSource);	
+			$reportWriter = new ReportWriter($reporte, dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo);
+			$reportWriter->writeReport(ReportWriter::PDF);
+	
+			$mensajeExito = new Mensaje();
+			$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+			'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+			$mensajeExito->setArchivoGenerado($nombreArchivo);
+			$this->res = $mensajeExito;
+			$this->res->imprimirRespuesta($this->res->generarJson());
+		}
+		else{			 
+			 $resultLibroBancos->imprimirRespuesta($resultLibroBancos->generarJson());			
+		}
 	}
 			
 }
