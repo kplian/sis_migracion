@@ -71,6 +71,12 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 	
+	function anteriorEstadoLibroBancos(){
+        $this->objFunc=$this->create('MODTsLibroBancos');  
+        $this->res=$this->objFunc->anteriorEstadoLibroBancos($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
+	
 	function siguienteEstadoLibroBancos(){
 		$this->objFunc=$this->create('MODTsLibroBancos');
 		$this->res=$this->objFunc->siguienteEstadoLibroBancos($this->objParam);					

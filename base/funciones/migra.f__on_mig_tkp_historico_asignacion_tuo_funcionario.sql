@@ -101,6 +101,9 @@ $body$
 						 ,fecha_documento_asignacion = p_fecha_documento_asignacion
 						 ,observaciones_finalizacion = p_observaciones_finalizacion
 						 WHERE id_uo_funcionario=p_id_uo_funcionario;
+                         
+                         update orga.tcargo set id_oficina = p_id_oficina
+                        where id_cargo = p_id_cargo;
 
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN

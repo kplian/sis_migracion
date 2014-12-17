@@ -220,6 +220,25 @@ class MODTsLibroBancos extends MODbase{
 		return $this->respuesta;
 	}
 	
+	function anteriorEstadoLibroBancos(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='tes.ft_ts_libro_bancos_ime';
+        $this->transaccion='TES_ANTELB_IME';
+        $this->tipo_procedimiento='IME';
+                
+        //Define los parametros para la funcion
+        $this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+        $this->setParametro('operacion','operacion','varchar');
+		$this->setParametro('obs','obs','varchar');
+        
+        //Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+	
 	function siguienteEstadoLibroBancos(){
         //Definicion de variables para ejecucion del procedimiento
         $this->procedimiento='tes.ft_ts_libro_bancos_ime';

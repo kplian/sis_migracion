@@ -49,12 +49,22 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			);
 			
+			this.addButton('ant_estado',{
+              argument: {estado: 'anterior'},
+              text:'Rechazar',
+              iconCls: 'batras',
+              disabled:true,
+              handler:this.antEstado,
+              tooltip: '<b>Pasar al Anterior Estado</b>'
+			  }
+			);
+			
 			this.addButton('fin_registro',
 				{	text:'Siguiente',
 					iconCls: 'badelante',
 					disabled:true,
 					handler:this.sigEstado,
-					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador pasa a pendiente</p>'
+					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 				}
 			);
 			this.addButton('btnChequeoDocumentosWf',
@@ -652,15 +662,18 @@ header("content-type: text/javascript; charset=UTF-8");
 					  this.getBoton('fin_registro').enable();				 
 					  this.getBoton('btnCheque').disable();
 					  this.getBoton('btnMemoramdum').disable();
+					  this.getBoton('ant_estado').disable();
 					  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
 				  }
 				  else{				  
 					  
 					   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
 						  this.getBoton('fin_registro').disable();
+						  this.getBoton('ant_estado').disable();
 						}					
 						else{
 						  this.getBoton('fin_registro').enable();
+						  this.getBoton('ant_estado').enable();
 						}
 						if (data['estado'] == 'impreso'){   
 						  this.getBoton('btnCheque').enable();
@@ -739,6 +752,24 @@ header("content-type: text/javascript; charset=UTF-8");
 			});	
 		},
 		
+		antEstado:function(res,eve)
+		{                   
+			var d= this.sm.getSelected().data;
+			Phx.CP.loadingShow();
+			var operacion = 'cambiar';
+			operacion=  res.argument.estado == 'inicio'?'inicio':operacion; 
+			
+			Ext.Ajax.request({
+				url:'../../sis_migracion/control/TsLibroBancos/anteriorEstadoLibroBancos',
+				params:{id_libro_bancos:d.id_libro_bancos, 
+						operacion: operacion},
+				success:this.successSinc,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});     
+		},
+		  
 		sigEstado:function(){                   
 		  var rec=this.sm.getSelected();
 		  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
