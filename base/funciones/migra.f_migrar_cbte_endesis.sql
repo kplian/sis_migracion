@@ -66,7 +66,7 @@ BEGIN
     select  
     cbte.id_int_comprobante, 
     cbte.id_clase_comprobante, 
-    cbte.id_int_comprobante_fk, 
+    
     cbte.id_subsistema, 
     cbte.id_depto, 
     cbte.id_moneda, 
