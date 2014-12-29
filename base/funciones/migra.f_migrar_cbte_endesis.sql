@@ -54,7 +54,7 @@ DECLARE
 BEGIN
 
 
-   v_nombre_funcion:='conta.f_migrar_cbte_endesis';
+   v_nombre_funcion:='migra.f_migrar_cbte_endesis';
 
 	--Verificación de existencia de parámetro
     if not exists(select 1 from conta.tint_comprobante
@@ -66,7 +66,7 @@ BEGIN
     select  
     cbte.id_int_comprobante, 
     cbte.id_clase_comprobante, 
-    
+    cbte.id_int_comprobante_fks, 
     cbte.id_subsistema, 
     cbte.id_depto, 
     cbte.id_moneda, 
