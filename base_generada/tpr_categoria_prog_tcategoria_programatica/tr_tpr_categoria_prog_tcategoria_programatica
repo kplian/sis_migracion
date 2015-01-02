@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tpr_categoria_prog
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_categoria_prog FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_categoria_prog_tcategoria_programatica();
