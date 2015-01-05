@@ -33,11 +33,22 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		
 		this.addButton('btnCheque',
 			{
-				text: 'Cheque',
+				text: 'Cheque 1',
 				iconCls: 'bprintcheck',
 				disabled: false,
 				handler: this.imprimirCheque,
-				tooltip: '<b>Cheque</b><br/>Imprimir cheque'
+				tooltip: '<b>Cheque</b><br/>Imprimir cheque en el tamaño antiguo'
+			}
+		);
+		
+		
+		this.addButton('btnCheque2',
+			{
+				text: 'Cheque 2',
+				iconCls: 'bprintcheck',
+				disabled: false,
+				handler: this.imprimirCheque2,
+				tooltip: '<b>Cheque</b><br/>Imprimir cheque en el tamaño nuevo'
 			}
 		);
 		
@@ -653,6 +664,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				  this.getBoton('del').enable();    
 				  this.getBoton('fin_registro').enable();				 
 				  this.getBoton('btnCheque').disable();
+				  this.getBoton('btnCheque2').disable();
 				  this.getBoton('btnMemoramdum').disable();	  
 			  }
 			  else{				  
@@ -665,10 +677,12 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					}
 					if (data['estado'] == 'impreso'){   
 					  this.getBoton('btnCheque').enable();
+					  this.getBoton('btnCheque2').enable();
 					  this.getBoton('btnMemoramdum').enable();
 					}					
 					else{
 					  this.getBoton('btnCheque').disable();
+					  this.getBoton('btnCheque2').disable();
 					  this.getBoton('btnMemoramdum').disable();
 					}
 					this.getBoton('edit').disable();
@@ -680,6 +694,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				this.getBoton('fin_registro').disable();
 				this.getBoton('btnMemoramdum').disable();
 				this.getBoton('btnCheque').disable();
+				this.getBoton('btnCheque2').disable();
 				this.getBoton('edit').disable();
 				this.getBoton('del').disable();
 		  }
@@ -780,6 +795,35 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				Phx.CP.loadingShow();
 				Ext.Ajax.request({
 				url:'../../sis_migracion/control/TsLibroBancos/imprimirCheque',
+				params:{
+					'a_favor':data.a_favor , 
+					'importe_cheque' : data.importe_cheque ,
+					'fecha_cheque_literal' : data.fecha_cheque_literal
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+			}
+		}
+		else
+		{
+			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
+		}
+	},
+	
+	imprimirCheque2 : function(){
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect!=0)
+		{
+			if(confirm('¿Está seguro de imprimir el cheque?'))
+			{
+				var data=this.sm.getSelected().data;
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+				url:'../../sis_migracion/control/TsLibroBancos/imprimirCheque2',
 				params:{
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,

@@ -31,11 +31,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			this.addButton('btnCheque',
 				{
-					text: 'Cheque',
+					text: 'Cheque 1',
 					iconCls: 'bprintcheck',
 					disabled: false,
 					handler: this.imprimirCheque,
-					tooltip: '<b>Cheque</b><br/>Imprimmir cheque'
+					tooltip: '<b>Cheque</b><br/>Imprimmir cheque en tamaño antiguo'
+				}
+			);
+						
+			this.addButton('btnCheque2',
+				{
+					text: 'Cheque 2',
+					iconCls: 'bprintcheck',
+					disabled: false,
+					handler: this.imprimirCheque2,
+					tooltip: '<b>Cheque</b><br/>Imprimmir cheque en tamaño nuevo'
 				}
 			);
 			
@@ -661,6 +671,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					  this.getBoton('del').enable();    
 					  this.getBoton('fin_registro').enable();				 
 					  this.getBoton('btnCheque').disable();
+					  this.getBoton('btnCheque2').disable();
 					  this.getBoton('btnMemoramdum').disable();
 					  this.getBoton('ant_estado').disable();
 					  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
@@ -677,10 +688,12 @@ header("content-type: text/javascript; charset=UTF-8");
 						}
 						if (data['estado'] == 'impreso'){   
 						  this.getBoton('btnCheque').enable();
+						  this.getBoton('btnCheque2').enable();
 						  this.getBoton('btnMemoramdum').enable();
 						}					
 						else{
 						  this.getBoton('btnCheque').disable();
+						  this.getBoton('btnCheque2').disable();
 						  this.getBoton('btnMemoramdum').disable();
 						}
 						this.getBoton('edit').disable();
@@ -694,6 +707,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				  this.getBoton('fin_registro').disable();
 				  this.getBoton('btnMemoramdum').disable();
 				  this.getBoton('btnCheque').disable();
+				  this.getBoton('btnCheque2').disable();
 				  this.getBoton('edit').disable();
 				  this.getBoton('del').disable();
 			  }		  
@@ -740,6 +754,24 @@ header("content-type: text/javascript; charset=UTF-8");
 			Phx.CP.loadingShow();
 			Ext.Ajax.request({
 				url:'../../sis_migracion/control/TsLibroBancos/imprimirCheque',
+				params:{
+					'a_favor':data.a_favor , 
+					'importe_cheque' : data.importe_cheque ,
+					'fecha_cheque_literal' : data.fecha_cheque_literal
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});	
+		},
+		
+		imprimirCheque2 : function(){
+		
+			var data=this.sm.getSelected().data;
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_migracion/control/TsLibroBancos/imprimirCheque2',
 				params:{
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,
