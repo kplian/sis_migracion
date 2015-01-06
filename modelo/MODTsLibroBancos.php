@@ -88,7 +88,7 @@ class MODTsLibroBancos extends MODbase{
 	function reporteLibroBancos(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='tes.ft_ts_libro_bancos_sel';
-		$this->transaccion='TS_RELIBA_SEL';
+		$this->transaccion='TES_RELIBA_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 		
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
