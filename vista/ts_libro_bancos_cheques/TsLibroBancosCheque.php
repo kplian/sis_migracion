@@ -266,6 +266,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					 options: ['cheque','debito_automatico','transferencia_carta']
 				},
 			grid:true,
+			valorInicial:'cheque',
 			form:true
 		},
 		{
@@ -609,6 +610,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpDetalle = this.getComponente('detalle');		
 			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
 			this.cmpIdCuentaBancaria = this.getComponente('id_cuenta_bancaria');
+			this.cmpNroComprobante = this.getComponente('nro_comprobante');
 						
 			this.ocultarComponente(this.cmpIdFinalidad);
 			this.ocultarComponente(this.cmpNroCheque);
@@ -657,7 +659,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.cmpNroCheque.reset();
 						break;
 				  }
-			  },this);				
+			  },this);
 		},		
 		
 		preparaMenu:function(n){
@@ -880,6 +882,14 @@ header("content-type: text/javascript; charset=UTF-8");
 			Phx.vista.TsLibroBancosCheque.superclass.onButtonNew.call(this); 	    
 			this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
 			this.cmpIdFinalidad.setValue(this.maestro.id_finalidad);
+			this.cmpDetalle.setValue(this.maestro.detalle);
+			this.cmpObservaciones.setValue(this.maestro.observaciones);
+			this.cmpNroLiquidacion.setValue(this.maestro.nro_liquidacion);
+			this.cmpNroComprobante.setValue(this.maestro.nro_comprobante);
+			
+			var record = this.cmpTipo.getStore();
+			record.data.variable = 'cheque';			
+			this.cmpTipo.fireEvent('select',this,record);
 		},
 		
 		onButtonEdit:function(){
