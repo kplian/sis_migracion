@@ -53,6 +53,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('nombre_finalidad','varchar');
 		$this->captura('color','varchar');
 		$this->captura('saldo_deposito','numeric');
+		$this->captura('nombre_regional','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

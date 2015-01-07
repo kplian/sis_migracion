@@ -589,7 +589,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'id_finalidad', type: 'numeric'},
 		{name:'nombre_finalidad', type: 'string'},
 		{name:'color', type: 'string'},
-		{name:'saldo_deposito', type: 'numeric'}
+		{name:'saldo_deposito', type: 'numeric'},
+		{name:'nombre_regional', type: 'string'}
 	],
         sortInfo : {
             field : 'fecha',
