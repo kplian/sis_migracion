@@ -760,7 +760,8 @@ header("content-type: text/javascript; charset=UTF-8");
 				params:{
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,
-					'fecha_cheque_literal' : data.fecha_cheque_literal
+					'fecha_cheque_literal' : data.fecha_cheque_literal,
+					'nombre_regional' : data.nombre_regional
 				},
 				success:this.successExport,
 				failure: this.conexionFailure,
@@ -778,7 +779,8 @@ header("content-type: text/javascript; charset=UTF-8");
 				params:{
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,
-					'fecha_cheque_literal' : data.fecha_cheque_literal
+					'fecha_cheque_literal' : data.fecha_cheque_literal,
+					'nombre_regional' : data.nombre_regional
 				},
 				success:this.successExport,
 				failure: this.conexionFailure,

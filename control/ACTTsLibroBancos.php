@@ -94,7 +94,7 @@ class ACTTsLibroBancos extends ACTbase{
 		$fecha_cheque_literal = $this->objParam->getParametro('fecha_cheque_literal');
 		$importe_cheque =$this->objParam->getParametro('importe_cheque');;	
 		$a_favor = $this->objParam->getParametro('a_favor');
-		$nombre_lugar = 'Cochabamba';
+		$nombre_lugar = $this->objParam->getParametro('nombre_regional');
 		
 		$fichero= 'HTMLReporteCheque.php';
 		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
@@ -155,7 +155,7 @@ class ACTTsLibroBancos extends ACTbase{
 		$fecha_cheque_literal = $this->objParam->getParametro('fecha_cheque_literal');
 		$importe_cheque =$this->objParam->getParametro('importe_cheque');;	
 		$a_favor = $this->objParam->getParametro('a_favor');
-		$nombre_lugar = 'Cochabamba';
+		$nombre_lugar = $this->objParam->getParametro('nombre_regional');
 		
 		$fichero= 'HTMLReporteCheque2.php';
 		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
