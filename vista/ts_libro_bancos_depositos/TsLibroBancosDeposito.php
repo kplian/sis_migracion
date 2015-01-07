@@ -348,7 +348,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     fields: ['id_finalidad','nombre_finalidad','color'],
                     // turn on remote sorting
                     remoteSort: true,
-                    baseParams:{par_filtro:'nombre_finalidad'}
+                    baseParams:{par_filtro:'nombre_finalidad', vista: 'vista'}
                     }),
                 valueField: 'id_finalidad',
                 displayField: 'nombre_finalidad',

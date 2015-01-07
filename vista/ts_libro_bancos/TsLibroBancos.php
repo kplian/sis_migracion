@@ -365,7 +365,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
                     fields: ['id_finalidad','nombre_finalidad','color'],
                     // turn on remote sorting
                     remoteSort: true,
-                    baseParams:{par_filtro:'nombre_finalidad'}
+                    baseParams:{par_filtro:'nombre_finalidad', vista: 'vista'}
                     }),
                 valueField: 'id_finalidad',
                 displayField: 'nombre_finalidad',
@@ -869,9 +869,9 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.ocultarComponente(this.cmpNroCheque);
 		this.ocultarComponente(this.cmpImporteDeposito);
 		this.ocultarComponente(this.cmpImporteCheque);
-		this.ocultarComponente(this.cmpIdLibroBancosFk);
+		this.ocultarComponente(this.cmpIdLibroBancosFk);					
 		
-		 this.cmpTipo.on('select',function(com,dat){
+		this.cmpTipo.on('select',function(com,dat){
 		
 			switch(dat.data.variable){
 				case 'cheque':
