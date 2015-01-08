@@ -588,7 +588,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_finalidad', type: 'numeric'},
 		{name:'nombre_finalidad', type: 'string'},
 		{name:'color', type: 'string'},
-		{name:'saldo_deposito', type: 'numeric'}
+		{name:'saldo_deposito', type: 'numeric'},
+		{name:'nombre_regional', type: 'string'}
 	],
 	sortInfo:{
 		field: 'fecha',
@@ -798,7 +799,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				params:{
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,
-					'fecha_cheque_literal' : data.fecha_cheque_literal
+					'fecha_cheque_literal' : data.fecha_cheque_literal,
+					'nombre_regional' : data.nombre_regional
 				},
 				success:this.successExport,
 				failure: this.conexionFailure,
@@ -827,7 +829,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				params:{
 					'a_favor':data.a_favor , 
 					'importe_cheque' : data.importe_cheque ,
-					'fecha_cheque_literal' : data.fecha_cheque_literal
+					'fecha_cheque_literal' : data.fecha_cheque_literal,
+					'nombre_regional' : data.nombre_regional
 				},
 				success:this.successExport,
 				failure: this.conexionFailure,
