@@ -740,10 +740,10 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			if(NumSelect != 0)
 			{		
-				var data='id='+ data.id_libro_bancos;  
+				var data='id='+ data.nro_comprobante;  
 				console.log(data);
-				//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);
-				window.open('http://172.17.45.11/Home/MemorandumFondosEnAvance?'+data);	
+				window.open('http://172.17.45.11/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
+				//window.open('http://172.17.45.11/Home/MemorandumFondosEnAvance?'+data);	
 			}
 			else
 			{
