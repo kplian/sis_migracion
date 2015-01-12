@@ -592,7 +592,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'nombre_regional', type: 'string'}
 	],
 	sortInfo:{
-		field: 'fecha',
+		field: 'id_libro_bancos',
 		direction: 'DESC'
 	},
 	bdel:true,

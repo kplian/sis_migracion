@@ -570,7 +570,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'saldo_deposito', type: 'numeric'}
 	],
 		sortInfo : {
-			field : 'fecha',
+			field : 'id_libro_bancos',
 			direction : 'DESC'
 		},
 		bdel : true,
@@ -581,7 +581,10 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpTipo = this.getComponente('tipo');		
 			this.cmpNroCheque = this.getComponente('nro_cheque');
 			this.cmpImporteCheque = this.getComponente('importe_cheque');
+			this.cmpImporteDeposito = this.getComponente('importe_deposito');
 			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
+			this.cmpDepto = this.getComponente('id_depto');
+			this.cmpFecha = this.getComponente('fecha');
 			
 			this.ocultarComponente(this.cmpNroCheque);
 			this.ocultarComponente(this.cmpImporteCheque);
@@ -610,7 +613,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						  this.getBoton('fin_registro').enable();
 						  this.getBoton('btnReporteDeposito').disable();
 						}
-						this.getBoton('edit').disable();
+						this.getBoton('edit').enable();
 						this.getBoton('del').disable();
 				   }
 			  }
@@ -693,6 +696,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpNroLiquidacion.setValue(data.nro_liquidacion);
 			this.cmpIdLibroBancosFk.setValue(data.id_libro_bancos_fk);
 			
+		},
+		
+		onButtonEdit:function(){
+			Phx.vista.TsLibroBancosDeposito.superclass.onButtonEdit.call(this);
+			var data = this.getSelectedData();
+			
+			if(data.estado=='depositado'){
+				this.cmpDepto.disable();
+				this.cmpFecha.disable();
+				this.cmpImporteDeposito.disable();
+			}else{
+				this.cmpDepto.enable();
+				this.cmpFecha.enable();
+				this.cmpImporteDeposito.enable();
+			}
 		},
 		
 		reporteDeposito : function(){

@@ -526,7 +526,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'color', type: 'string'}
 	],
         sortInfo : {
-            field : 'fecha',
+            field : 'id_libro_bancos',
             direction : 'DESC'
         },
         bdel : true,
