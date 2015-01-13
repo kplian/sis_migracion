@@ -623,7 +623,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			this.cmpObservaciones = this.getComponente('observaciones');
 			this.cmpDetalle = this.getComponente('detalle');		
 			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
-			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');	
+			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');				
 			
 			this.cmpTipo.setValue(data.tipo);
 			this.cmpAFavor.setValue(data.a_favor);
@@ -686,7 +686,12 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					  this.getBoton('btnCheque2').disable();
 					  this.getBoton('btnMemoramdum').disable();
 					}
-					this.getBoton('edit').disable();
+					if (data['estado'] == 'impreso'){   
+							this.getBoton('edit').enable();
+					}else{
+						this.getBoton('edit').disable();
+					}
+					//this.getBoton('edit').disable();
 					this.getBoton('del').disable();
 			   }
 				this.getBoton('btnChequeoDocumentosWf').enable();
@@ -700,6 +705,26 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				this.getBoton('del').disable();
 		  }
 	 },
+	 
+	 onButtonEdit:function(){
+			Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
+			var data = this.getSelectedData();			
+			if(data.tipo=='cheque')
+				this.mostrarComponente(this.cmpNroCheque);
+			else
+				this.ocultarComponente(this.cmpNroCheque);
+			if(data.estado=='impreso'){
+				this.cmpDepto.disable();
+				this.cmpFecha.disable();
+				this.cmpImporteCheque.disable();
+				this.cmpNroCheque.disable();
+			}else{
+				this.cmpDepto.enable();
+				this.cmpFecha.enable();
+				this.cmpImporteCheque.enable();
+				this.cmpNroCheque.disable();
+			}
+		},
 	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();
@@ -868,6 +893,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	    this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
 		this.cmpIdFinalidad = this.getComponente('id_finalidad');
 		this.cmpIdCuentaBancaria = this.getComponente('id_cuenta_bancaria');
+		this.cmpDepto = this.getComponente('id_depto');
+		this.cmpFecha = this.getComponente('fecha');
 		
 		this.ocultarComponente(this.cmpNroCheque);
 		this.ocultarComponente(this.cmpImporteDeposito);
