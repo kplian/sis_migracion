@@ -612,6 +612,8 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpNroLiquidacion = this.getComponente('nro_liquidacion');
 			this.cmpIdCuentaBancaria = this.getComponente('id_cuenta_bancaria');
 			this.cmpNroComprobante = this.getComponente('nro_comprobante');
+			this.cmpDepto = this.getComponente('id_depto');
+			this.cmpFecha = this.getComponente('fecha');
 						
 			this.ocultarComponente(this.cmpIdFinalidad);
 			this.ocultarComponente(this.cmpNroCheque);
@@ -692,14 +694,18 @@ header("content-type: text/javascript; charset=UTF-8");
 						if (data['estado'] == 'impreso'){   
 						  this.getBoton('btnCheque').enable();
 						  this.getBoton('btnCheque2').enable();
-						  this.getBoton('btnMemoramdum').enable();
+						  this.getBoton('btnMemoramdum').enable();						  
 						}					
 						else{
 						  this.getBoton('btnCheque').disable();
 						  this.getBoton('btnCheque2').disable();
 						  this.getBoton('btnMemoramdum').disable();
 						}
-						this.getBoton('edit').disable();
+						if (data['estado'] == 'impreso'){   
+							this.getBoton('edit').enable();
+						}else{
+							this.getBoton('edit').disable();
+						}
 						this.getBoton('del').disable();
 				   }			  	  
 				  this.getBoton('btnChequeoDocumentosWf').enable();
@@ -902,6 +908,17 @@ header("content-type: text/javascript; charset=UTF-8");
 				this.mostrarComponente(this.cmpNroCheque);
 			else
 				this.ocultarComponente(this.cmpNroCheque);
+			if(data.estado=='impreso'){
+				this.cmpDepto.disable();
+				this.cmpFecha.disable();
+				this.cmpImporteCheque.disable();
+				this.cmpNroCheque.disable();
+			}else{
+				this.cmpDepto.enable();
+				this.cmpFecha.enable();
+				this.cmpImporteCheque.enable();
+				this.cmpNroCheque.disable();
+			}
 		},
 		
         onReloadPage : function(m) {
