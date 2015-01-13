@@ -59,7 +59,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			);
 			
-			this.addButton('ant_estado',{
+			/*this.addButton('ant_estado',{
               argument: {estado: 'anterior'},
               text:'Rechazar',
               iconCls: 'batras',
@@ -67,7 +67,7 @@ header("content-type: text/javascript; charset=UTF-8");
               handler:this.antEstado,
               tooltip: '<b>Pasar al Anterior Estado</b>'
 			  }
-			);
+			);*/
 			
 			this.addButton('fin_registro',
 				{	text:'Siguiente',
@@ -678,18 +678,18 @@ header("content-type: text/javascript; charset=UTF-8");
 					  this.getBoton('btnCheque').disable();
 					  this.getBoton('btnCheque2').disable();
 					  this.getBoton('btnMemoramdum').disable();
-					  this.getBoton('ant_estado').disable();
+					  //this.getBoton('ant_estado').disable();
 					  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
 				  }
 				  else{				  
 					  
 					   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
 						  this.getBoton('fin_registro').disable();
-						  this.getBoton('ant_estado').disable();
+						  //this.getBoton('ant_estado').disable();
 						}					
 						else{
 						  this.getBoton('fin_registro').enable();
-						  this.getBoton('ant_estado').enable();
+						  //this.getBoton('ant_estado').enable();
 						}
 						if (data['estado'] == 'impreso'){   
 						  this.getBoton('btnCheque').enable();
