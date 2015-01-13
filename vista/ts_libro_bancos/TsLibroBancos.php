@@ -62,6 +62,16 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		
+		this.addButton('ant_estado',{
+		  argument: {estado: 'anterior'},
+		  text:'Anterior',
+		  iconCls: 'batras',
+		  disabled:true,
+		  handler:this.antEstado,
+		  tooltip: '<b>Pasar al Anterior Estado</b>'
+		  }
+		);
+		
 		this.addButton('fin_registro',
 			{	text:'Siguiente',
 				iconCls: 'badelante',
@@ -70,7 +80,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado</p>'
 			}
 		);
-		
+				
 		this.addButton('btnChequeoDocumentosWf',
 			{
 				text: 'Documentos',
@@ -666,15 +676,18 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				  this.getBoton('fin_registro').enable();				 
 				  this.getBoton('btnCheque').disable();
 				  this.getBoton('btnCheque2').disable();
-				  this.getBoton('btnMemoramdum').disable();	  
+				  this.getBoton('btnMemoramdum').disable();
+				  this.getBoton('ant_estado').disable();				  
 			  }
 			  else{				  
 				  
 				   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado' || data['estado'] == 'depositado'){   
 					  this.getBoton('fin_registro').disable();
+					  this.getBoton('ant_estado').disable();
 					}					
 					else{
 					  this.getBoton('fin_registro').enable();
+					  this.getBoton('ant_estado').enable();
 					}
 					if (data['estado'] == 'impreso'){   
 					  this.getBoton('btnCheque').enable();
@@ -687,7 +700,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					  this.getBoton('btnMemoramdum').disable();
 					}
 					if (data['estado'] == 'impreso'){   
-							this.getBoton('edit').enable();
+						this.getBoton('edit').enable();
 					}else{
 						this.getBoton('edit').disable();
 					}
@@ -707,24 +720,55 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	 },
 	 
 	 onButtonEdit:function(){
-			Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
-			var data = this.getSelectedData();			
-			if(data.tipo=='cheque')
-				this.mostrarComponente(this.cmpNroCheque);
-			else
-				this.ocultarComponente(this.cmpNroCheque);
-			if(data.estado=='impreso'){
-				this.cmpDepto.disable();
-				this.cmpFecha.disable();
-				this.cmpImporteCheque.disable();
-				this.cmpNroCheque.disable();
-			}else{
-				this.cmpDepto.enable();
-				this.cmpFecha.enable();
-				this.cmpImporteCheque.enable();
-				this.cmpNroCheque.disable();
-			}
-		},
+		Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
+		var data = this.getSelectedData();			
+		if(data.tipo=='cheque')
+			this.mostrarComponente(this.cmpNroCheque);
+		else
+			this.ocultarComponente(this.cmpNroCheque);
+		if(data.estado=='impreso'){
+			this.cmpDepto.disable();
+			this.cmpFecha.disable();
+			this.cmpImporteCheque.disable();
+			this.cmpNroCheque.disable();
+		}else{
+			this.cmpDepto.enable();
+			this.cmpFecha.enable();
+			this.cmpImporteCheque.enable();
+			this.cmpNroCheque.disable();
+		}
+	},
+		
+	antEstado:function(res,eve)
+	{                   
+		var d= this.sm.getSelected().data;
+		Phx.CP.loadingShow();
+		var operacion = 'cambiar';
+		operacion=  res.argument.estado == 'inicio'?'inicio':operacion; 
+		
+		Ext.Ajax.request({
+			url:'../../sis_migracion/control/TsLibroBancos/anteriorEstadoLibroBancos',
+			params:{id_libro_bancos:d.id_libro_bancos,
+					id_proceso_wf:d.id_proceso_wf,
+					id_estado_wf:d.id_estado_wf, 				
+					operacion: operacion},
+			success:this.successSinc,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});     
+	},
+		
+	successSinc:function(resp){
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		
+		if(reg.ROOT.datos.resultado!='falla'){                
+			this.reload();
+		 }else{
+			alert(reg.ROOT.datos.mensaje)
+		}
+	},
 	
 	sigEstado:function(){                   
 	  var rec=this.sm.getSelected();

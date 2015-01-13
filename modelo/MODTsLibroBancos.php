@@ -229,6 +229,8 @@ class MODTsLibroBancos extends MODbase{
                 
         //Define los parametros para la funcion
         $this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+		$this->setParametro('id_estado_wf','id_estado_wf','int4');
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
         $this->setParametro('operacion','operacion','varchar');
 		$this->setParametro('obs','obs','varchar');
         

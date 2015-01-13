@@ -59,15 +59,15 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			);
 			
-			/*this.addButton('ant_estado',{
+			this.addButton('ant_estado',{
               argument: {estado: 'anterior'},
-              text:'Rechazar',
+              text:'Anterior',
               iconCls: 'batras',
               disabled:true,
               handler:this.antEstado,
               tooltip: '<b>Pasar al Anterior Estado</b>'
 			  }
-			);*/
+			);
 			
 			this.addButton('fin_registro',
 				{	text:'Siguiente',
@@ -678,18 +678,18 @@ header("content-type: text/javascript; charset=UTF-8");
 					  this.getBoton('btnCheque').disable();
 					  this.getBoton('btnCheque2').disable();
 					  this.getBoton('btnMemoramdum').disable();
-					  //this.getBoton('ant_estado').disable();
+					  this.getBoton('ant_estado').disable();
 					  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
 				  }
 				  else{				  
 					  
 					   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
 						  this.getBoton('fin_registro').disable();
-						  //this.getBoton('ant_estado').disable();
+						  this.getBoton('ant_estado').disable();
 						}					
 						else{
 						  this.getBoton('fin_registro').enable();
-						  //this.getBoton('ant_estado').enable();
+						  this.getBoton('ant_estado').enable();
 						}
 						if (data['estado'] == 'impreso'){   
 						  this.getBoton('btnCheque').enable();
@@ -804,13 +804,26 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			Ext.Ajax.request({
 				url:'../../sis_migracion/control/TsLibroBancos/anteriorEstadoLibroBancos',
-				params:{id_libro_bancos:d.id_libro_bancos, 
+				params:{id_libro_bancos:d.id_libro_bancos,
+                        id_proceso_wf:d.id_proceso_wf,
+                        id_estado_wf:d.id_estado_wf, 				
 						operacion: operacion},
 				success:this.successSinc,
 				failure: this.conexionFailure,
 				timeout:this.timeout,
 				scope:this
 			});     
+		},
+		
+		successSinc:function(resp){
+            Phx.CP.loadingHide();
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+			console.log(reg.ROOT.datos);
+            if(reg.ROOT.datos.resultado!='falla'){                
+                this.reload();
+             }else{
+                alert(reg.ROOT.datos.mensaje)
+            }
 		},
 		  
 		sigEstado:function(){                   
