@@ -908,7 +908,9 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpObservaciones.setValue(this.maestro.observaciones);
 			this.cmpNroLiquidacion.setValue(this.maestro.nro_liquidacion);
 			this.cmpNroComprobante.setValue(this.maestro.nro_comprobante);
-			
+			this.cmpDepto.enable();
+			this.cmpFecha.enable();
+				
 			var record = this.cmpTipo.getStore();
 			record.data.variable = 'cheque';			
 			this.cmpTipo.fireEvent('select',this,record);
