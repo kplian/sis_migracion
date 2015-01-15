@@ -722,7 +722,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			{		
 				var data='idLibroBancos='+ data.id_libro_bancos;  			
 				//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);
-				window.open('http://172.17.45.11/LibroBancos/Home/VerLibroBancosDeposito?'+data);
+				window.open('http://sms.obairlines.bo/LibroBancos/Home/VerLibroBancosDeposito?'+data);
 			}
 			else
 			{
