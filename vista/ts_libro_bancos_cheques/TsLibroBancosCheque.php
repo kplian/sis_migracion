@@ -598,6 +598,8 @@ header("content-type: text/javascript; charset=UTF-8");
         },
         bdel : true,
         bsave : false,
+		fheight:'80%',
+		
 		iniciarEventos:function(){
 		
 			this.cmpTipo = this.getComponente('tipo');		

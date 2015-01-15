@@ -531,6 +531,7 @@ header("content-type: text/javascript; charset=UTF-8");
         },
         bdel : true,
         bsave : false,
+		fheight:'80%',
 
 		loadValoresIniciales:function(){
 			Phx.vista.TsLibroBancosDepositoExtra.superclass.loadValoresIniciales.call(this);

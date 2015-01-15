@@ -301,7 +301,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				maxLength:1310722
 			},
 				type:'NumberField',
-				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
+				//filters:{pfiltro:'saldo_deposito',type:'numeric'},
 				id_grupo:1,
 				grid:true,
 				form:false
@@ -575,6 +575,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		bdel : true,
 		bsave : false,
+		fheight:'80%',
 		
 		iniciarEventos:function(){
 		
@@ -601,7 +602,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					  this.getBoton('edit').enable();				  
 					  this.getBoton('del').enable();    
 					  this.getBoton('fin_registro').enable();				 
-					  this.getBoton('btnReporteDeposito').disable();	  
+					  this.getBoton('btnReporteDeposito').enable();	  
 				  }
 				  else{				  
 					  
@@ -719,8 +720,9 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			if(NumSelect != 0)
 			{		
-				var data='id='+ data.id_libro_bancos;  			
-				//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);				
+				var data='idLibroBancos='+ data.id_libro_bancos;  			
+				//window.open('http://172.17.45.11/ReportesEndeSis/Home/MemorandumFondosEnAvance?'+data);
+				window.open('http://172.17.45.11/LibroBancos/Home/VerLibroBancosDeposito?'+data);
 			}
 			else
 			{

@@ -11,7 +11,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
-
+	
 	constructor:function(config){
 		this.maestro=config.maestro;
     	//llama al constructor de la clase padre
@@ -609,6 +609,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	bsave:false,
 	bnew:true,
 	bedit:true,
+	fheight:'80%',
 	
 	loadValoresIniciales:function(){
 		Phx.vista.TsLibroBancos.superclass.loadValoresIniciales.call(this);
