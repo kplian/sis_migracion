@@ -137,11 +137,14 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 80,
+				gwidth: 90,
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){
 					//return value?value.dateFormat('d/m/Y'):''
-					return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+					if(record.data['sistema_origen']=='FONDOS_AVANCE')
+						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value.dateFormat('d/m/Y')+'</b></FONT>');
+					else
+						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
 				}
 			},
 				type:'DateField',
@@ -599,7 +602,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'nombre_finalidad', type: 'string'},
 		{name:'color', type: 'string'},
 		{name:'saldo_deposito', type: 'numeric'},
-		{name:'nombre_regional', type: 'string'}
+		{name:'nombre_regional', type: 'string'},
+		{name:'sistema_origen', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_libro_bancos',
@@ -693,7 +697,10 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					if (data['estado'] == 'impreso'){   
 					  this.getBoton('btnCheque').enable();
 					  this.getBoton('btnCheque2').enable();
-					  this.getBoton('btnMemoramdum').enable();
+					  if(data['sistema_origen']=='FONDOS_AVANCE')
+						this.getBoton('btnMemoramdum').enable();
+					  else
+					    this.getBoton('btnMemoramdum').disable();
 					}					
 					else{
 					  this.getBoton('btnCheque').disable();

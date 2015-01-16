@@ -54,6 +54,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('color','varchar');
 		$this->captura('saldo_deposito','numeric');
 		$this->captura('nombre_regional','varchar');
+		$this->captura('sistema_origen','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
