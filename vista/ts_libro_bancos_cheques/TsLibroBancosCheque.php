@@ -112,21 +112,6 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 		{
             config:{
-                name: 'num_tramite',
-                fieldLabel: 'Num. Tramite',
-                allowBlank: true,
-                anchor: '80%',
-                gwidth: 150,
-                maxLength:200
-            },
-            type:'TextField',
-            filters:{pfiltro:'lban.num_tramite',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:false
-        },
-		{
-            config:{
                 name: 'id_depto',
                 fieldLabel: 'Depto',
                 allowBlank: false,
@@ -149,7 +134,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){
 					//return value?value.dateFormat('d/m/Y'):''
@@ -168,7 +153,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'A Favor',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 125,
 				maxLength:100
 			},
 				type:'TextField',
@@ -183,7 +168,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'Detalle',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 125,
 				maxLength:200
 			},
 				type:'TextArea',
@@ -275,7 +260,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'Nro Cheque',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:6
 			},
 				type:'NumberField',
@@ -339,7 +324,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				lazyRender:true,
 				mode: 'local',
 				valueField: 'estilo',
-				gwidth: 100,
+				gwidth: 60,
 				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU']
 			},
 			type:'ComboBox',
@@ -352,6 +337,36 @@ header("content-type: text/javascript; charset=UTF-8");
 			grid:true,
 			form:true
 		},
+		{
+			config:{
+				name: 'estado',
+				fieldLabel: 'Estado',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 80,
+				maxLength:20
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.estado',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false
+		},	
+		{
+            config:{
+                name: 'num_tramite',
+                fieldLabel: 'Num. Tramite',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 150,
+                maxLength:200
+            },
+            type:'TextField',
+            filters:{pfiltro:'lban.num_tramite',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
 		{
             config:{
                 name:'id_finalidad',
@@ -399,7 +414,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     },*/
             grid:true,
             form:true
-        },
+        },	
 		{
 			config: {
 				name: 'id_libro_bancos_fk',
@@ -431,7 +446,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				pageSize: 15,
 				queryDelay: 1000,
 				anchor: '100%',
-				gwidth: 150,
+				gwidth: 120,
 				minChars: 2,
 				renderer : function(value, p, record) {
 					return String.format('{0}', record.data['id_libro_bancos_fk']);
@@ -442,21 +457,6 @@ header("content-type: text/javascript; charset=UTF-8");
 			filters: {pfiltro: 'movtip.nombre',type: 'string'},
 			grid: true,
 			form: true
-		},
-		{
-			config:{
-				name: 'estado',
-				fieldLabel: 'Estado',
-				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:20
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.estado',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
 		},
 		{
 			config:{

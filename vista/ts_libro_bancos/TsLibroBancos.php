@@ -115,21 +115,6 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
             config:{
-                name: 'num_tramite',
-                fieldLabel: 'Num. Tramite',
-                allowBlank: true,
-                anchor: '80%',
-                gwidth: 150,
-                maxLength:200
-            },
-            type:'TextField',
-            filters:{pfiltro:'lban.num_tramite',type:'string'},
-            id_grupo:1,
-            grid:true,
-            form:false
-        },
-		{
-            config:{
                 name: 'id_depto',
                 fieldLabel: 'Depto',
                 allowBlank: false,
@@ -152,7 +137,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){
 					//return value?value.dateFormat('d/m/Y'):''
@@ -171,7 +156,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'A favor de',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 125,
 				maxLength:100
 			},
 				type:'TextField',
@@ -186,7 +171,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Detalle',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 125,
 				maxLength:200
 			},
 				type:'TextArea',
@@ -279,7 +264,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nro Cheque',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 80,
 				maxLength:6
 			},
 				type:'NumberField',
@@ -344,7 +329,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				lazyRender:true,
 				mode: 'local',
 				valueField: 'estilo',
-				gwidth: 100,
+				gwidth: 60,
 				store:['CBB','SRZ','LPB','TJA','SRE','CIJ','TDD','UYU']
 			},
 			type:'ComboBox',
@@ -356,6 +341,21 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				},
 			grid:true,
 			form:true
+		},
+		{
+			config:{
+				name: 'estado',
+				fieldLabel: 'estado',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:20
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.estado',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false
 		},
 		{
             config:{
@@ -436,7 +436,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				pageSize: 15,
 				queryDelay: 1000,
 				anchor: '100%',
-				gwidth: 150,
+				gwidth: 110,
 				minChars: 2,
 				renderer : function(value, p, record) {
 					return String.format('{0}', (record.data['id_libro_bancos_fk']==null)?'':record.data['id_libro_bancos_fk']);
@@ -447,22 +447,22 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			filters: {pfiltro: 'lban.id_libro_bancos_fk',type: 'string'},
 			grid: true,
 			form: true
-		},
+		},		
 		{
-			config:{
-				name: 'estado',
-				fieldLabel: 'estado',
-				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:20
-			},
-				type:'TextField',
-				filters:{pfiltro:'lban.estado',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
-		},
+            config:{
+                name: 'num_tramite',
+                fieldLabel: 'Num. Tramite',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 150,
+                maxLength:200
+            },
+            type:'TextField',
+            filters:{pfiltro:'lban.num_tramite',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:false
+        },
 		{
 			config:{
 				name: 'indice',
