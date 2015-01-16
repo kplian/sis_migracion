@@ -59,7 +59,7 @@ $body$
 						p_id_usuario_mod,
 						p_id_usuario_reg,
 						p_nro_afp,
-						p_tipo_jubilado,
+						(case when p_tipo_jubilado is null then 'no' else p_tipo_jubilado end),
 						p_usuario_ai);
 
 						       
@@ -87,7 +87,7 @@ $body$
 						 ,id_usuario_mod=p_id_usuario_mod
 						 ,id_usuario_reg=p_id_usuario_reg
 						 ,nro_afp=p_nro_afp
-						 ,tipo_jubilado=p_tipo_jubilado
+						 ,tipo_jubilado=(case when p_tipo_jubilado is null then 'no' else p_tipo_jubilado end)
 						 ,usuario_ai=p_usuario_ai
 						 WHERE id_funcionario_afp=p_id_funcionario_afp;
 
