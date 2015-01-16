@@ -923,6 +923,11 @@ header("content-type: text/javascript; charset=UTF-8");
 			var record = this.cmpTipo.getStore();
 			record.data.variable = 'cheque';			
 			this.cmpTipo.fireEvent('select',this,record);
+		},		
+		
+		successSave: function(resp) {		   
+		   Phx.vista.TsLibroBancosCheque.superclass.successSave.call(this,resp);        
+		   Phx.CP.getPagina(this.idContenedorPadre).reload();  
 		},
 		
 		onButtonEdit:function(){

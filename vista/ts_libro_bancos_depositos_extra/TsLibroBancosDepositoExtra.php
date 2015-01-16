@@ -184,7 +184,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				gwidth: 70,
 				store:new Ext.data.ArrayStore({
                             fields: ['variable', 'valor'],
-                            data : [ ['deposito','Dep?sito']
+                            data : [ ['deposito','Depósito']
                                     ]
                                     }),
 				valueField: 'variable',
@@ -291,7 +291,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				name: 'id_libro_bancos_fk',
 				fieldLabel: 'Deposito Asociado',
 				allowBlank: true,
-				emptyText: 'Elija una opci?n',
+				emptyText: 'Elija una opción',
 				store: new Ext.data.JsonStore({
 					url: '../../sis_/control/Clase/Metodo',
 					id: 'id_',
@@ -542,6 +542,11 @@ header("content-type: text/javascript; charset=UTF-8");
 			Phx.vista.TsLibroBancosDepositoExtra.superclass.onButtonNew.call(this); 	    
 			this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
 			this.cmpIdFinalidad.setValue(this.maestro.id_finalidad);
+		},
+		
+		successSave: function(resp) {		   
+		   Phx.vista.TsLibroBancosDepositoExtra.superclass.successSave.call(this,resp);        
+		   Phx.CP.getPagina(this.idContenedorPadre).reload();  
 		},
 		
 		clonar:function(){
