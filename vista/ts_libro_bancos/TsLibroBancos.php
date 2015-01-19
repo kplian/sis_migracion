@@ -364,7 +364,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
             config:{
                 name:'id_finalidad',
                 fieldLabel:'Finalidad',
-                allowBlank:true,
+                allowBlank:false,
                 emptyText:'Finalidad...',
                 store: new Ext.data.JsonStore({
                          url: '../../sis_tesoreria/control/Finalidad/listarFinalidadCuentaBancaria',

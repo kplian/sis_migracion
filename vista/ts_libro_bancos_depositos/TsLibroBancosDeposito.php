@@ -334,7 +334,7 @@ header("content-type: text/javascript; charset=UTF-8");
             config:{
                 name:'id_finalidad',
                 fieldLabel:'Finalidad',
-                allowBlank:true,
+                allowBlank:false,
                 emptyText:'Finalidad...',
                 store: new Ext.data.JsonStore({
                          url: '../../sis_tesoreria/control/Finalidad/listarFinalidadCuentaBancaria',
