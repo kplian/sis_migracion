@@ -286,7 +286,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				maxLength:1310722
 			},
 				type:'NumberField',
-				//filters:{pfiltro:'saldo_deposito',type:'numeric'},
+				filters:{pfiltro:'saldo_deposito',type:'numeric'},
 				id_grupo:1,
 				grid:true,
 				form:false
