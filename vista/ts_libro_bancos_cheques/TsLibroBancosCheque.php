@@ -633,7 +633,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.ocultarComponente(this.cmpNroCheque);
 						this.cmpImporteDeposito.setValue(0.00);
 						this.ocultarComponente(this.cmpImporteDeposito);
-						this.cmpImporteCheque.setValue(0.00);
+						//this.cmpImporteCheque.setValue(0.00);
 						this.mostrarComponente(this.cmpImporteCheque);
 						this.cmpNroCheque.reset();
 						break;	
@@ -641,7 +641,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.mostrarComponente(this.cmpNroCheque);
 						this.cmpImporteDeposito.setValue(0.00);
 						this.ocultarComponente(this.cmpImporteDeposito);
-						this.cmpImporteCheque.setValue(0.00);
+						//this.cmpImporteCheque.setValue(0.00);
 						this.mostrarComponente(this.cmpImporteCheque);
 						
 						var cta_bancaria = this.cmpIdCuentaBancaria.getValue();
@@ -663,7 +663,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						this.ocultarComponente(this.cmpNroCheque);
 						this.cmpImporteDeposito.setValue(0.00);
 						this.ocultarComponente(this.cmpImporteDeposito);
-						this.cmpImporteCheque.setValue(0.00);
+						//this.cmpImporteCheque.setValue(0.00);
 						this.mostrarComponente(this.cmpImporteCheque);
 						this.cmpNroCheque.reset();
 						break;
@@ -946,7 +946,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				this.cmpDepto.enable();
 				this.cmpFecha.enable();
 				this.cmpImporteCheque.enable();
-				this.cmpNroCheque.disable();
+				this.cmpNroCheque.enable();
 			}
 		},
 		

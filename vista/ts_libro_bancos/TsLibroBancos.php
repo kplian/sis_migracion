@@ -190,7 +190,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:25
+				maxLength:200
 			},
 				type:'TextArea',
 				filters:{pfiltro:'lban.observaciones',type:'string'},
@@ -743,7 +743,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			this.cmpDepto.enable();
 			this.cmpFecha.enable();
 			this.cmpImporteCheque.enable();
-			this.cmpNroCheque.disable();
+			this.cmpNroCheque.enable();
 		}
 	},
 		
