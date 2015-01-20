@@ -707,7 +707,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					  this.getBoton('btnCheque2').disable();
 					  this.getBoton('btnMemoramdum').disable();
 					}
-					if (data['estado'] == 'impreso'){   
+					if (data['estado'] == 'impreso' || data['estado'] == 'cobrado' || data['estado'] == 'entregado'){   
 						this.getBoton('edit').enable();
 					}else{
 						this.getBoton('edit').disable();
@@ -734,7 +734,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			this.mostrarComponente(this.cmpNroCheque);
 		else
 			this.ocultarComponente(this.cmpNroCheque);
-		if(data.estado=='impreso'){
+		if(data.estado=='impreso' || data.estado=='entregado' || data.estado=='cobrado'){
 			this.cmpDepto.disable();
 			this.cmpFecha.disable();
 			this.cmpImporteCheque.disable();
