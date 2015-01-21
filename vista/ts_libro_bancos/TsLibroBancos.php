@@ -141,10 +141,14 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){
 					//return value?value.dateFormat('d/m/Y'):''
-					if(record.data['sistema_origen']=='FONDOS_AVANCE')
+					if(record.data['sistema_origen']=='FONDOS_AVANCE'){
 						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value.dateFormat('d/m/Y')+'</b></FONT>');
-					else
-						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+					}else{
+						if(record.data['sistema_origen']=='KERP')						
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PAGOS'+value.dateFormat('d/m/Y')+'</b></FONT>');					
+						else
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+					}
 				}
 			},
 				type:'DateField',
