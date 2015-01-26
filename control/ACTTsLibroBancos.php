@@ -211,6 +211,67 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 	
+	function vistaPrevia(){
+		
+		$fecha_cheque_literal = $this->objParam->getParametro('fecha_cheque_literal');
+		$importe_cheque =$this->objParam->getParametro('importe_cheque');;	
+		$a_favor = $this->objParam->getParametro('a_favor');
+		$nombre_lugar = $this->objParam->getParametro('nombre_regional');
+		
+		$fichero= 'HTMLReporteCheque.php';
+		$fichero_salida = dirname(__FILE__).'/../../reportes_generados/'.$fichero;
+		
+		$fp=fopen($fichero_salida,w);
+		
+		$funciones = new funciones();
+		
+		$contenido = "<body onLoad='window.print();'>";
+		$contenido = $contenido. "<table border=0 style='line-height: 10px;'>";
+		$contenido = $contenido. "<td colspan='10'; style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='26'; style='text-align: left; width:25px; font-size:8pt'>".$nombre_lugar.", ".$fecha_cheque_literal."</td><tr>";
+		$contenido = $contenido. "<td colspan='28'; style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='3'; style='text-align: left; width:35px; font-size:8pt'>".number_format($importe_cheque,2)."</td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>".$a_favor."</td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td colspan='33'; style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td colspan='31'; style='text-align: left; width:35px; font-size:8pt'>".$funciones->num2letrasCheque($importe_cheque).'-----'."</td><tr>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'>VISTA PREVIA SIN VALOR</td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td>";
+		$contenido = $contenido. "<td style='text-align: left; width:35px; font-size:8pt'></td><td style='text-align: left; width:35px; font-size:8pt'></td><tr>";
+		$contenido = $contenido. '</body>';
+
+		fwrite($fp, $contenido);
+		fclose($fp);
+			
+		$mensajeExito = new Mensaje();
+		$mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+										'Se generó con éxito el reporte: '.$fichero,'control');
+		$mensajeExito->setArchivoGenerado($fichero);
+		$this->res = $mensajeExito;
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	  }
+	  
 	function listarDepositosENDESIS(){
 		$this->objParam->defecto('ordenacion','id_libro_bancos');
 		$this->objParam->defecto('dir_ordenacion','asc');

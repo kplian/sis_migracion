@@ -90,6 +90,16 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
 			}
 		);
+		
+		this.addButton('btnVistaPrevia',
+			{
+				text: 'Cheque Vista Previa',
+				iconCls: 'bprintcheck',
+				disabled: true,
+				handler: this.vistaPrevia,
+				tooltip: '<b>Vista Previa Cheque</b><br/>Vista Previa Cheque'
+			}
+		);
 	},
 			
 	Atributos:[
@@ -729,6 +739,11 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				this.getBoton('edit').disable();
 				this.getBoton('del').disable();
 		  }
+		  if(data['tipo']=='cheque'){
+			this.getBoton('btnVistaPrevia').enable();
+		  }else{
+			this.getBoton('btnVistaPrevia').disable();
+		  }
 	 },
 	 
 	 onButtonEdit:function(){
@@ -919,6 +934,33 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				scope:this
 			});
 			}
+		}
+		else
+		{
+			Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
+		}
+	},
+	
+	vistaPrevia : function(){
+		var NumSelect=this.sm.getCount();
+		
+		if(NumSelect!=0)
+		{
+			var data=this.sm.getSelected().data;
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+			url:'../../sis_migracion/control/TsLibroBancos/vistaPrevia',
+			params:{
+				'a_favor':data.a_favor , 
+				'importe_cheque' : data.importe_cheque ,
+				'fecha_cheque_literal' : data.fecha_cheque_literal,
+				'nombre_regional' : data.nombre_regional
+			},
+			success:this.successExport,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+			});
 		}
 		else
 		{
