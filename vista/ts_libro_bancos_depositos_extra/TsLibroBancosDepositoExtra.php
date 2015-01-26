@@ -448,7 +448,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				maxLength:4
 			},
 				type:'NumberField',
-				filters:{pfiltro:'usu1.cuenta',type:'string'},
+				filters:{pfiltro:'usr_reg',type:'string'},
 				id_grupo:1,
 				grid:true,
 				form:false
