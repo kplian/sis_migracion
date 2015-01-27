@@ -28,6 +28,16 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			);
 			
+			this.addButton('ant_estado',{
+              argument: {estado: 'anterior'},
+              text:'Anterior',
+              iconCls: 'batras',
+              disabled:true,
+              handler:this.antEstado,
+              tooltip: '<b>Pasar al Anterior Estado</b>'
+			  }
+			);
+			
 			this.addButton('fin_registro',
 				{	text:'Siguiente',
 					iconCls: 'badelante',
@@ -592,24 +602,60 @@ header("content-type: text/javascript; charset=UTF-8");
 					  this.getBoton('edit').enable();				  
 					  this.getBoton('del').enable();    
 					  this.getBoton('fin_registro').enable();					  
+					  this.getBoton('ant_estado').disable();					  
 				  }
 				  else{				  
 					  
 					   if (data['estado'] == 'depositado'){   
 						  this.getBoton('fin_registro').disable();
+						  this.getBoton('ant_estado').enable();
 						}					
 						else{
 						  this.getBoton('fin_registro').enable();
+						  this.getBoton('ant_estado').disable();
 						}
 						this.getBoton('edit').disable();
 						this.getBoton('del').disable();
 				   }		
 			   }else{
+					this.getBoton('ant_estado').disable();
 					this.getBoton('fin_registro').disable();
 					this.getBoton('edit').disable();
 					this.getBoton('del').disable();
 			   }
 		 },
+		 
+		 antEstado:function(res,eve)
+		{                   
+			var d= this.sm.getSelected().data;
+			Phx.CP.loadingShow();
+			var operacion = 'cambiar';
+			operacion=  res.argument.estado == 'inicio'?'inicio':operacion; 
+			
+			Ext.Ajax.request({
+				url:'../../sis_migracion/control/TsLibroBancos/anteriorEstadoLibroBancos',
+				params:{id_libro_bancos:d.id_libro_bancos,
+                        id_proceso_wf:d.id_proceso_wf,
+                        id_estado_wf:d.id_estado_wf, 				
+						operacion: operacion},
+				success:this.successSinc,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});     
+		},
+		
+		successSinc:function(resp){
+            Phx.CP.loadingHide();
+            var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+			console.log(reg.ROOT.datos);
+            if(reg.ROOT.datos.resultado!='falla'){                
+                this.reload();
+             }else{
+                alert(reg.ROOT.datos.mensaje)
+            }
+		},
+		
 		sigEstado:function(){                   
 		  var rec=this.sm.getSelected();
 		  this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
