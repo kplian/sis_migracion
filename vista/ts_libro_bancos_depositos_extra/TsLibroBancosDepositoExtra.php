@@ -563,6 +563,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpIdFinalidad.setValue(this.maestro.id_finalidad);
 		},
 		
+		onButtonEdit:function(){
+			Phx.vista.TsLibroBancosDepositoExtra.superclass.onButtonEdit.call(this);
+			var data = this.getSelectedData();
+			
+			if(data.estado=='depositado'){
+				this.cmpDepto.disable();
+				this.cmpFecha.disable();
+				this.cmpImporteDeposito.disable();
+			}else{
+				this.cmpDepto.enable();
+				this.cmpFecha.enable();
+				this.cmpImporteDeposito.enable();
+			}
+		},
+		
 		successSave: function(resp) {		   
 		   Phx.vista.TsLibroBancosDepositoExtra.superclass.successSave.call(this,resp);        
 		   Phx.CP.getPagina(this.idContenedorPadre).reload();  
@@ -591,8 +606,11 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpTipo = this.getComponente('tipo');		
 			this.cmpNroCheque = this.getComponente('nro_cheque');
 			this.cmpImporteCheque = this.getComponente('importe_cheque');
+			this.cmpImporteDeposito = this.getComponente('importe_deposito');
 			this.cmpIdLibroBancosFk = this.getComponente('id_libro_bancos_fk');
 			this.cmpIdFinalidad = this.getComponente('id_finalidad');
+			this.cmpDepto = this.getComponente('id_depto');
+			this.cmpFecha = this.getComponente('fecha');
 			
 			this.ocultarComponente(this.cmpIdFinalidad);
 			this.ocultarComponente(this.cmpNroCheque);
@@ -623,7 +641,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						  this.getBoton('fin_registro').enable();
 						  this.getBoton('ant_estado').disable();
 						}
-						this.getBoton('edit').disable();
+						this.getBoton('edit').enable();
 						this.getBoton('del').disable();
 				   }		
 			   }else{
