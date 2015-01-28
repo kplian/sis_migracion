@@ -47,6 +47,7 @@ DECLARE
     va_nro_cheque integer[];
     va_tipo varchar[];
     va_id_libro_bancos integer[];
+    va_id_cuenta_bancaria_endesis integer[];
     
     v_glosa1 varchar;
     v_glosa2 varchar;
@@ -152,10 +153,15 @@ BEGIN
                   coalesce(tra.nombre_cheque_trans,'S/N') as nombre_cheque_trans,
                   coalesce(tra.nro_cheque,-1) as nro_cheque,
                   tra.forma_pago::varchar as tipo,
-                  coalesce(tra.id_cuenta_bancaria_mov,-1) as id_libro_bancos
+                  coalesce(tra.id_cuenta_bancaria_mov,-1) as id_libro_bancos,
+                  coalesce(cb.id_cuenta_bancaria,-1) as id_cuenta_bancaria_endesis
                   from conta.tint_transaccion tra
                   inner join param.tcentro_costo cco
                   on cco.id_centro_costo = tra.id_centro_costo
+                  inner join conta.tcuenta cta
+                  on cta.id_cuenta=tra.id_cuenta
+      			  left join migra.tts_cuenta_bancaria cb
+                  on cb.id_cuenta_bancaria_pxp=tra.id_cuenta_bancaria and cb.id_gestion=cta.id_gestion       
                   where tra.id_int_comprobante = p_id_int_comprobante) loop
                   
     	va_id_int_transaccion[v_cont]=v_dat.id_int_transaccion;
@@ -178,6 +184,7 @@ BEGIN
         va_nro_cheque[v_cont]=v_dat.nro_cheque;
         va_tipo[v_cont]= COALESCE(v_dat.tipo,'');
         va_id_libro_bancos[v_cont]=v_dat.id_libro_bancos;
+        va_id_cuenta_bancaria_endesis[v_cont]=v_dat.id_cuenta_bancaria_endesis;
         va_glosa[v_cont]=COALESCE(v_dat.glosa,'--');
         --quita caracteres espcilaes que no tienen representacion en LATIN9
         va_glosa[v_cont] = translate(va_glosa[v_cont], '•', '-');
@@ -282,7 +289,8 @@ BEGIN
                 '||COALESCE(('array['''|| array_to_string(va_nombre_cheque_trans, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
                 '||COALESCE(('array['|| array_to_string(va_nro_cheque, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
                 '||COALESCE(('array['''|| array_to_string(va_tipo, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
-                '||COALESCE(('array['|| array_to_string(va_id_libro_bancos, ',')||']::integer[]')::varchar,'NULL::integer[]')||')'; 
+                '||COALESCE(('array['|| array_to_string(va_id_libro_bancos, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
+                '||COALESCE(('array['|| array_to_string(va_id_cuenta_bancaria_endesis, ',')||']::integer[]')::varchar,'NULL::integer[]')||')'; 
                 
                 
                 
