@@ -147,10 +147,14 @@ header("content-type: text/javascript; charset=UTF-8");
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){
 					//return value?value.dateFormat('d/m/Y'):''
-					if(record.data['sistema_origen']=='FONDOS_AVANCE')
+					if(record.data['sistema_origen']=='FONDOS_AVANCE'){
 						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value.dateFormat('d/m/Y')+'</b></FONT>');
-					else
-						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+					}else{
+						if(record.data['sistema_origen']=='KERP')						
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PG '+value.dateFormat('d/m/Y')+'</b></FONT>');					
+						else
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+					}
 				}
 			},
 				type:'DateField',
@@ -769,7 +773,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			if(NumSelect != 0)
 			{		
-				var data='id='+ data.nro_comprobante;  
+				var data='id='+ data.id_libro_bancos;  
 				console.log(data);
 				window.open('http://172.17.45.11/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);
 				//window.open('http://172.17.45.11/Home/MemorandumFondosEnAvance?'+data);	

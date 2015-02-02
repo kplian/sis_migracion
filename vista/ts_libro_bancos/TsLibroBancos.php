@@ -872,7 +872,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		
 		if(NumSelect != 0)
 		{		
-			var data='id='+ data.nro_comprobante;  			
+			var data='id='+ data.id_libro_bancos;  			
 			window.open('http://172.17.45.11/ReportesPXP/Home/MemorandumFondosEnAvance?'+data);				
 		}
 		else
