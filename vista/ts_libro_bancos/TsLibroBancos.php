@@ -62,6 +62,16 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			}
 		);
 		
+		this.addButton('btnNotificacion',
+			{
+				text: 'Notificacion',
+				iconCls: 'bdibu_mail',
+				disabled: false,
+				handler: this.enviarNotificacion,
+				tooltip: '<b>Notificacion</b><br/>Envia email de notificacion al solicitante'
+			}
+		);
+		
 		this.addButton('ant_estado',{
 		  argument: {estado: 'anterior'},
 		  text:'Anterior',
@@ -696,30 +706,40 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				  this.getBoton('btnCheque').disable();
 				  this.getBoton('btnCheque2').disable();
 				  this.getBoton('btnMemoramdum').disable();
+				  this.getBoton('btnNotificacion').disable();
 				  this.getBoton('ant_estado').disable();				  
 			  }
 			  else{				  
 				  
-				   if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado' || data['estado'] == 'depositado'){   
+				   //if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado' || data['estado'] == 'depositado'){   
+				   if (data['estado'] == 'anulado' || data['estado'] == 'reingresado' || data['estado'] == 'depositado'){   
 					  this.getBoton('fin_registro').disable();
 					  this.getBoton('ant_estado').disable();
 					}					
 					else{
-					  this.getBoton('fin_registro').enable();
+					  if(data['estado'] == 'cobrado')
+						this.getBoton('fin_registro').disable();
+					  else
+						this.getBoton('fin_registro').enable();
+					  //this.getBoton('fin_registro').enable();
 					  this.getBoton('ant_estado').enable();
 					}
 					if (data['estado'] == 'impreso'){   
 					  this.getBoton('btnCheque').enable();
 					  this.getBoton('btnCheque2').enable();
-					  if(data['sistema_origen']=='FONDOS_AVANCE')
+					  if(data['sistema_origen']=='FONDOS_AVANCE'){
 						this.getBoton('btnMemoramdum').enable();
-					  else
+						this.getBoton('btnNotificacion').enable();
+					  }else{
 					    this.getBoton('btnMemoramdum').disable();
+					    this.getBoton('btnNotificacion').disable();
+					  }
 					}					
 					else{
 					  this.getBoton('btnCheque').disable();
 					  this.getBoton('btnCheque2').disable();
 					  this.getBoton('btnMemoramdum').disable();
+					  this.getBoton('btnNotificacion').disable();
 					}
 					if (data['estado'] == 'impreso' || data['estado'] == 'cobrado' || data['estado'] == 'entregado'){   
 						this.getBoton('edit').enable();
@@ -734,6 +754,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				this.getBoton('btnChequeoDocumentosWf').disable();
 				this.getBoton('fin_registro').disable();
 				this.getBoton('btnMemoramdum').disable();
+				this.getBoton('btnNotificacion').disable();
 				this.getBoton('btnCheque').disable();
 				this.getBoton('btnCheque2').disable();
 				this.getBoton('edit').disable();
@@ -795,6 +816,22 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		 }else{
 			alert(reg.ROOT.datos.mensaje)
 		}
+	},
+	
+	enviarNotificacion:function(res,eve)
+	{                   
+		var d= this.sm.getSelected().data;
+		Phx.CP.loadingShow();
+		
+		Ext.Ajax.request({
+			url:'../../sis_migracion/control/TsLibroBancos/enviarNotificacion',
+			params:{id_libro_bancos:d.id_libro_bancos,				
+					operacion: 'notificar'},
+			success:this.successSinc,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});     
 	},
 	
 	sigEstado:function(){                   

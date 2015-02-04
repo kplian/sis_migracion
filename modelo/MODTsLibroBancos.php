@@ -115,20 +115,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('total_haber','text');
 		$this->captura('indice','numeric');
 		$this->captura('fecha','date');
-		/*
-		$this->var->add_def_cols('fecha_reporte','text');	
-		$this->var->add_def_cols('a_favor','varchar');
-		$this->var->add_def_cols('detalle','text');	
-		$this->var->add_def_cols('nro_liquidacion','varchar');
-		$this->var->add_def_cols('nro_comprobante','varchar');
-		$this->var->add_def_cols('nro_cheque','integer');	
-		$this->var->add_def_cols('importe_deposito','text');				
-		$this->var->add_def_cols('importe_cheque','text');
-		$this->var->add_def_cols('saldo','text');
-		$this->var->add_def_cols('total_debe','text');
-		$this->var->add_def_cols('total_haber','text');
-		$this->var->add_def_cols('indice','numeric');
-		$this->var->add_def_cols('fecha','date');*/
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -310,6 +297,25 @@ class MODTsLibroBancos extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+	
+	function obtenerDatosSolicitanteFondoAvance(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='tes.ft_ts_libro_bancos_sel';
+		$this->transaccion='TES_SOLFONAVA_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setCount(false);
+		$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+		//Definicion de la lista del resultado del query
+		$this->captura('email','varchar');
+		$this->captura('nombre_completo','text');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}	
 }
 ?>
