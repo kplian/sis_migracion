@@ -357,6 +357,9 @@ class ACTTsLibroBancos extends ACTbase{
 		 
 	     $array = $this->res->getDatos();		 
 		 
+		 if($array[0]['email']==''){
+			echo "{\"ROOT\":{\"error\":true,\"detalle\":{\"mensaje\":\" Error al enviar correo no existe destinatario\"}}}"; 
+		 }
 		 ////////////////////////////////////////
 		 //arma el texto del correo electronico
 		 ///////////////////////////////////////
@@ -378,14 +381,14 @@ class ACTTsLibroBancos extends ACTbase{
 		 ///////////////////////////////////////////////////
 		   
 		    $correo=new CorreoExterno();
-		    //$correo->addDestinatario($_SESSION['_MAIL_NITIFICACIONES_2']); //  este mail esta destinado al area de presupuestos
-	        //$correo->addDestinatario($array[0]['email']);
-			$correo->addDestinatario('gonzalo.sarmiento@boa.bo');
+		    $correo->addDestinatario($_SESSION['_MAIL_NITIFICACIONES_2']); //  este mail esta destinado al area de presupuestos
+	        $correo->addDestinatario($array[0]['email']);
+			
 		    //asunto
-       		$correo->setAsunto('Prueba Solicitud atendida');
+       		$correo->setAsunto('Solicitud atendida');
             //cuerpo mensaje
             $correo->setMensaje($data_mail);
-            $correo->setTitulo('Prueba Solicitud atendida');
+            $correo->setTitulo('Solicitud atendida');
 			
 			$correo->setDefaultPlantilla();
             $resp=$correo->enviarCorreo();           
