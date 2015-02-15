@@ -1,8 +1,17 @@
 CREATE OR REPLACE FUNCTION migracion.f_trans_tkp_empleado_afp_tfuncionario_afp (
-			  v_operacion varchar,p_id_empleado_afp int4,p_id_afp int4,p_id_empleado int4,p_estado_reg varchar,p_fecha_asignacion date,p_fecha_finalizacion date,p_fecha_reg date,p_jubilado varchar,p_nro_afp varchar)
-			RETURNS varchar [] AS
-			$BODY$
-
+  v_operacion varchar,
+  p_id_empleado_afp integer,
+  p_id_afp integer,
+  p_id_empleado integer,
+  p_estado_reg varchar,
+  p_fecha_asignacion date,
+  p_fecha_finalizacion date,
+  p_fecha_reg date,
+  p_jubilado varchar,
+  p_nro_afp varchar
+)
+RETURNS varchar [] AS
+$body$
 DECLARE
 			 
 			g_registros record;
@@ -53,7 +62,7 @@ BEGIN
 			v_id_usuario_mod=1::int4;
 			v_id_usuario_reg=1::int4;
 			v_nro_afp=convert(p_nro_afp::varchar, 'LATIN1', 'UTF8');
-			v_tipo_jubilado=convert((case when p_jubilado = 'si' then 'jubilado_55' else 'no' end)::varchar, 'LATIN1', 'UTF8');
+			v_tipo_jubilado=convert(p_jubilado::varchar, 'LATIN1', 'UTF8');
 			v_usuario_ai=convert('no_hay'::varchar, 'LATIN1', 'UTF8');
    
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
@@ -95,9 +104,8 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
-			$BODY$
-
+$body$
 LANGUAGE 'plpgsql'
-			VOLATILE
-			CALLED ON NULL INPUT
-			SECURITY INVOKER;
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER;
