@@ -26,6 +26,9 @@ DECLARE
 			v_id_usuario_reg int4;
 			v_nombre varchar;
 			v_usuario_ai varchar;
+			v_fecha_ini date;
+			v_fecha_fin date;
+			v_id_cargo_padre integer;
 BEGIN
 			
 			
@@ -36,7 +39,10 @@ BEGIN
 			           ---------------------------------------
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
-
+			select fecha_inicio, fecha_fin, id_cargo_padre 
+			into v_fecha_ini,v_fecha_fin,v_id_cargo_padre
+			from kard.tkp_cargo
+			where id_cargo = p_id_cargo
 			           
 			           			v_id_temporal_cargo=p_id_cargo::int4;
 			v_id_temporal_jerarquia_aprobacion=p_id_jerarquia_aprobacion::int4;
@@ -54,7 +60,8 @@ BEGIN
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tkp_cargo_ttemporal_cargo (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_temporal_cargo::varchar,'NULL')||','||COALESCE(v_id_temporal_jerarquia_aprobacion::varchar,'NULL')||','||COALESCE(''''||v_estado::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_ai::varchar,'NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')||','||COALESCE(''''||v_usuario_ai::varchar||'''','NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_temporal_cargo::varchar,'NULL')||','||COALESCE(v_id_temporal_jerarquia_aprobacion::varchar,'NULL')||','||COALESCE(''''||v_estado::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_ai::varchar,'NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')
+			               ||','||COALESCE(''''||v_usuario_ai::varchar||'''','NULL') ||','||COALESCE(''''||v_fecha_ini::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_fin::varchar||'''','NULL')||','||COALESCE(v_id_cargo_padre::varchar,'NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink

@@ -10,7 +10,11 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_cargo_ttemporal_cargo (
   p_id_usuario_mod integer,
   p_id_usuario_reg integer,
   p_nombre varchar,
-  p_usuario_ai varchar
+  p_usuario_ai varchar,
+  p_fecha_ini date,
+  p_fecha_fin date,
+  id_cargo_padre
+  
 )
 RETURNS text AS
 $body$
@@ -39,7 +43,9 @@ $body$
 						id_usuario_mod,
 						id_usuario_reg,
 						nombre,
-						usuario_ai)
+						usuario_ai,
+						fecha_ini,
+						id_cargo_padre)
 				VALUES (
 						p_id_temporal_cargo,
 						p_id_temporal_jerarquia_aprobacion,
@@ -51,7 +57,9 @@ $body$
 						p_id_usuario_mod,
 						p_id_usuario_reg,
 						p_nombre,
-						p_usuario_ai);
+						p_usuario_ai,
+						p_fecha_ini,
+						p_id_cargo_padre);
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
@@ -78,6 +86,10 @@ $body$
 						 ,id_usuario_reg=p_id_usuario_reg
 						 ,nombre=p_nombre
 						 ,usuario_ai=p_usuario_ai
+						 ,fecha_ini = p_fecha_ini
+						 ,fecha_fin = p_fecha_fin
+						 ,id_cargo_padre = p_id_cargo_padre
+						 
 						 WHERE id_temporal_cargo=p_id_temporal_cargo;
 
 						       
