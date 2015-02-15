@@ -55,6 +55,15 @@ header("content-type: text/javascript; charset=UTF-8");
 					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador pasara a depositado</p>'
 				}
 			);
+			
+			this.addButton('trans_deposito',
+				{	text:'Transfer. Depósito',
+					iconCls: 'btransferMoney',
+					disabled:false,
+					handler:this.transDeposito,
+					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Total o Saldo</p>'
+				}
+			);
         },
         Atributos:[
 		{
@@ -101,11 +110,18 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'Fecha',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 80,
+				gwidth: 90,
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){
 					//return value?value.dateFormat('d/m/Y'):''
-					return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+					if(record.data['sistema_origen']=='FONDOS_AVANCE'){
+						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value.dateFormat('d/m/Y')+'</b></FONT>');
+					}else{
+						if(record.data['sistema_origen']=='KERP')						
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PG '+value.dateFormat('d/m/Y')+'</b></FONT>');					
+						else
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+					}
 				}
 			},
 				type:'DateField',
@@ -136,7 +152,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 125,
-				maxLength:200
+				maxLength:400
 			},
 				type:'TextArea',
 				filters:{pfiltro:'lban.detalle',type:'string'},
@@ -185,6 +201,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.nro_comprobante',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
+				name: 'comprobante_sigma',
+				fieldLabel: 'Comprobante Sigma',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -529,6 +560,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'id_libro_bancos_fk', type: 'numeric'},
 		{name:'estado', type: 'string'},
 		{name:'nro_comprobante', type: 'string'},
+		{name:'comprobante_sigma', type: 'string'},
 		{name:'indice', type: 'numeric'},
 		{name:'estado_reg', type: 'string'},
 		{name:'tipo', type: 'string'},
@@ -542,7 +574,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'nombre', type: 'string'},
 		{name:'id_finalidad', type: 'numeric'},
 		{name:'nombre_finalidad', type: 'string'},
-		{name:'color', type: 'string'}
+		{name:'color', type: 'string'},
+		{name:'sistema_origen', type: 'string'}
 	],
         sortInfo : {
             field : 'id_libro_bancos',
@@ -624,32 +657,29 @@ header("content-type: text/javascript; charset=UTF-8");
 			  
 			  Phx.vista.TsLibroBancosDepositoExtra.superclass.preparaMenu.call(this,n); 
 			  
-			  if(data['id_proceso_wf'] !== null){			  
-				  if (data['estado']== 'borrador'){
-					  this.getBoton('edit').enable();				  
-					  this.getBoton('del').enable();    
-					  this.getBoton('fin_registro').enable();					  
-					  this.getBoton('ant_estado').disable();					  
-				  }
-				  else{				  
-					  
-					   if (data['estado'] == 'depositado'){   
-						  this.getBoton('fin_registro').disable();
-						  this.getBoton('ant_estado').enable();
-						}					
-						else{
-						  this.getBoton('fin_registro').enable();
-						  this.getBoton('ant_estado').disable();
-						}
-						this.getBoton('edit').enable();
-						this.getBoton('del').disable();
-				   }		
-			   }else{
+			  if(data['id_proceso_wf'] !== null){
+				  if(data['estado']=='borrador'){
+					this.getBoton('edit').enable();
+					this.getBoton('del').enable();
 					this.getBoton('ant_estado').disable();
-					this.getBoton('fin_registro').disable();
-					this.getBoton('edit').disable();
+					this.getBoton('fin_registro').enable();
+				  }else{
 					this.getBoton('del').disable();
-			   }
+					this.getBoton('fin_registro').disable();
+					if(data['estado']=='transferido'){
+						this.getBoton('edit').disable();
+						this.getBoton('ant_estado').disable();
+					}else{
+						this.getBoton('edit').enable();
+						this.getBoton('ant_estado').enable();
+					}
+				  }			  		  
+			  }else{
+				this.getBoton('fin_registro').disable();
+				this.getBoton('ant_estado').disable();
+				this.getBoton('edit').disable();
+				this.getBoton('del').disable();
+			  }
 		 },
 		 
 		 antEstado:function(res,eve)
@@ -707,6 +737,55 @@ header("content-type: text/javascript; charset=UTF-8");
 									 });        
 				   
 		 },	   
+		 
+		 transDeposito:function(){ 
+			var rec=this.sm.getSelected();
+			
+			var NumSelect=this.sm.getCount();
+			
+			if(NumSelect != 0)
+			{						
+				Phx.CP.loadWindows('../../../sis_migracion/vista/transferencia/FormTransferencia.php',
+				'Transferencia Deposito',
+				{
+					modal:true,
+					width:450,
+					height:250
+				}, {data:rec.data}, this.idContenedor,'FormTransferencia',
+				{
+					config:[{
+							  event:'beforesave',
+							  delegate: this.transferir,
+							}
+							],
+				   scope:this
+				 })
+			}
+			else
+			{
+				Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+			}
+			      				   
+		},
+		
+		transferir:function(wizard,resp){
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url:'../../sis_migracion/control/TsLibroBancos/transferirDeposito',
+                params:{
+                        id_libro_bancos:resp.id_libro_bancos,
+                        tipo:resp.tipo,  
+                        id_libro_bancos_fk:resp.id_libro_bancos_fk
+                 },
+                argument:{wizard:wizard},  
+                success:this.successWizard,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+           
+		},
 		
 		onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
@@ -734,7 +813,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
-			this.reload();
+			Phx.CP.getPagina(this.idContenedorPadre).reload();  
+			//this.reload();
 		 },
 		 
 		onReloadPage:function(m){

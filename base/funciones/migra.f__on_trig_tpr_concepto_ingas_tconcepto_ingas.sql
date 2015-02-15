@@ -177,7 +177,7 @@ $body$
                       param.tconcepto_ingas  
                     SET						 
                     estado_reg=p_estado_reg
-        			,desc_ingas = v_desc_ingas
+        			,desc_ingas = p_desc_ingas
                    ,fecha_mod=p_fecha_mod
                    ,fecha_reg=p_fecha_reg
                    ,id_oec=p_id_oec
