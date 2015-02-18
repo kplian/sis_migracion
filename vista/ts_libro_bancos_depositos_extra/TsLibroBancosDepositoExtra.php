@@ -55,6 +55,15 @@ header("content-type: text/javascript; charset=UTF-8");
 					tooltip: '<b>Siguiente</b><p>Pasa al siguiente estado, si esta en borrador pasara a depositado</p>'
 				}
 			);
+			
+			this.addButton('trans_deposito',
+				{	text:'Transfer. Depósito',
+					iconCls: 'btransfer',
+					disabled:false,
+					handler:this.transDeposito,
+					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Total o Saldo</p>'
+				}
+			);
         },
         Atributos:[
 		{
@@ -715,6 +724,55 @@ header("content-type: text/javascript; charset=UTF-8");
 									 });        
 				   
 		 },	   
+		 
+		 transDeposito:function(){ 
+			var rec=this.sm.getSelected();
+			
+			var NumSelect=this.sm.getCount();
+			
+			if(NumSelect != 0)
+			{						
+				Phx.CP.loadWindows('../../../sis_migracion/vista/transferencia/FormTransferencia.php',
+				'Transferencia Deposito',
+				{
+					modal:true,
+					width:450,
+					height:250
+				}, {data:rec.data}, this.idContenedor,'FormTransferencia',
+				{
+					config:[{
+							  event:'beforesave',
+							  delegate: this.transferir,
+							}
+							],
+				   scope:this
+				 })
+			}
+			else
+			{
+				Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un item.');
+			}
+			      				   
+		},
+		
+		transferir:function(wizard,resp){
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                // form:this.form.getForm().getEl(),
+                url:'../../sis_migracion/control/TsLibroBancos/transferirDeposito',
+                params:{
+                        id_libro_bancos:resp.id_libro_bancos,
+                        tipo:resp.tipo,  
+                        id_libro_bancos_fk:resp.id_libro_bancos_fk
+                 },
+                argument:{wizard:wizard},  
+                success:this.successWizard,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+           
+		},
 		
 		onSaveWizard:function(wizard,resp){
 			Phx.CP.loadingShow();
@@ -742,7 +800,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
-			this.reload();
+			Phx.CP.getPagina(this.idContenedorPadre).reload();  
+			//this.reload();
 		 },
 		 
 		onReloadPage:function(m){

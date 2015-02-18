@@ -62,7 +62,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.addButton('btnNotificacion',
 				{
 					text: 'Notificacion',
-					iconCls: 'bdibu_mail',
+					iconCls: 'bsendmail',
 					disabled: false,
 					handler: this.enviarNotificacion,
 					tooltip: '<b>Notificacion</b><br/>Envia email de notificacion al solicitante'
@@ -714,7 +714,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				  else{				  
 					  
 					   //if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
-					   if (data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
+					   if (data['estado'] == 'anulado' || data['estado'] == 'reingresado' || data['estado'] == 'transferido'){   
 						  this.getBoton('fin_registro').disable();
 						  this.getBoton('ant_estado').disable();
 						}					
@@ -972,7 +972,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		successWizard:function(resp){
 			Phx.CP.loadingHide();
 			resp.argument.wizard.panel.destroy()
-			this.reload();
+			Phx.CP.getPagina(this.idContenedorPadre).reload();  
+			//this.reload();
 		 },
 		 
 		 loadCheckDocumentosSolWf:function() {

@@ -65,7 +65,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.addButton('btnNotificacion',
 			{
 				text: 'Notificacion',
-				iconCls: 'bdibu_mail',
+				iconCls: 'bsendmail',
 				disabled: false,
 				handler: this.enviarNotificacion,
 				tooltip: '<b>Notificacion</b><br/>Envia email de notificacion al solicitante'

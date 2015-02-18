@@ -31,7 +31,7 @@ class ACTTsLibroBancos extends ACTbase{
 		}
 		if($this->objParam->getParametro('mycls')=='TsLibroBancosCheque'){
 			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
-			$this->objParam->addFiltro("tipo in (''cheque'',''debito_automatico'',''transferencia_carta'')");
+			$this->objParam->addFiltro("tipo in (''cheque'',''debito_automatico'',''transferencia_carta'',''transferencia_intern'')");
 		}
 		if($this->objParam->getParametro('mycls')=='TsLibroBancosDepositoExtra'){
 			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
@@ -85,6 +85,12 @@ class ACTTsLibroBancos extends ACTbase{
 		$this->res=$this->objFunc->siguienteEstadoLibroBancos($this->objParam);					
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	function transferirDeposito(){
+        $this->objFunc=$this->create('MODTsLibroBancos');  
+        $this->res=$this->objFunc->transferirDeposito($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
+    }
 	
 	function eliminarTsLibroBancos(){
 			$this->objFunc=$this->create('MODTsLibroBancos');	
