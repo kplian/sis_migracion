@@ -31,11 +31,11 @@ class ACTTsLibroBancos extends ACTbase{
 		}
 		if($this->objParam->getParametro('mycls')=='TsLibroBancosCheque'){
 			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
-			$this->objParam->addFiltro("tipo in (''cheque'',''debito_automatico'',''transferencia_carta'',''transferencia_intern'')");
+			$this->objParam->addFiltro("tipo in (''cheque'',''debito_automatico'',''transferencia_carta'',''transf_interna_debe'')");
 		}
 		if($this->objParam->getParametro('mycls')=='TsLibroBancosDepositoExtra'){
 			$this->objParam->addFiltro("id_libro_bancos_fk = ".$this->objParam->getParametro('id_libro_bancos'));
-			$this->objParam->addFiltro("tipo=''deposito''");
+			$this->objParam->addFiltro("tipo in (''deposito'',''transf_interna_haber'')");
 		}
 		
 		if($this->objParam->getParametro('m_nro_cheque')!=''){
