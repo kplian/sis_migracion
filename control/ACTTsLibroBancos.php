@@ -387,7 +387,7 @@ class ACTTsLibroBancos extends ACTbase{
 		 ///////////////////////////////////////////////////
 		   
 		    $correo=new CorreoExterno();
-		    $correo->addDestinatario($_SESSION['_MAIL_NITIFICACIONES_2']); //  este mail esta destinado al area de presupuestos
+		    $correo->addDestinatario($_SESSION['_MAIL_NITIFICACIONES_3']); //  este mail esta destinado al area de tesoreria
 	        $correo->addDestinatario($array[0]['email']);
 			
 		    //asunto

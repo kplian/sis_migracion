@@ -26,7 +26,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			});
 			this.Atributos[1].valorInicial = this.id_cuenta_bancaria;
-			this.Atributos[16].config.store.baseParams.id_cuenta_bancaria =this.id_cuenta_bancaria;		
+			this.Atributos[17].config.store.baseParams.id_cuenta_bancaria =this.id_cuenta_bancaria;		
 			
 			this.addButton('btnClonar',
 				{
@@ -69,7 +69,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			this.addButton('trans_deposito',
 				{	text:'Transfer. Depósito',
-					iconCls: 'btransfer',
+					iconCls: 'btransferMoney',
 					disabled:false,
 					handler:this.transDeposito,
 					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Total o Saldo</p>'
@@ -165,7 +165,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 150,
-				maxLength:200,				
+				maxLength:400,				
 				renderer : function (value, p, record){		
 					if(record.data['saldo_deposito']==0)					
 						return String.format('{0}', '<h2 style="background-color:#B9BBC9;"><b>'+value+'</b></h2>');
@@ -223,6 +223,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			id_grupo:1,
 			grid:true,
 			form:true
+		},
+		{
+			config:{
+				name: 'comprobante_sigma',
+				fieldLabel: 'Comprobante Sigma',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
 		},
 		{
 			config:{
@@ -579,6 +594,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'id_libro_bancos_fk', type: 'numeric'},
 		{name:'estado', type: 'string'},
 		{name:'nro_comprobante', type: 'string'},
+		{name:'comprobante_sigma', type: 'string'},
 		{name:'indice', type: 'numeric'},
 		{name:'estado_reg', type: 'string'},
 		{name:'tipo', type: 'string'},
@@ -624,34 +640,26 @@ header("content-type: text/javascript; charset=UTF-8");
 			  var data = this.getSelectedData();
 			  
 			  Phx.vista.TsLibroBancosDeposito.superclass.preparaMenu.call(this,n); 
-			  if(data['id_proceso_wf'] !== null){
-				  if (data['estado']== 'borrador'){
-					  this.getBoton('edit').enable();				  
-					  this.getBoton('del').enable();    
-					  this.getBoton('fin_registro').enable();				  
-					  this.getBoton('ant_estado').disable();				  
-					  this.getBoton('btnReporteDeposito').enable();	  
-				  }
-				  else{				  
-					  
-					   if (data['estado'] == 'depositado'){   
-						  this.getBoton('fin_registro').disable();
-						  this.getBoton('ant_estado').enable();
-						  this.getBoton('btnReporteDeposito').enable();
-						}					
-						else{
-						  this.getBoton('fin_registro').enable();
-						  this.getBoton('ant_estado').disable();
-						  this.getBoton('btnReporteDeposito').disable();
-						}
+			  if(data['id_proceso_wf'] !== null){			
+				  if(data['estado']=='borrador'){
+					this.getBoton('edit').enable();
+					this.getBoton('del').enable();
+					this.getBoton('ant_estado').disable();
+					this.getBoton('fin_registro').enable();
+				  }else{
+					this.getBoton('del').disable();
+					this.getBoton('fin_registro').disable();
+					if(data['estado']=='transferido'){
+						this.getBoton('edit').disable();
+						this.getBoton('ant_estado').disable();
+					}else{
 						this.getBoton('edit').enable();
-						this.getBoton('del').disable();
-				   }
-			  }
-			  else{
-			    //this.menuAdq.disable();				  
-			    this.getBoton('fin_registro').disable();
-			    this.getBoton('ant_estado').disable();				
+						this.getBoton('ant_estado').enable();
+					}
+				  }			  		  
+			  }else{
+				this.getBoton('fin_registro').disable();
+				this.getBoton('ant_estado').disable();
 				this.getBoton('edit').disable();
 				this.getBoton('del').disable();
 			  }	

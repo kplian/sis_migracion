@@ -195,7 +195,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 125,
-				maxLength:200
+				maxLength:400
 			},
 				type:'TextArea',
 				filters:{pfiltro:'lban.detalle',type:'string'},
@@ -244,6 +244,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.nro_comprobante',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
+				name: 'comprobante_sigma',
+				fieldLabel: 'Comprobante Sigma',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -600,6 +615,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'id_libro_bancos_fk', type: 'numeric'},
 		{name:'estado', type: 'string'},
 		{name:'nro_comprobante', type: 'string'},
+		{name:'comprobante_sigma', type: 'string'},
 		{name:'indice', type: 'numeric'},
 		{name:'estado_reg', type: 'string'},
 		{name:'tipo', type: 'string'},
@@ -617,7 +633,8 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'color', type: 'string'},
 		{name:'saldo_deposito', type: 'numeric'},
 		{name:'nombre_regional', type: 'string'},
-		{name:'sistema_origen', type: 'string'}
+		{name:'sistema_origen', type: 'string'},
+		{name:'notificado', type: 'string'}
 	],
         sortInfo : {
             field : 'id_libro_bancos',
@@ -699,75 +716,86 @@ header("content-type: text/javascript; charset=UTF-8");
 			  //var tb =this.tbar;
 			  
 			  Phx.vista.TsLibroBancosCheque.superclass.preparaMenu.call(this,n); 
+			  
 			  if(data['id_proceso_wf'] !== null){
-				  if (data['estado']== 'borrador'){
-					  this.getBoton('edit').enable();				  
-					  this.getBoton('del').enable();    
-					  this.getBoton('fin_registro').enable();				 
-					  this.getBoton('btnCheque').disable();
-					  this.getBoton('btnCheque2').disable();
-					  this.getBoton('btnMemoramdum').disable();
-					  this.getBoton('btnNotificacion').disable();
-					  this.getBoton('ant_estado').disable();
-					  //this.TabPanelSouth.get(1).disable();		//pestaña plan de pagos			  
-				  }
-				  else{				  
-					  
-					   //if (data['estado'] == 'cobrado' || data['estado'] == 'anulado' || data['estado'] == 'reingresado'){   
-					   if (data['estado'] == 'anulado' || data['estado'] == 'reingresado' || data['estado'] == 'transferido'){   
-						  this.getBoton('fin_registro').disable();
-						  this.getBoton('ant_estado').disable();
-						}					
-						else{
-						  if(data['estado'] == 'cobrado')
-							this.getBoton('fin_registro').disable();
-						  else
-							this.getBoton('fin_registro').enable();
-						  //this.getBoton('fin_registro').enable();
-						  this.getBoton('ant_estado').enable();
-						}
-						if (data['estado'] == 'impreso'){   
-						  this.getBoton('btnCheque').enable();
-						  this.getBoton('btnCheque2').enable();
-						  if(data['sistema_origen']=='FONDOS_AVANCE'){
-							this.getBoton('btnMemoramdum').enable();							
-							this.getBoton('btnNotificacion').enable();
-						  }else{
-							this.getBoton('btnMemoramdum').disable();
-							this.getBoton('btnNotificacion').disable();
-						  }
-						}					
-						else{
-						  this.getBoton('btnCheque').disable();
-						  this.getBoton('btnNotificacion').disable();
-						  this.getBoton('btnCheque2').disable();
-						  this.getBoton('btnMemoramdum').disable();
-						}
-						if (data['estado'] == 'impreso' || data['estado'] == 'cobrado' || data['estado'] == 'entregado'){   
-							this.getBoton('edit').enable();
-						}else{
-							this.getBoton('edit').disable();
-						}
-						this.getBoton('del').disable();
-				   }			  	  
-				  this.getBoton('btnChequeoDocumentosWf').enable();
-			  }
-			  else{
-				  //this.menuAdq.disable();				  
+			
+			  if(data['tipo'] == 'cheque'){				  
 				  this.getBoton('btnChequeoDocumentosWf').disable();
-				  this.getBoton('fin_registro').disable();
-				  this.getBoton('btnMemoramdum').disable();
-				  this.getBoton('btnCheque').disable();
-				  this.getBoton('btnCheque2').disable();
-				  this.getBoton('btnNotificacion').disable();
-				  this.getBoton('edit').disable();
-				  this.getBoton('del').disable();
-			  }
-			  if(data['tipo']=='cheque'){
-				this.getBoton('btnVistaPrevia').enable();
+				  if(data['estado']=='borrador'){
+					this.getBoton('btnMemoramdum').disable();
+					this.getBoton('btnNotificacion').disable();				  
+					this.getBoton('btnCheque').disable();
+					this.getBoton('btnCheque2').disable();				
+					this.getBoton('btnVistaPrevia').disable();
+					this.getBoton('edit').enable();
+					this.getBoton('del').enable();
+					this.getBoton('ant_estado').disable();
+					this.getBoton('fin_registro').enable();					
+				  }else{
+					this.getBoton('del').disable();
+					this.getBoton('btnVistaPrevia').enable();
+					if(data['estado']=='cobrado'||data['estado']=='reingresado'||data['estado']=='anulado'){
+						this.getBoton('edit').disable();							
+						this.getBoton('btnCheque').disable();
+						this.getBoton('btnCheque2').disable();						
+						this.getBoton('ant_estado').enable();
+						this.getBoton('fin_registro').disable();
+					}else{
+						this.getBoton('edit').enable();						
+						this.getBoton('btnCheque').enable();
+						this.getBoton('btnCheque2').enable();						
+						this.getBoton('ant_estado').enable();
+						this.getBoton('fin_registro').enable();
+					}  
+					if(data['sistema_origen']=='FONDOS_AVANCE'){						
+						this.getBoton('btnMemoramdum').enable();
+						if(data['notificado']=='no')
+							this.getBoton('btnNotificacion').enable();
+						else
+							this.getBoton('btnNotificacion').disable();
+					}else{
+						this.getBoton('btnMemoramdum').disable();
+						this.getBoton('btnNotificacion').disable();
+					}
+				  }
+				  
 			  }else{
-				this.getBoton('btnVistaPrevia').disable();
+				  this.getBoton('btnMemoramdum').disable();
+				  this.getBoton('btnNotificacion').disable();				  
+				  this.getBoton('btnCheque').disable();
+				  this.getBoton('btnCheque2').disable();				
+				  this.getBoton('btnVistaPrevia').disable();
+				  this.getBoton('btnChequeoDocumentosWf').disable();
+				  if(data['estado']=='borrador'){
+					this.getBoton('edit').enable();
+					this.getBoton('del').enable();
+					this.getBoton('ant_estado').disable();
+					this.getBoton('fin_registro').enable();
+				  }else{
+					this.getBoton('del').disable();
+					this.getBoton('fin_registro').disable();
+					if(data['estado']=='transferido'){
+						this.getBoton('edit').disable();
+						this.getBoton('ant_estado').disable();
+					}else{
+						this.getBoton('edit').enable();
+						this.getBoton('ant_estado').enable();
+					}
+				  }
 			  }
+			  
+		  }else{
+				this.getBoton('btnChequeoDocumentosWf').disable();
+				this.getBoton('fin_registro').disable();
+				this.getBoton('btnMemoramdum').disable();
+				this.getBoton('btnNotificacion').disable();
+				this.getBoton('ant_estado').disable();
+				this.getBoton('btnCheque').disable();
+				this.getBoton('btnCheque2').disable();				
+				this.getBoton('btnVistaPrevia').disable();
+				this.getBoton('edit').disable();
+				this.getBoton('del').disable();
+		  }
 		 },
 		
 		clonar:function(){

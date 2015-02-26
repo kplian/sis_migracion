@@ -58,7 +58,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			this.addButton('trans_deposito',
 				{	text:'Transfer. Depósito',
-					iconCls: 'btransfer',
+					iconCls: 'btransferMoney',
 					disabled:false,
 					handler:this.transDeposito,
 					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Total o Saldo</p>'
@@ -152,7 +152,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 125,
-				maxLength:200
+				maxLength:400
 			},
 				type:'TextArea',
 				filters:{pfiltro:'lban.detalle',type:'string'},
@@ -201,6 +201,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.nro_comprobante',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
+				name: 'comprobante_sigma',
+				fieldLabel: 'Comprobante Sigma',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 125,
+				maxLength:50
+			},
+				type:'TextField',
+				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -545,6 +560,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'id_libro_bancos_fk', type: 'numeric'},
 		{name:'estado', type: 'string'},
 		{name:'nro_comprobante', type: 'string'},
+		{name:'comprobante_sigma', type: 'string'},
 		{name:'indice', type: 'numeric'},
 		{name:'estado_reg', type: 'string'},
 		{name:'tipo', type: 'string'},
@@ -641,32 +657,29 @@ header("content-type: text/javascript; charset=UTF-8");
 			  
 			  Phx.vista.TsLibroBancosDepositoExtra.superclass.preparaMenu.call(this,n); 
 			  
-			  if(data['id_proceso_wf'] !== null){			  
-				  if (data['estado']== 'borrador'){
-					  this.getBoton('edit').enable();				  
-					  this.getBoton('del').enable();    
-					  this.getBoton('fin_registro').enable();					  
-					  this.getBoton('ant_estado').disable();					  
-				  }
-				  else{				  
-					  
-					   if (data['estado'] == 'depositado'){   
-						  this.getBoton('fin_registro').disable();
-						  this.getBoton('ant_estado').enable();
-						}					
-						else{
-						  this.getBoton('fin_registro').enable();
-						  this.getBoton('ant_estado').disable();
-						}
-						this.getBoton('edit').enable();
-						this.getBoton('del').disable();
-				   }		
-			   }else{
+			  if(data['id_proceso_wf'] !== null){
+				  if(data['estado']=='borrador'){
+					this.getBoton('edit').enable();
+					this.getBoton('del').enable();
 					this.getBoton('ant_estado').disable();
-					this.getBoton('fin_registro').disable();
-					this.getBoton('edit').disable();
+					this.getBoton('fin_registro').enable();
+				  }else{
 					this.getBoton('del').disable();
-			   }
+					this.getBoton('fin_registro').disable();
+					if(data['estado']=='transferido'){
+						this.getBoton('edit').disable();
+						this.getBoton('ant_estado').disable();
+					}else{
+						this.getBoton('edit').enable();
+						this.getBoton('ant_estado').enable();
+					}
+				  }			  		  
+			  }else{
+				this.getBoton('fin_registro').disable();
+				this.getBoton('ant_estado').disable();
+				this.getBoton('edit').disable();
+				this.getBoton('del').disable();
+			  }
 		 },
 		 
 		 antEstado:function(res,eve)

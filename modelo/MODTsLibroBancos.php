@@ -35,6 +35,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('id_libro_bancos_fk','int4');
 		$this->captura('estado','varchar');
 		$this->captura('nro_comprobante','varchar');
+		$this->captura('comprobante_sigma','varchar');
 		$this->captura('indice','numeric');
 		$this->captura('estado_reg','varchar');
 		$this->captura('tipo','varchar');
@@ -55,6 +56,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->captura('saldo_deposito','numeric');
 		$this->captura('nombre_regional','varchar');
 		$this->captura('sistema_origen','varchar');
+		$this->captura('notificado','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -145,6 +147,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('id_libro_bancos_fk','id_libro_bancos_fk','int4');
 		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('nro_comprobante','nro_comprobante','varchar');
+		$this->setParametro('comprobante_sigma','comprobante_sigma','varchar');
 		$this->setParametro('indice','indice','numeric');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('tipo','tipo','varchar');
@@ -179,6 +182,7 @@ class MODTsLibroBancos extends MODbase{
 		$this->setParametro('id_libro_bancos_fk','id_libro_bancos_fk','int4');
 		$this->setParametro('estado','estado','varchar');
 		$this->setParametro('nro_comprobante','nro_comprobante','varchar');
+		$this->setParametro('comprobante_sigma','comprobante_sigma','varchar');
 		$this->setParametro('indice','indice','numeric');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('tipo','tipo','varchar');
