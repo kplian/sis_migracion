@@ -161,13 +161,18 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){
 					//return value?value.dateFormat('d/m/Y'):''
+					if(value == null)
+						value = '';
+					else 
+						value = value.dateFormat('d/m/Y');
+					
 					if(record.data['sistema_origen']=='FONDOS_AVANCE'){
-						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value.dateFormat('d/m/Y')+'</b></FONT>');
+						return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'F.A. '+value+'</b></FONT>');
 					}else{
 						if(record.data['sistema_origen']=='KERP')						
-							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PG '+value.dateFormat('d/m/Y')+'</b></FONT>');					
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+'PG '+value+'</b></FONT>');					
 						else
-							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value.dateFormat('d/m/Y')+'</b></FONT>');
+							return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+value+'</b></FONT>');
 					}
 				}
 			},
@@ -717,7 +722,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		  if(data['id_proceso_wf'] !== null){
 			
 			  if(data['tipo'] == 'cheque'){				  
-				  this.getBoton('btnChequeoDocumentosWf').disable();
+				  this.getBoton('btnChequeoDocumentosWf').enable();
 				  if(data['estado']=='borrador'){
 					this.getBoton('btnMemoramdum').disable();
 					this.getBoton('btnNotificacion').disable();				  
