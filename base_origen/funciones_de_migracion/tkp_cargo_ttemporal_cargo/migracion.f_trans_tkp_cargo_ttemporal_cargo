@@ -42,7 +42,7 @@ BEGIN
 			select fecha_inicio, fecha_fin, id_cargo_padre 
 			into v_fecha_ini,v_fecha_fin,v_id_cargo_padre
 			from kard.tkp_cargo
-			where id_cargo = p_id_cargo
+			where id_cargo = p_id_cargo;
 			           
 			           			v_id_temporal_cargo=p_id_cargo::int4;
 			v_id_temporal_jerarquia_aprobacion=p_id_jerarquia_aprobacion::int4;
