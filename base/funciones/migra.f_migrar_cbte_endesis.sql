@@ -107,7 +107,7 @@ BEGIN
     v_rec.id_depto = v_id_depto_endesis;
     
     --  RAC   29/01/2014
-    --obtener tipo de cambio para la fecha del comprobante si el tipo de cambio combenido en NULL
+    --obtener tipo de cambio para la fecha del comprobante si el tipo de cambio convenido en NULL
     
     IF v_rec.tipo_cambio  is NULL  THEN
     
