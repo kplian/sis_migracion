@@ -268,7 +268,8 @@ class MODTsLibroBancos extends MODbase{
         //Define los parametros para la funcion
         $this->setParametro('id_libro_bancos','id_libro_bancos','int4');
         $this->setParametro('id_libro_bancos_fk','id_libro_bancos_fk','int4');
-        $this->setParametro('tipo','tipo','varchar');
+        $this->setParametro('tipo','tipo','varchar');		
+		$this->setParametro('importe_transferencia','importe_transferencia','numeric');
 
         //Ejecuta la instruccion
         $this->armarConsulta();

@@ -38,8 +38,12 @@ DECLARE
 	v_id_cuenta_bancaria_pxp integer;
 	v_tipo_mov varchar;
 	v_id_cuenta_bancaria integer;
+    v_id_libro_bancos_fk  integer;
 						
 BEGIN
+	select id_libro_bancos into v_id_libro_bancos_fk
+    from tes.tts_libro_bancos
+    where id_libro_bancos = p_id_libro_bancos_fk;
 						
 	if(v_operacion = 'INSERT') THEN
 	
@@ -85,7 +89,7 @@ BEGIN
 						p_fecha,
 						p_fecha_mod,
 						p_fecha_reg,
-						p_id_libro_bancos_fk,
+						v_id_libro_bancos_fk,
 						p_id_usuario_mod,
 						p_id_usuario_reg,
 						p_importe_cheque,
@@ -136,7 +140,7 @@ BEGIN
                       'cheque',
                       p_detalle,
                       p_nro_cheque,
-                      p_id_libro_bancos_fk,
+                      v_id_libro_bancos_fk,
                       coalesce(p_importe_cheque,p_importe_deposito)::numeric,
                       p_estado,
                       p_observaciones
@@ -160,7 +164,7 @@ BEGIN
 						 ,fecha=p_fecha
 						 ,fecha_mod=p_fecha_mod
 						 ,fecha_reg=p_fecha_reg
-						 ,id_libro_bancos_fk=p_id_libro_bancos_fk
+						 ,id_libro_bancos_fk=v_id_libro_bancos_fk
 						 ,id_usuario_mod=p_id_usuario_mod
 						 ,id_usuario_reg=p_id_usuario_reg
 						 ,importe_cheque=p_importe_cheque
@@ -190,7 +194,7 @@ BEGIN
 						estado_reg = p_estado_reg,
 						tipo_mov = v_tipo_mov,
 						descripcion = p_detalle,
-                        id_cuenta_bancaria_mov_fk=p_id_libro_bancos_fk,
+                        id_cuenta_bancaria_mov_fk=v_id_libro_bancos_fk,
 						nro_doc_tipo = p_nro_cheque,
 						importe = coalesce(p_importe_cheque,p_importe_deposito)::numeric,
 						estado = p_estado,

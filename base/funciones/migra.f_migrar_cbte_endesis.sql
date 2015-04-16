@@ -36,21 +36,18 @@ DECLARE
     va_importe_recurso numeric[];
     va_importe_gasto numeric[];
     va_id_uo integer[];
-	va_id_ep integer[];
-    
-    v_id_depto_endesis  integer;
-    
-    v_tipo_cambio numeric;
-    
-    va_id_cuenta_bancaria integer[];
-    va_nombre_cheque_trans varchar[];
-    va_nro_cheque integer[];
-    va_tipo varchar[];
-    va_id_libro_bancos integer[];
-    va_id_cuenta_bancaria_endesis integer[];
-    
-    v_glosa1 varchar;
-    v_glosa2 varchar;
+	va_id_ep integer[];    
+    v_id_depto_endesis  			integer;    
+    v_tipo_cambio 					numeric;    
+    va_id_cuenta_bancaria 			integer[];
+    va_nombre_cheque_trans 			varchar[];
+    va_nro_cheque 					integer[];
+    va_tipo 						varchar[];
+    va_id_libro_bancos 				integer[];
+    va_id_cuenta_bancaria_endesis 	integer[];    
+    v_glosa1 						varchar;
+    v_glosa2 						varchar;
+    v_id_depto_libro  				integer;
 
 BEGIN
 
@@ -87,7 +84,8 @@ BEGIN
 	cla.codigo as codigo_clase_cbte,
     cbte.momento_comprometido,
     cbte.momento_ejecutado,
-    cbte.momento_pagado
+    cbte.momento_pagado,
+    cbte.id_depto_libro
     into
     v_rec
     from conta.tint_comprobante cbte
@@ -102,9 +100,18 @@ BEGIN
         v_id_depto_endesis 
     from migra.tdepto_to_depto_endesis dd 
     where dd.id_depto_pxp = v_rec.id_depto;
-    
-    
     v_rec.id_depto = v_id_depto_endesis;
+    
+    --obtener relacion del depto de libro de bancos
+    select 
+        dd.id_depto_endesis 
+      into 
+        v_id_depto_libro
+    from migra.tdepto_to_depto_endesis dd 
+    where dd.id_depto_pxp = v_rec.id_depto_libro;
+    
+    v_rec.id_depto_libro = v_id_depto_libro;
+    
     
     --  RAC   29/01/2014
     --obtener tipo de cambio para la fecha del comprobante si el tipo de cambio convenido en NULL
@@ -250,6 +257,7 @@ BEGIN
                 'null' ||','||
                 v_rec.id_subsistema ||','||
                 v_rec.id_depto ||','||
+                coalesce(v_rec.id_depto_libro::varchar,'null')||','||
                 v_rec.id_moneda ||','||
                 v_rec.id_periodo ||','||
                 ''''||coalesce(v_rec.nro_cbte,'') ||''','||

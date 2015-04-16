@@ -123,3 +123,14 @@ ALTER TABLE migracion.tct_comprobante
 
 ALTER TABLE presto.tpr_concepto_ingas
   ADD COLUMN sw_autorizacion VARCHAR(50)[];
+  
+  --------------- SQL ---------------
+
+ALTER TABLE sci.tct_comprobante
+  ADD COLUMN id_depto_libro INTEGER;
+  
+  
+  --------------- SQL ---------------
+
+ALTER TABLE migracion.tct_comprobante
+  ADD COLUMN id_depto_libro INTEGER;

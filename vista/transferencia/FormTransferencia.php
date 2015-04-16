@@ -16,6 +16,7 @@ Phx.vista.FormTransferencia=Ext.extend(Phx.frmInterfaz,{
     constructor:function(config){   
         Phx.vista.FormTransferencia.superclass.constructor.call(this,config);
         this.init(); 
+		this.iniciarEventos();
 		Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: this.data.id_cuenta_bancaria, mycls:"TsLibroBancosDeposito"});
         this.loadValoresIniciales();
     },
@@ -46,7 +47,8 @@ Phx.vista.FormTransferencia=Ext.extend(Phx.frmInterfaz,{
 				store:new Ext.data.ArrayStore({
                             fields: ['variable', 'valor'],
                             data : [ ['total','Total'],
-									 ['saldo','Saldo']
+									 ['saldo','Saldo'],
+									 ['parcial','Parcial']
                                     ]
                                     }),
 				valueField: 'variable',
@@ -62,54 +64,6 @@ Phx.vista.FormTransferencia=Ext.extend(Phx.frmInterfaz,{
 			grid:true,
 			form:true
 		}, 
-		/*{
-            config:{
-                name:'id_libro_bancos_fk',
-                fieldLabel:'Deposito',
-                allowBlank:false,
-                emptyText:'Deposito...',
-                store: new Ext.data.JsonStore({
-                         url: '../../sis_migracion/control/TsLibroBancos/listarTsLibroBancos',
-                         id: 'id_libro_bancos',
-                         root: 'datos',
-                         sortInfo:{
-                            field: 'nombre_finalidad',
-                            direction: 'ASC'
-                    },
-                    totalProperty: 'total',
-                    fields: ['id_finalidad','nombre_finalidad','color'],
-                    // turn on remote sorting
-                    remoteSort: true,
-                    baseParams:{par_filtro:'nombre_finalidad', vista: 'vista'}
-                    }),
-                valueField: 'id_finalidad',
-                displayField: 'nombre_finalidad',
-                //tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>{denominacion}</p></div></tpl>',
-                hiddenName: 'id_finalidad',
-                forceSelection:true,
-                typeAhead: false,
-                triggerAction: 'all',
-                lazyRender:true,
-                mode:'remote',
-                pageSize:10,
-                queryDelay:1000,
-                listWidth:600,
-                resizable:true,
-                anchor:'80%',
-                renderer : function(value, p, record) {
-					//return String.format(record.data['nombre_finalidad']);
-					return String.format('{0}', '<FONT COLOR="'+record.data['color']+'"><b>'+record.data['nombre_finalidad']+'</b></FONT>');
-				}
-            },
-            type:'ComboBox',
-            id_grupo:0,
-				filters:{   
-                        pfiltro:'fin.nombre_finalidad',
-                        type:'string'
-                    },
-            grid:true,
-            form:true
-        },*/
 		{
             config:{
                 name: 'id_cuenta_bancaria_mov',
@@ -152,11 +106,47 @@ Phx.vista.FormTransferencia=Ext.extend(Phx.frmInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
-        }
+        },
+		{
+			config:{
+				name: 'importe_transferencia',
+				fieldLabel: 'Importe',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:1310722
+			},
+			type:'NumberField',
+			//filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
+			id_grupo:1,
+			grid:true,
+			form:true
+		}
     ],
     
     title:'Transferencia de Deposito',
     
+	iniciarEventos:function(){
+	
+		this.cmpTipo = this.getComponente('tipo');	
+		this.cmpImporteTransferencia = this.getComponente('importe_transferencia');	
+				
+		 this.cmpTipo.on('select',function(com,dat){
+		 
+			  switch(dat.data.variable){
+				case  'parcial':
+					this.cmpImporteTransferencia.reset();
+					this.mostrarComponente(this.cmpImporteTransferencia);					
+					break;	
+				
+				default:
+					this.ocultarComponente(this.cmpImporteTransferencia);
+					this.cmpImporteTransferencia.reset();
+					break;
+			  }
+		  },this);
+	},
+	
     onSubmit:function(){
        //TODO passar los datos obtenidos del wizard y pasar  el evento save 
        if (this.form.getForm().isValid()) {
@@ -168,7 +158,8 @@ Phx.vista.FormTransferencia=Ext.extend(Phx.frmInterfaz,{
         var resp = {
                    id_libro_bancos:this.data.id_libro_bancos,
                    tipo:this.Cmp.tipo.getValue(),
-				   id_libro_bancos_fk:this.Cmp.id_cuenta_bancaria_mov.getValue()
+				   importe_transferencia:this.Cmp.importe_transferencia.getValue(),
+				   id_libro_bancos_fk:this.Cmp.id_cuenta_bancaria_mov.getValue()				   
             }   
          return resp;   
      }
