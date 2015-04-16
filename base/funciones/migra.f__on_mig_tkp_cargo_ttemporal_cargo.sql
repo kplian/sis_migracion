@@ -13,7 +13,7 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_cargo_ttemporal_cargo (
   p_usuario_ai varchar,
   p_fecha_ini date,
   p_fecha_fin date,
-  id_cargo_padre
+  p_id_cargo_padre integer
   
 )
 RETURNS text AS
