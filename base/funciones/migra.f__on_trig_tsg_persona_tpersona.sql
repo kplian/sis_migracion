@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_persona_tpersona (
   v_operacion varchar,
   p_id_persona integer,
@@ -22,7 +20,10 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_persona_tpersona (
   p_num_documento integer,
   p_telefono1 varchar,
   p_telefono2 varchar,
-  p_correo2 varchar
+  p_correo2 varchar,
+  p_nacionalidad varchar,
+  p_id_tipo_doc_identificacion integer,
+  p_expedicion varchar
 )
 RETURNS text AS
 $body$
@@ -64,7 +65,10 @@ $body$
 						num_documento,
 						telefono1,
 						telefono2,
-                        correo2)
+                        correo2,
+                        nacionalidad,
+                        id_tipo_doc_identificacion,
+                        expedicion)
 				VALUES (
 						p_id_persona,
 						p_apellido_materno,
@@ -86,7 +90,10 @@ $body$
 						p_num_documento,
 						p_telefono1,
 						p_telefono2,
-                        p_correo2);
+                        p_correo2,
+                        p_nacionalidad,
+                        p_id_tipo_doc_identificacion,
+                        p_expedicion);
                           
                         
                          v_conexion:=migra.f_obtener_cadena_conexion();
@@ -135,6 +142,9 @@ $body$
 						 ,telefono1=p_telefono1
 						 ,telefono2=p_telefono2
                          ,correo2=p_correo2
+                         ,nacionalidad=p_nacionalidad
+                         ,id_tipo_doc_identificacion=p_id_tipo_doc_identificacion
+                         ,expedicion=p_expedicion
 						 WHERE id_persona=p_id_persona;
                          
                          

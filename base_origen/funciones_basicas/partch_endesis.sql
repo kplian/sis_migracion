@@ -134,3 +134,20 @@ ALTER TABLE sci.tct_comprobante
 
 ALTER TABLE migracion.tct_comprobante
   ADD COLUMN id_depto_libro INTEGER;
+
+
+--------------- SQL ---------------
+
+ALTER TABLE migracion.tct_comprobante
+  ADD COLUMN id_depto_conta_pxp INTEGER;
+
+COMMENT ON COLUMN migracion.tct_comprobante.id_depto_conta_pxp
+IS 'identifica el id del departamento de conta en pxp sn traducir';
+
+--------------- SQL ---------------
+
+ALTER TABLE sci.tct_comprobante
+  ADD COLUMN id_depto_conta_pxp INTEGER;
+
+COMMENT ON COLUMN sci.tct_comprobante.id_depto_conta_pxp
+IS 'id del departamento de conta sin traducir';

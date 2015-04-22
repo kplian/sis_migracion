@@ -48,6 +48,7 @@ DECLARE
     v_glosa1 						varchar;
     v_glosa2 						varchar;
     v_id_depto_libro  				integer;
+    v_id_depto_origen_pxp			integer;
 
 BEGIN
 
@@ -93,6 +94,8 @@ BEGIN
 	on cla.id_clase_comprobante = cbte.id_clase_comprobante
     where cbte.id_int_comprobante = p_id_int_comprobante;
     
+    
+    v_id_depto_origen_pxp = v_rec.id_depto;
     
     select 
         dd.id_depto_endesis 
@@ -258,6 +261,7 @@ BEGIN
                 v_rec.id_subsistema ||','||
                 v_rec.id_depto ||','||
                 coalesce(v_rec.id_depto_libro::varchar,'null')||','||
+                coalesce(v_id_depto_origen_pxp::varchar,'null')||','||
                 v_rec.id_moneda ||','||
                 v_rec.id_periodo ||','||
                 ''''||coalesce(v_rec.nro_cbte,'') ||''','||

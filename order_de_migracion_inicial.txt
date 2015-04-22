@@ -54,6 +54,7 @@ SELECT * FROM migracion.f_mig_ini_tkp_cargo_ttemporal_cargo();
 
 
 --MIGRACION DE PRESUPUESTOS
+SELECT * FROM migracion.f_mig_ini_tpr_categoria_programaticas_tcategoria_programatica();
 
 SELECT * FROM migracion.f_mig_ini_tpr_presupuesto_tcentro_costo()
 
