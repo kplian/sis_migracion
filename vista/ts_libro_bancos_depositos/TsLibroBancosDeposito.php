@@ -69,7 +69,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			this.addButton('trans_deposito',
 				{	text:'Transfer. Depósito',
-					iconCls: 'btransferMoney',
+					iconCls: 'btransfer',
 					disabled:false,
 					handler:this.transDeposito,
 					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Total o Saldo</p>'
@@ -101,7 +101,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'},//parametros adicionales que se le pasan al store
                 gdisplayField:'nombre',
                 gwidth: 100
             },
@@ -154,6 +154,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 			type:'TextField',
 			filters:{pfiltro:'lban.a_favor',type:'string'},
+			bottom_filter: true,
 			id_grupo:1,
 			grid:true,
 			form:true
@@ -235,6 +236,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -296,6 +298,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_deposito',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				valorInicial:0,
 				grid:true,
@@ -328,6 +331,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'NumberField',
 				filters:{pfiltro:'saldo_deposito',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:false
@@ -472,7 +476,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 maxLength:200
             },
             type:'TextField',
-            filters:{pfiltro:'lban.num_tramite',type:'string'},
+            filters:{pfiltro:'lban.num_tramite',type:'string'},			
             id_grupo:1,
             grid:true,
             form:false
@@ -489,7 +493,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'NumberField',
 				filters:{pfiltro:'lban.indice',type:'numeric'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -613,7 +617,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'sistema_origen', type: 'string'}
 	],
 		sortInfo : {
-			field : 'id_libro_bancos',
+			field : 'fecha',
 			direction : 'DESC'
 		},
 		bdel : true,
@@ -759,7 +763,8 @@ header("content-type: text/javascript; charset=UTF-8");
                 params:{
                         id_libro_bancos:resp.id_libro_bancos,
                         tipo:resp.tipo,  
-                        id_libro_bancos_fk:resp.id_libro_bancos_fk
+                        id_libro_bancos_fk:resp.id_libro_bancos_fk,
+						importe_transferencia:resp.importe_transferencia
                  },
                 argument:{wizard:wizard},  
                 success:this.successWizard,
@@ -818,10 +823,17 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 		},
 		
+		onButtonNew:function(){
+			Phx.vista.TsLibroBancosDeposito.superclass.onButtonNew.call(this);
+			this.cmpDepto.enable();
+			this.cmpFecha.enable();
+			this.cmpImporteDeposito.enable();
+		},
+		
 		onButtonEdit:function(){
 			Phx.vista.TsLibroBancosDeposito.superclass.onButtonEdit.call(this);
+			this.cmpTipo.disable();
 			var data = this.getSelectedData();
-			
 			if(data.estado=='depositado'){
 				this.cmpDepto.disable();
 				this.cmpFecha.disable();

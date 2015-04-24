@@ -141,7 +141,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'},//parametros adicionales que se le pasan al store
                 gdisplayField:'nombre',
                 gwidth: 100
             },
@@ -193,6 +193,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.a_favor',type:'string'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -316,6 +317,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -331,6 +333,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_deposito',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -346,6 +349,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -361,6 +365,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:false
@@ -522,7 +527,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				type:'NumberField',
 				filters:{pfiltro:'lban.indice',type:'numeric'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -651,7 +656,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		{name:'sistema_origen', type: 'string'}
 	],
 	sortInfo:{
-		field: 'id_libro_bancos',
+		field: 'fecha',
 		direction: 'DESC'
 	},
 	bdel:true,
@@ -668,6 +673,8 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	onButtonNew:function(){
 		Phx.vista.TsLibroBancos.superclass.onButtonNew.call(this); 	    
 		this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
+		this.cmpDepto.enable();
+		this.cmpFecha.enable();
 	},
 		
 	clonar:function(){
@@ -802,15 +809,29 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 	 
 	 onButtonEdit:function(){
 		Phx.vista.TsLibroBancos.superclass.onButtonEdit.call(this);
+		this.cmpTipo.disable();
 		var data = this.getSelectedData();			
-		if(data.tipo=='cheque')
+		
+		if(data.tipo=='cheque'){
 			this.mostrarComponente(this.cmpNroCheque);
-		else
+			this.mostrarComponente(this.cmpImporteCheque);
+		}
+		else{
 			this.ocultarComponente(this.cmpNroCheque);
-		if(data.estado=='impreso' || data.estado=='entregado' || data.estado=='cobrado'){
+			if(data.tipo=='deposito'){
+				this.mostrarComponente(this.cmpImporteDeposito);
+				this.ocultarComponente(this.cmpImporteCheque);
+			}
+			else{
+				this.mostrarComponente(this.cmpImporteCheque);
+				this.ocultarComponente(this.cmpImporteDeposito);
+			}
+		}
+		if(data.estado=='impreso' || data.estado=='entregado' || data.estado=='cobrado'|| data.estado=='depositado'){
 			this.cmpDepto.disable();
 			this.cmpFecha.disable();
 			this.cmpImporteCheque.disable();
+			this.cmpImporteDeposito.disable();
 			this.cmpNroCheque.disable();
 		}else{
 			this.cmpDepto.enable();
@@ -1076,7 +1097,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					this.mostrarComponente(this.cmpNroCheque);
 					this.cmpImporteDeposito.setValue(0.00);
 					this.ocultarComponente(this.cmpImporteDeposito);
-					this.cmpImporteCheque.setValue(0.00);
+					this.cmpImporteCheque.setValue('');
 					this.mostrarComponente(this.cmpImporteCheque);
 					
 					var cta_bancaria = this.cmpIdCuentaBancaria.getValue();
@@ -1096,7 +1117,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					break;
 				case  'deposito':
 					this.ocultarComponente(this.cmpNroCheque);
-					this.cmpImporteDeposito.setValue(0.00);
+					this.cmpImporteDeposito.setValue('');
 					this.mostrarComponente(this.cmpImporteDeposito);
 					this.cmpImporteCheque.setValue(0.00);
 					this.ocultarComponente(this.cmpImporteCheque);
@@ -1106,7 +1127,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					this.ocultarComponente(this.cmpNroCheque);
 					this.cmpImporteDeposito.setValue(0.00);
 					this.ocultarComponente(this.cmpImporteDeposito);
-					this.cmpImporteCheque.setValue(0.00);
+					this.cmpImporteCheque.setValue('');
 					this.mostrarComponente(this.cmpImporteCheque);
 					this.cmpNroCheque.reset();
 					break;	
@@ -1114,7 +1135,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 					this.ocultarComponente(this.cmpNroCheque);
 					this.cmpImporteDeposito.setValue(0.00);
 					this.ocultarComponente(this.cmpImporteDeposito);
-					this.cmpImporteCheque.setValue(0.00);
+					this.cmpImporteCheque.setValue('');
 					this.mostrarComponente(this.cmpImporteCheque);
 					this.cmpNroCheque.reset();
 					break;

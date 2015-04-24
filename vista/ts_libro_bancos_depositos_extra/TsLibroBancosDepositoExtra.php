@@ -94,7 +94,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'},//parametros adicionales que se le pasan al store
                 gdisplayField:'nombre',
                 gwidth: 100
             },
@@ -141,6 +141,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.a_favor',type:'string'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -215,7 +216,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				maxLength:50
 			},
 				type:'TextField',
-				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},
+				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},				
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -277,6 +278,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_deposito',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -291,7 +293,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				maxLength:1310722
 			},
 				type:'NumberField',
-				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
+				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},				
 				id_grupo:1,
 				valorInicial:0,
 				grid:false,
@@ -376,7 +378,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			type: 'ComboBox',
 			id_grupo: 0,
 			filters: {pfiltro: 'movtip.nombre',type: 'string'},
-			grid: true,
+			grid: false,
 			form: true
 		},
 		{
@@ -454,7 +456,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'NumberField',
 				filters:{pfiltro:'lban.indice',type:'numeric'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -578,7 +580,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'sistema_origen', type: 'string'}
 	],
         sortInfo : {
-            field : 'id_libro_bancos',
+            field : 'fecha',
             direction : 'DESC'
         },
         bdel : true,
@@ -594,11 +596,15 @@ header("content-type: text/javascript; charset=UTF-8");
 			Phx.vista.TsLibroBancosDepositoExtra.superclass.onButtonNew.call(this); 	    
 			this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
 			this.cmpIdFinalidad.setValue(this.maestro.id_finalidad);
+			this.cmpDepto.enable();
+			this.cmpFecha.enable();
+			this.cmpImporteDeposito.enable();
 		},
-		
+				
 		onButtonEdit:function(){
 			Phx.vista.TsLibroBancosDepositoExtra.superclass.onButtonEdit.call(this);
-			var data = this.getSelectedData();
+			this.cmpTipo.disable();
+			var data = this.getSelectedData();			
 			
 			if(data.estado=='depositado'){
 				this.cmpDepto.disable();

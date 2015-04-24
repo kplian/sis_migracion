@@ -97,6 +97,8 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			);
 			
+			this.addButton('diagrama_gantt',{text:'',iconCls: 'bgantt',disabled:true,handler:this.diagramGantt,tooltip: '<b>Diagrama Gantt de proceso macro</b>'});
+			
 			this.addButton('btnVistaPrevia',
 			{
 				text: 'Cheque Vista Previa',
@@ -137,7 +139,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 anchor: '80%',
                 origen: 'DEPTO',
                 tinit: false,
-                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES'},//parametros adicionales que se le pasan al store
+                baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB'},//parametros adicionales que se le pasan al store
                 gdisplayField:'nombre',
                 gwidth: 100
             },
@@ -189,6 +191,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.a_favor',type:'string'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -264,6 +267,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'TextField',
 				filters:{pfiltro:'lban.comprobante_sigma',type:'string'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -311,6 +315,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.nro_cheque',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -341,6 +346,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			},
 				type:'NumberField',
 				filters:{pfiltro:'lban.importe_cheque',type:'numeric'},
+				bottom_filter: true,
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -409,6 +415,7 @@ header("content-type: text/javascript; charset=UTF-8");
             },
             type:'TextField',
             filters:{pfiltro:'lban.num_tramite',type:'string'},
+			bottom_filter: true,
             id_grupo:1,
             grid:true,
             form:false
@@ -501,7 +508,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			type: 'ComboBox',
 			id_grupo: 0,
 			filters: {pfiltro: 'movtip.nombre',type: 'string'},
-			grid: true,
+			grid: false,
 			form: true
 		},
 		{
@@ -516,7 +523,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				type:'NumberField',
 				filters:{pfiltro:'lban.indice',type:'numeric'},
 				id_grupo:1,
-				grid:true,
+				grid:false,
 				form:false
 		},
 		{
@@ -642,7 +649,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'notificado', type: 'string'}
 	],
         sortInfo : {
-            field : 'id_libro_bancos',
+            field : 'fecha',
             direction : 'DESC'
         },
         bdel : true,
@@ -726,6 +733,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			  if(data['tipo'] == 'cheque'){				  
 				  this.getBoton('btnChequeoDocumentosWf').enable();
+				  this.getBoton('diagrama_gantt').enable();
 				  if(data['estado']=='borrador'){
 					this.getBoton('btnMemoramdum').disable();
 					this.getBoton('btnNotificacion').disable();				  
@@ -739,7 +747,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				  }else{
 					this.getBoton('del').disable();
 					this.getBoton('btnVistaPrevia').enable();
-					if(data['estado']=='cobrado'||data['estado']=='reingresado'||data['estado']=='anulado'){
+					if(data['estado']=='cobrado'||data['estado']=='reingresado'||data['estado']=='anulado'||data['estado']=='vbpagosindocumento'){
 						this.getBoton('edit').disable();							
 						this.getBoton('btnCheque').disable();
 						this.getBoton('btnCheque2').disable();						
@@ -1023,6 +1031,19 @@ header("content-type: text/javascript; charset=UTF-8");
 						'DocumentoWf'
 			)
 		},
+		
+		diagramGantt:function (){         
+            var data=this.sm.getSelected().data.id_proceso_wf;
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_workflow/control/ProcesoWf/diagramaGanttTramite',
+                params:{'id_proceso_wf':data},
+                success:this.successExport,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });         
+		},
 		 
 		loadValoresIniciales:function(){
 			Phx.vista.TsLibroBancosCheque.superclass.loadValoresIniciales.call(this);
@@ -1052,7 +1073,9 @@ header("content-type: text/javascript; charset=UTF-8");
 		
 		onButtonEdit:function(){
 			Phx.vista.TsLibroBancosCheque.superclass.onButtonEdit.call(this);
-			var data = this.getSelectedData();			
+			this.cmpTipo.disable();			
+			var data = this.getSelectedData();
+			
 			if(data.tipo=='cheque')
 				this.mostrarComponente(this.cmpNroCheque);
 			else
