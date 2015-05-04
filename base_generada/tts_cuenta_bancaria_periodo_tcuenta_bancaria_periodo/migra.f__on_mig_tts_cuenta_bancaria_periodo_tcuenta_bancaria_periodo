@@ -1,0 +1,107 @@
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tts_cuenta_bancaria_periodo_tcuenta_bancaria_periodo (
+						  v_operacion varchar,p_id_cuenta_bancaria_periodo int4,p_estado varchar,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_cuenta_bancaria int4,p_id_periodo int4,p_id_usuario_ai int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_usuario_ai varchar)
+						RETURNS text AS
+						$BODY$
+
+/*
+						Function:  Para migracion de la tabla param.tgestion
+						Fecha Creacion:  April 6, 2015, 5:34 pm
+						Autor: autogenerado (GONZALO JOSE SARMIENTO SEJAS)
+						
+						*/
+						
+						DECLARE
+						
+						BEGIN
+						
+						    if(v_operacion = 'INSERT') THEN
+						
+						          INSERT INTO 
+						            TES.tcuenta_bancaria_periodo (
+						id_cuenta_bancaria_periodo,
+						estado,
+						estado_reg,
+						fecha_mod,
+						fecha_reg,
+						id_cuenta_bancaria,
+						id_periodo,
+						id_usuario_ai,
+						id_usuario_mod,
+						id_usuario_reg,
+						usuario_ai)
+				VALUES (
+						p_id_cuenta_bancaria_periodo,
+						p_estado,
+						p_estado_reg,
+						p_fecha_mod,
+						p_fecha_reg,
+						p_id_cuenta_bancaria,
+						p_id_periodo,
+						p_id_usuario_ai,
+						p_id_usuario_mod,
+						p_id_usuario_reg,
+						p_usuario_ai);
+
+                               
+                                ELSEIF  v_operacion = 'UPDATE' THEN
+                                       
+                                       IF  not EXISTS(select 1 
+                                           from TES.tcuenta_bancaria_periodo
+ 
+                                           						 WHERE id_cuenta_bancaria_periodo=p_id_cuenta_bancaria_periodo) THEN
+                                       
+                                            raise exception 'No existe el registro que  desea modificar';
+                                            
+                                       END IF;
+						               
+						               
+						               UPDATE 
+						                  TES.tcuenta_bancaria_periodo  
+						                SET						 estado=p_estado
+						 ,estado_reg=p_estado_reg
+						 ,fecha_mod=p_fecha_mod
+						 ,fecha_reg=p_fecha_reg
+						 ,id_cuenta_bancaria=p_id_cuenta_bancaria
+						 ,id_periodo=p_id_periodo
+						 ,id_usuario_ai=p_id_usuario_ai
+						 ,id_usuario_mod=p_id_usuario_mod
+						 ,id_usuario_reg=p_id_usuario_reg
+						 ,usuario_ai=p_usuario_ai
+						 WHERE id_cuenta_bancaria_periodo=p_id_cuenta_bancaria_periodo;
+
+						       
+						       ELSEIF  v_operacion = 'DELETE' THEN
+						       
+						         
+						         IF  not EXISTS(select 1 
+                                           from TES.tcuenta_bancaria_periodo
+						 WHERE id_cuenta_bancaria_periodo=p_id_cuenta_bancaria_periodo) THEN
+                                       
+                                            raise exception 'No existe el registro que  desea eliminar';
+                                            
+                                END IF;
+						         
+						         
+						         DELETE FROM 
+						              TES.tcuenta_bancaria_periodo
+ 
+						              						 WHERE id_cuenta_bancaria_periodo=p_id_cuenta_bancaria_periodo;
+
+						       
+						       END IF;  
+						  
+						 return 'true';
+						
+						-- statements;
+						--EXCEPTION
+						--WHEN exception_name THEN
+						--  statements;
+						END;
+						$BODY$
+
+
+						LANGUAGE 'plpgsql'
+						VOLATILE
+						CALLED ON NULL INPUT
+						SECURITY INVOKER
+						COST 100;
