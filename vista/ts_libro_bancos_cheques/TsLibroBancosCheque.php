@@ -1060,6 +1060,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.cmpNroComprobante.setValue(this.maestro.nro_comprobante);
 			this.cmpDepto.enable();
 			this.cmpFecha.enable();
+			this.cmpTipo.enable();
 				
 			var record = this.cmpTipo.getStore();
 			record.data.variable = 'cheque';			
