@@ -649,7 +649,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'notificado', type: 'string'}
 	],
         sortInfo : {
-            field : 'fecha',
+            field : 'fecha DESC , nro_cheque',
             direction : 'DESC'
         },
         bdel : true,
