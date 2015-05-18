@@ -49,7 +49,7 @@ BEGIN
     v_desc = '[REGISTRADO POR SISTEMA DE COMPRAS]';
 
     v_sql = 'select
-    		   sdet.descripcion, 
+           sdet.descripcion, 
                cot.fecha_adju, 
                pdet.precio_compra, 
                ping.id_moneda,
@@ -66,19 +66,18 @@ BEGIN
                cc.id_uo,
                cc.id_gestion,
                cg.desc_ingas
-    		from alm.tpreingreso ping
+        from alm.tpreingreso ping
             inner join alm.tpreingreso_det pdet on pdet.id_preingreso = ping.id_preingreso
             inner join adq.tcotizacion_det  cd on cd.id_cotizacion_det = pdet.id_cotizacion_det
             inner join adq.tsolicitud_det sdet on sdet.id_solicitud_det =cd.id_solicitud_det
             inner join param.tconcepto_ingas cg on cg.id_concepto_ingas = sdet.id_concepto_ingas
-            
             inner join adq.tcotizacion cot on cot.id_cotizacion = cd.id_cotizacion
             inner join adq.tproceso_compra pro on pro.id_proceso_compra = cot.id_proceso_compra
             inner join adq.tsolicitud sol on sol.id_solicitud = pro.id_solicitud
-            
-          
             inner join param.tcentro_costo cc on cc.id_centro_costo = sdet.id_centro_costo
-            where ping.id_preingreso  = '||p_id_preingreso;
+            where ping.id_preingreso  = '||p_id_preingreso || '
+            and pdet.sw_generar = ''si''
+            and pdet.estado = ''mod''';
             
     
     for v_rec in (select * from dblink(v_sql,true) as (descripcion TEXT,
@@ -198,7 +197,7 @@ BEGIN
         end if;
     
     end loop;
-    --raise exception 'fuck';
+
     return 'Hecho';
     
 
