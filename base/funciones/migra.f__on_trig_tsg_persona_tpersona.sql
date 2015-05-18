@@ -23,7 +23,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_persona_tpersona (
   p_correo2 varchar,
   p_nacionalidad varchar,
   p_id_tipo_doc_identificacion integer,
-  p_expedicion varchar
+  p_expedicion varchar,
+  p_discapacitado varchar
 )
 RETURNS text AS
 $body$
@@ -68,7 +69,8 @@ $body$
                         correo2,
                         nacionalidad,
                         id_tipo_doc_identificacion,
-                        expedicion)
+                        expedicion,
+                        discapacitado)
 				VALUES (
 						p_id_persona,
 						p_apellido_materno,
@@ -93,7 +95,8 @@ $body$
                         p_correo2,
                         p_nacionalidad,
                         p_id_tipo_doc_identificacion,
-                        p_expedicion);
+                        p_expedicion,
+                        p_discapacitado);
                           
                         
                          v_conexion:=migra.f_obtener_cadena_conexion();
@@ -145,6 +148,7 @@ $body$
                          ,nacionalidad=p_nacionalidad
                          ,id_tipo_doc_identificacion=p_id_tipo_doc_identificacion
                          ,expedicion=p_expedicion
+                         ,discapacitado = p_discapacitado
 						 WHERE id_persona=p_id_persona;
                          
                          

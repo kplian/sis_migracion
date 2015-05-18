@@ -56,6 +56,7 @@ DECLARE
 			v_presupuesta varchar;
             v_padre int4;
             v_id_nivel	int4;
+            v_prioridad		varchar;
 BEGIN
 			
 			
@@ -66,7 +67,7 @@ BEGIN
 			           ---------------------------------------
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
-			select stro.id_padre into v_padre from kard.tkp_unidad_organizacional uo
+			select stro.id_padre,uo.prioridad into v_padre,v_prioridad from kard.tkp_unidad_organizacional uo
 			left join kard.tkp_estructura_organizacional stro on stro.id_hijo = uo.id_unidad_organizacional
 			where uo.id_unidad_organizacional=p_id_unidad_organizacional;
 			
@@ -97,12 +98,14 @@ BEGIN
             from kard.tkp_unidad_organizacional uo 
             where uo.id_unidad_organizacional = p_id_unidad_organizacional;
             
+            v_prioridad=convert(v_prioridad, 'LATIN1', 'UTF8');
+            
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tkp_unidad_organizacional_tuo (
 			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_cargo_individual::varchar||'''','NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_correspondencia::varchar||'''','NULL')||','||COALESCE(''''||v_descripcion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(''''||v_gerencia::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||
-                           ','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nodo_base::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_cargo::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_unidad::varchar||'''','NULL')||','||COALESCE(''''||v_presupuesta::varchar||'''','NULL')||','||COALESCE(v_id_nivel::varchar,'NULL')||')';
+                           ','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nodo_base::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_cargo::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_unidad::varchar||'''','NULL')||','||COALESCE(''''||v_presupuesta::varchar||'''','NULL')||','||COALESCE(v_id_nivel::varchar,'NULL')||','||COALESCE(''''||v_prioridad::varchar||'''','NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
@@ -141,4 +144,5 @@ $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;

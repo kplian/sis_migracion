@@ -721,6 +721,9 @@ header("content-type: text/javascript; charset=UTF-8");
 						break;
 				  }
 			  },this);
+			  
+			  this.cmpTipo.on('focus',function(com,dat){
+			  },this);
 		},		
 		
 		preparaMenu:function(n){

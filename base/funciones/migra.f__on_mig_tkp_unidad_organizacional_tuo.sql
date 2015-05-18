@@ -15,7 +15,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_unidad_organizacional_tuo (
   p_nombre_cargo varchar,
   p_nombre_unidad varchar,
   p_presupuesta varchar,
-  p_id_nivel integer
+  p_id_nivel integer,
+  p_prioridad varchar
 )
 RETURNS text AS
 $body$
@@ -49,7 +50,8 @@ $body$
 						nombre_cargo,
 						nombre_unidad,
 						presupuesta,
-                        id_nivel_organizacional)
+                        id_nivel_organizacional,
+                        prioridad)
 				VALUES (
 						p_id_uo,
 						p_cargo_individual,
@@ -66,7 +68,8 @@ $body$
 						p_nombre_cargo,
 						p_nombre_unidad,
 						p_presupuesta,
-                        p_id_nivel);
+                        p_id_nivel,
+                        p_prioridad);
 
 						       
 							    ELSEIF  v_operacion = 'UPDATE' THEN
@@ -98,6 +101,7 @@ $body$
 						 ,nombre_unidad=p_nombre_unidad
 						 ,presupuesta=p_presupuesta
                          ,id_nivel_organizacional = p_id_nivel
+                         ,prioridad = p_prioridad
 						 WHERE id_uo=p_id_uo;
 
 						       

@@ -89,26 +89,32 @@ $body$
                                             
                                        END IF;
 						               
-						               
-						               UPDATE 
-						                  PLANI.tdescuento_bono  
-						                SET						 id_funcionario=p_id_funcionario
-						 ,id_moneda=p_id_moneda
-						 ,id_tipo_columna=v_id_tipo_columna
-						 ,estado_reg=p_estado_reg
-						 ,fecha_fin=p_fecha_fin
-						 ,fecha_ini=p_fecha_ini
-						 ,fecha_mod=p_fecha_mod
-						 ,fecha_reg=p_fecha_reg
-						 ,id_usuario_ai=p_id_usuario_ai
-						 ,id_usuario_mod=p_id_usuario_mod
-						 ,id_usuario_reg=p_id_usuario_reg
-						 ,monto_total=p_monto_total
-						 ,num_cuotas=p_num_cuotas
-						 ,usuario_ai=p_usuario_ai
-						 ,valor_por_cuota=p_valor_por_cuota
-						 WHERE id_descuento_bono=p_id_descuento_bono;
-
+						               if (p_estado_reg = 'eliminado') then
+                                       		UPDATE 
+                                                    PLANI.tdescuento_bono  
+                                                  SET	
+                                   					estado_reg='inactivo'
+                                            WHERE id_descuento_bono=p_id_descuento_bono;
+                                       else
+                                                 UPDATE 
+                                                    PLANI.tdescuento_bono  
+                                                  SET						 id_funcionario=p_id_funcionario
+                                   ,id_moneda=p_id_moneda
+                                   ,id_tipo_columna=v_id_tipo_columna
+                                   ,estado_reg=p_estado_reg
+                                   ,fecha_fin=p_fecha_fin
+                                   ,fecha_ini=p_fecha_ini
+                                   ,fecha_mod=p_fecha_mod
+                                   ,fecha_reg=p_fecha_reg
+                                   ,id_usuario_ai=p_id_usuario_ai
+                                   ,id_usuario_mod=p_id_usuario_mod
+                                   ,id_usuario_reg=p_id_usuario_reg
+                                   ,monto_total=p_monto_total
+                                   ,num_cuotas=p_num_cuotas
+                                   ,usuario_ai=p_usuario_ai
+                                   ,valor_por_cuota=p_valor_por_cuota
+                                   WHERE id_descuento_bono=p_id_descuento_bono;
+								end if;
 						       
 						       ELSEIF  v_operacion = 'DELETE' THEN
 						       

@@ -6,6 +6,8 @@ CREATE OR REPLACE FUNCTION migracion.f_migrar_cbte_pxp (
   p_id_int_comprobante_fk integer,
   p_id_subsistema integer,
   p_id_depto integer,
+  p_id_depto_libro integer,
+  p_id_depto_conta_pxp integer,
   p_id_moneda integer,
   p_id_periodo integer,
   p_nro_cbte varchar,
@@ -42,7 +44,8 @@ CREATE OR REPLACE FUNCTION migracion.f_migrar_cbte_pxp (
   p_nombre_cheque varchar [],
   p_nro_cheque integer [],
   p_tipo varchar [],
-  p_id_libro_bancos integer []
+  p_id_libro_bancos integer [],
+  p_id_cuenta_bancaria_endesis integer []
 )
 RETURNS varchar AS
 $body$
@@ -119,39 +122,13 @@ BEGIN
         else
         	v_id_libro_bancos = p_id_libro_bancos[i];
         end if;
-        v_id_cuenta_bancaria_endesis=null;
-        --Obtención de cuenta bancaria de endesis
-        if v_id_libro_bancos is not null then
-        	--Se obtiene la cuenta bancaria a partir del deposito
-        	select id_cuenta_bancaria
-            into v_id_cuenta_bancaria_endesis
-            from tesoro.tts_libro_bancos lb
-            where lb.id_libro_bancos = v_id_libro_bancos;
-        else
-        	--Obtiene la gestión a partir de la fecha del comprobante
-        	select
-        	par.id_parametro
-            into v_id_parametro
-            from tesoro.tts_parametro par
-            where gestion_tesoro = to_char(p_fecha::date,'yyyy')::numeric;
         
-        	--Obtiene el número de cuenta bancaria de alguna gestión
-        	select cb.nro_cuenta_banco
-            into v_nro_cuenta_banco
-            from tesoro.tts_cuenta_bancaria cb
-            where cb.id_cuenta_bancaria = v_id_cuenta_bancaria;
-            
-            --Se obtiene la cuenta bancaria de la gestión deseada
-            select cb.id_cuenta_bancaria
-            into v_id_cuenta_bancaria_endesis
-            from tesoro.tts_cuenta_bancaria cb
-            where cb.nro_cuenta_banco = v_nro_cuenta_banco
-            and cb.id_parametro = v_id_parametro;
-            
+        if p_id_cuenta_bancaria_endesis[i] = -1 then
+        	v_id_cuenta_bancaria_endesis = null;
+        else
+        	v_id_cuenta_bancaria_endesis = p_id_cuenta_bancaria_endesis[i];
         end if;
-    
-      
-      
+              
     	insert into migracion.tct_comprobante
         values(
             p_id_int_comprobante, 
@@ -200,13 +177,16 @@ BEGIN
             p_tipo[i],
             v_id_libro_bancos,
             v_id_cuenta_bancaria_endesis,
-            public.f_iif((p_id_orden_trabajo[i] != 0), p_id_orden_trabajo[i]::text, NULL )::integer 
+            --p_id_orden_trabajo[i]
+            public.f_iif((p_id_orden_trabajo[i] != 0), p_id_orden_trabajo[i]::text, NULL )::integer,
+            p_id_depto_libro,
+            p_id_depto_conta_pxp
         );
     
     end loop;
    
     
-    
+   
     
 	--1. Recorrer la tabla temporal de comprobantes
     /*for v_rec in (select * from migracion.tct_comprobante
@@ -252,7 +232,9 @@ BEGIN
 				  id_uo,
 				  id_ep,
                   momento_pagado,
-                  momento_ejecutado
+                  momento_ejecutado,
+                  id_depto_libro,
+                  id_depto_conta_pxp
 				FROM 
 				  migracion.tct_comprobante
 				WHERE id_int_comprobante = p_id_int_comprobante
@@ -287,17 +269,23 @@ BEGIN
 				  id_uo,
 				  id_ep,
                   momento_pagado,
-                  momento_ejecutado) loop
+                  momento_ejecutado,
+                  id_depto_libro,
+                  id_depto_conta_pxp) loop
 
 		--Obtencion de parametros
         --id_parametro, momento_cbte, id_periodo_subsis, id_subsistema, id_usuario, id_clase_cbte,id_depto
-
+ 
         --Obtener id_parametro
         select id_parametro
         into v_id_parametro
         from sci.tct_parametro
-        where gestion_conta = to_char(v_rec.fecha,'yyyy');
-   
+        where gestion_conta::varchar = to_char(v_rec.fecha,'yyyy');
+    
+    
+    --raise exception 'tesxxxxt..';
+    
+    
         if v_id_parametro is null then
         	v_mensaje_verif = 'Gestion no encontrada.\n';
         end if;
@@ -325,7 +313,7 @@ BEGIN
         if v_id_clase_cbte is null then
         	v_mensaje_verif = v_mensaje_verif || 'Clase de comprobante no encontrada.\n';
         end if;
-        
+       
         --RCM:08/02/2014: REgla de los momentos contables
         if v_rec.momento = 'presupuestario' then
         	--Presupuestario
@@ -354,51 +342,55 @@ BEGIN
             v_id_comprobante = nextval('sci.tct_comprobante_id_comprobante_seq'::regclass);
             
             insert into sci.tct_comprobante(
-            id_comprobante, 
-            id_parametro, 
-            momento_cbte, 
-            fecha_cbte, 
-            concepto_cbte, 
-            glosa_cbte, 
-            acreedor, 
-            aprobacion, 
-            conformidad, 
-            pedido, 
-            id_periodo_subsis, 
-            id_usuario, 
-            id_subsistema, 
-            id_clase_cbte, 
-            fk_comprobante, 
-            id_depto, 
-            nro_cbte_siscon, 
-            origen, 
-            id_moneda, 
-            tipo_cambio,
-            id_int_comprobante,
-            nro_tramite
+              id_comprobante, 
+              id_parametro, 
+              momento_cbte, 
+              fecha_cbte, 
+              concepto_cbte, 
+              glosa_cbte, 
+              acreedor, 
+              aprobacion, 
+              conformidad, 
+              pedido, 
+              id_periodo_subsis, 
+              id_usuario, 
+              id_subsistema, 
+              id_clase_cbte, 
+              fk_comprobante, 
+              id_depto, 
+              nro_cbte_siscon, 
+              origen, 
+              id_moneda, 
+              tipo_cambio,
+              id_int_comprobante,
+              nro_tramite,
+              id_depto_libro,
+              id_depto_conta_pxp
             ) values(
-            v_id_comprobante, 
-            v_id_parametro, 
-            v_momento_cbte, 
-            v_rec.fecha, 
-            v_rec.glosa1, 
-            '', 
-            v_rec.beneficiario, 
-            v_rec.glosa2, 
-            v_rec.glosa2, 
-            v_rec.glosa2, 
-            v_id_periodo_subsis, 
-            v_rec.id_usuario_reg, 
-            v_id_subsistema, 
-            v_id_clase_cbte, 
-            NULL, 
-            v_rec.id_depto, 
-            NULL, 
-            v_origen, 
-            v_rec.id_moneda, 
-            v_rec.tipo_cambio,
-            v_rec.id_int_comprobante,
-            v_rec.nro_tramite
+              v_id_comprobante, 
+              v_id_parametro, 
+              v_momento_cbte, 
+              v_rec.fecha, 
+              v_rec.glosa1, 
+              '', 
+              v_rec.beneficiario, 
+              v_rec.glosa2, 
+              v_rec.glosa2, 
+              v_rec.glosa2, 
+              v_id_periodo_subsis, 
+              v_rec.id_usuario_reg, 
+              v_id_subsistema, 
+              v_id_clase_cbte, 
+              NULL, 
+              v_rec.id_depto, 
+              NULL, 
+              v_origen, 
+              v_rec.id_moneda, 
+              v_rec.tipo_cambio,
+              v_rec.id_int_comprobante,
+              v_rec.nro_tramite,
+              v_rec.id_depto_libro,
+              p_id_depto_conta_pxp
             );
         end if;
         
@@ -502,4 +494,5 @@ $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;

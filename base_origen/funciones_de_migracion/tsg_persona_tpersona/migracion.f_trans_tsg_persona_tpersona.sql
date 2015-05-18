@@ -66,8 +66,16 @@ DECLARE
 			v_telefono1 varchar;
 			v_telefono2 varchar;
             v_correo2 varchar;
+            v_id_tipo_doc_identificacion integer;
+            v_nacionalidad	varchar;
+            v_expedicion	varchar;
+            v_discapacitado		varchar;
+            
 BEGIN
-			
+			select p.id_tipo_doc_identificacion,p.nacionalidad,p.expedicion,lower(p.discapacitado) 
+            into v_id_tipo_doc_identificacion,v_nacionalidad,v_expedicion,v_discapacitado
+            from sss.tsg_persona p
+            where id_persona = p_id_persona;
 			
 			          --funcion para obtener cadena de conexion
 			          v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
@@ -77,7 +85,7 @@ BEGIN
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
 
-
+			
 			v_id_persona=p_id_persona::int4;
 			v_apellido_materno=convert(p_apellido_materno::varchar, 'LATIN1', 'UTF8');
 			v_apellido_paterno=convert(p_apellido_paterno::varchar, 'LATIN1', 'UTF8');
@@ -88,6 +96,7 @@ BEGIN
 			v_direccion=convert(p_direccion::varchar, 'LATIN1', 'UTF8');
 			v_estado_reg=convert('activo'::varchar, 'LATIN1', 'UTF8');
 			v_extension=convert(p_extension::varchar, 'LATIN1', 'UTF8');
+            v_discapacitado=convert(v_discapacitado::varchar, 'LATIN1', 'UTF8');
 			v_fecha_mod=p_fecha_ultima_modificacion::timestamp;
 			v_fecha_nacimiento=p_fecha_nacimiento::date;
 			v_fecha_reg=p_fecha_registro::timestamp;
@@ -97,9 +106,11 @@ BEGIN
 			v_nombre=convert(p_nombre::varchar, 'LATIN1', 'UTF8');
 			v_num_documento=NULL::int4;
 			v_telefono1=convert(p_telefono1::varchar, 'LATIN1', 'UTF8');
+            v_nacionalidad=convert(v_nacionalidad::varchar, 'LATIN1', 'UTF8');
 			v_telefono2=convert(p_telefono2::varchar, 'LATIN1', 'UTF8');
             
             v_correo2=convert(p_correo2::varchar, 'LATIN1', 'UTF8');
+            v_expedicion=convert(v_expedicion::varchar, 'LATIN1', 'UTF8');
             
             
 
@@ -108,7 +119,7 @@ BEGIN
 			        
 			          v_consulta = 'select migra.f__on_trig_tsg_persona_tpersona (
 			               '''||v_operacion::varchar||''','||COALESCE(v_id_persona::varchar,'NULL')||','||COALESCE(''''||v_apellido_materno::varchar||'''','NULL')||','||COALESCE(''''||v_apellido_paterno::varchar||'''','NULL')||','||COALESCE(''''||v_celular1::varchar||'''','NULL')||','||COALESCE(''''||v_celular2::varchar||'''','NULL')||','||COALESCE(''''||v_ci::varchar||'''','NULL')||','||COALESCE(''''||v_correo::varchar||'''','NULL')||','||COALESCE(''''||v_direccion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_extension::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_nacimiento::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','
-                           ||COALESCE(''''||v_genero::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')||','||COALESCE(v_num_documento::varchar,'NULL')||','||COALESCE(''''||v_telefono1::varchar||'''','NULL')||','||COALESCE(''''||v_telefono2::varchar||'''','NULL')||','||COALESCE(''''||v_correo2::varchar||'''','NULL')||   ')';
+                           ||COALESCE(''''||v_genero::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')||','||COALESCE(v_num_documento::varchar,'NULL')||','||COALESCE(''''||v_telefono1::varchar||'''','NULL')||','||COALESCE(''''||v_telefono2::varchar||'''','NULL')||','||COALESCE(''''||v_correo2::varchar||'''','NULL')||','||COALESCE(''''||v_nacionalidad::varchar||'''','NULL')||','||COALESCE(v_id_tipo_doc_identificacion::varchar,'NULL')||','||COALESCE(''''||v_expedicion::varchar||'''','NULL')||','||COALESCE(''''||v_discapacitado::varchar||'''','NULL')||   ')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
@@ -145,4 +156,5 @@ $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;
