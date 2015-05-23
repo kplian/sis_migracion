@@ -675,6 +675,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 		this.cmpIdLibroBancosFk.setValue(this.maestro.id_libro_bancos);
 		this.cmpDepto.enable();
 		this.cmpFecha.enable();
+		this.cmpTipo.enable();
 	},
 		
 	clonar:function(){
