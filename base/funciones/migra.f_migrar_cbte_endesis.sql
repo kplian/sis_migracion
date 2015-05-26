@@ -1,7 +1,8 @@
 --------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_endesis (
-  p_id_int_comprobante integer
+  p_id_int_comprobante integer,
+  p_conexion varchar = NULL::character varying
 )
 RETURNS varchar AS
 $body$
@@ -306,31 +307,30 @@ BEGIN
                 
                 
                 
-                raise notice '>>>>>>>>>>>>>>>>>>>>>>>>: %',pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','));
-                raise notice '=========================****:%',v_sql;
-	raise notice 'consulta : %', v_sql;
-     -- raise exception '..  % ...',va_tipo;
+               
    
-    --Obtención de cadana de conexión
-	v_cadena_cnx =  migra.f_obtener_cadena_conexion();
     
-    --Abrir conexión
-    v_resp = dblink_connect(v_cadena_cnx);
+    if (p_conexion is null) then   
+            --Obtención de cadana de conexión
+            v_cadena_cnx =  migra.f_obtener_cadena_conexion();
+              
+            --Abrir conexión
+            v_resp = dblink_connect(v_cadena_cnx);
+            
+           IF v_resp!='OK' THEN
+                raise exception 'FALLO LA CONEXION A LA BASE DE DATOS CON DBLINK';
+           END IF;
+            
+           --Ejecuta la función remotamente
+           perform * from dblink(v_sql, true) as (respuesta varchar);
+           --Cierra la conexión abierta
+           perform dblink_disconnect();
+    else
+        perform * from dblink(p_conexion, v_sql, true) as (respuesta varchar);
+    end if;
+            
  
-    IF v_resp!='OK' THEN
-        raise exception 'FALLO LA CONEXION A LA BASE DE DATOS CON DBLINK';
-    END IF;
     
-   
-    
-    --raise exception 'dd:%',v_sql;
-    --Ejecuta la función remotamente
-   perform * from dblink(v_sql, true) as (respuesta varchar);
-    
-   --raise exception 'llega';
-
-	--Cierra la conexión abierta
-	perform dblink_disconnect();
     
     --Devuelve la respuesta
     return 'Hecho';
