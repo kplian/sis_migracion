@@ -32,7 +32,7 @@ $body$
 						
 							select id_tipo_columna into v_id_tipo_columna
 						    from plani.ttipo_columna tc
-						    where codigo = p_tipo_columna;
+						    where codigo = p_tipo_columna and tc.estado_reg = 'activo';
 						    
 						    if (v_id_tipo_columna is null) then
 						    	return true;
