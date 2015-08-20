@@ -46,8 +46,7 @@ Phx.vista.FormTransferencia=Ext.extend(Phx.frmInterfaz,{
 				gwidth: 100,
 				store:new Ext.data.ArrayStore({
                             fields: ['variable', 'valor'],
-                            data : [ ['total','Total'],
-									 ['saldo','Saldo'],
+                            data : [ ['saldo','Saldo'],
 									 ['parcial','Parcial']
                                     ]
                                     }),

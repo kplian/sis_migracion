@@ -72,7 +72,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					iconCls: 'btransfer',
 					disabled:false,
 					handler:this.transDeposito,
-					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Total o Saldo</p>'
+					tooltip: '<b>Transferencia Depósito</b><p>Transferencia de Depósito Saldo o Parcial</p>'
 				}
 			);
 		},
