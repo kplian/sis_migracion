@@ -186,7 +186,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				fieldLabel: 'Observaciones',
 				allowBlank: true,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 150,
 				maxLength:200
 			},
 			type:'TextArea',
@@ -617,8 +617,10 @@ header("content-type: text/javascript; charset=UTF-8");
 		{name:'sistema_origen', type: 'string'}
 	],
 		sortInfo : {
-			field : 'fecha',
-			direction : 'DESC'
+			//field : 'fecha',
+			//direction : 'DESC'
+			field : 'fecha DESC, indice ',
+			direction : 'ASC'
 		},
 		bdel : true,
 		bsave : false,
