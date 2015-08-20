@@ -775,7 +775,7 @@ Phx.vista.TsLibroBancos=Ext.extend(Phx.gridInterfaz,{
 				  this.getBoton('btnCheque').disable();
 				  this.getBoton('btnCheque2').disable();				
 				  this.getBoton('btnVistaPrevia').disable();
-				  this.getBoton('btnChequeoDocumentosWf').disable();
+				  this.getBoton('btnChequeoDocumentosWf').enable();
 				  if(data['estado']=='borrador'){
 					this.getBoton('edit').enable();
 					this.getBoton('del').enable();
