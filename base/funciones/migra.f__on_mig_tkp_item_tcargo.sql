@@ -91,7 +91,7 @@ $body$
 						                  ORGA.tcargo  
 						                SET						 id_escala_salarial=p_id_escala_salarial
 						 ,id_lugar=p_id_lugar
-						 ,id_oficina=p_id_oficina
+						 --,id_oficina=p_id_oficina
 						 ,id_temporal_cargo=p_id_temporal_cargo
 						 ,id_tipo_contrato=p_id_tipo_contrato
 						 ,id_uo=p_id_uo
