@@ -261,3 +261,66 @@ ALTER TABLE migra.tts_libro_bancos
 SET SCHEMA tes;
 
 /***********************************F-SCP-GSS-MIGRA-0-24/11/2014****************************************/
+
+
+/***********************************I-SCP-GSS-MIGRA-0-02/09/2015****************************************/
+
+CREATE TABLE migra.tcbte_central (
+  id_int_comprobante INTEGER NOT NULL,
+  id_clase_comprobante INTEGER,
+  id_int_comprobante_fk INTEGER,
+  id_subsistema INTEGER,
+  id_depto INTEGER,
+  id_moneda INTEGER,
+  id_periodo INTEGER,
+  nro_cbte VARCHAR(30),
+  momento VARCHAR(30),
+  glosa1 VARCHAR(1500),
+  glosa2 VARCHAR(400),
+  beneficiario VARCHAR(500),
+  tipo_cambio NUMERIC(18,2),
+  id_funcionario_firma1 INTEGER,
+  id_funcionario_firma2 INTEGER,
+  id_funcionario_firma3 INTEGER,
+  fecha DATE,
+  nro_tramite VARCHAR(70),
+  id_int_transaccion INTEGER,
+  id_cuenta INTEGER NOT NULL,
+  id_auxiliar INTEGER NOT NULL,
+  id_centro_costo INTEGER NOT NULL,
+  id_partida INTEGER,
+  id_partida_ejecucion INTEGER,
+  glosa VARCHAR(1000),
+  importe_debe NUMERIC(18,2),
+  importe_haber NUMERIC(18,2),
+  importe_recurso NUMERIC(18,2),
+  importe_gasto NUMERIC(18,2),
+  importe_debe_mb NUMERIC(18,2),
+  importe_haber_mb NUMERIC(18,2),
+  importe_recurso_mb NUMERIC(18,2),
+  importe_gasto_mb NUMERIC(18,2),
+  id_usuario_reg INTEGER,
+  codigo_clase_cbte VARCHAR(50),
+  id_uo INTEGER,
+  id_ep INTEGER,
+  momento_comprometido VARCHAR(4) DEFAULT 'no'::character varying,
+  momento_ejecutado VARCHAR(4) DEFAULT 'no'::character varying,
+  momento_pagado VARCHAR(4) DEFAULT 'no'::character varying,
+  id_cuenta_bancaria INTEGER,
+  nombre_cheque VARCHAR(200),
+  nro_cheque INTEGER,
+  tipo VARCHAR(15),
+  id_libro_bancos INTEGER,
+  id_cuenta_bancaria_endesis INTEGER,
+  id_orden_trabajo INTEGER,
+  id_depto_libro INTEGER,
+  id_depto_conta_pxp INTEGER
+) 
+WITH (oids = false);
+
+
+/***********************************F-SCP-GSS-MIGRA-0-02/09/2015****************************************/
+
+
+
+
