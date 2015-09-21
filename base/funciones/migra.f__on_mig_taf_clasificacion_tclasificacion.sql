@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_taf_clasificacion_tclasificacion (
   v_operacion varchar,
   p_codigo varchar,
@@ -36,7 +34,7 @@ $body$
 						    if(v_operacion = 'INSERT') THEN
 						
 						          INSERT INTO 
-						            alm.tclasificacion (
+						            af.tclasificacion (
 						codigo,
 						id_clasificacion,
 						--correlativo_act,
@@ -79,7 +77,7 @@ $body$
 							    ELSEIF  v_operacion = 'UPDATE' THEN
 						              
                                 IF  not EXISTS(select 1 
-                                           from alm.tclasificacion 
+                                           from af.tclasificacion 
                                            where id_clasificacion=p_id_clasificacion) THEN
                                        
                                             raise exception 'No existe el registro que   desea eliminsr';
@@ -89,7 +87,7 @@ $body$
                                 
                                 
                                  UPDATE 
-						                  alm.tclasificacion  
+						                  af.tclasificacion  
 						                SET						 codigo=p_codigo						 
 						 ,descripcion=p_descripcion
 						 ,estado=p_estado
@@ -108,7 +106,7 @@ $body$
 						       
 						         
                                 IF  not EXISTS(select 1 
-                                           from alm.tclasificacion 
+                                           from af.tclasificacion 
                                            where id_clasificacion=p_id_clasificacion) THEN
                                        
                                             raise exception 'No existe el registro que   desea modificar';
@@ -116,7 +114,7 @@ $body$
                                 END IF;
                                  
                                  DELETE FROM 
-						              alm.tclasificacion
+						              af.tclasificacion
  
 						              						 WHERE id_clasificacion=p_id_clasificacion;
 
