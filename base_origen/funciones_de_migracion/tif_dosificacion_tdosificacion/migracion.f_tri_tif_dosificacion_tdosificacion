@@ -1,0 +1,51 @@
+
+		CREATE OR REPLACE FUNCTION migracion.f_tri_tif_dosificacion_tdosificacion ()
+		RETURNS trigger AS
+		$BODY$
+
+DECLARE
+		 
+		g_registros record;
+		v_consulta varchar;
+		v_res_cone  varchar;
+		v_cadena_cnx varchar;
+		v_cadena_con varchar;
+		resp boolean;
+		
+		BEGIN
+		   IF(TG_OP = 'INSERT' or  TG_OP ='UPDATE' ) THEN
+		   
+			 v_consulta =  'SELECT migracion.f_trans_tif_dosificacion_tdosificacion (
+                  '''||TG_OP::varchar||''','||COALESCE(NEW.id_dosificacion::varchar,'NULL')||','||COALESCE(NEW.id_actividad_economica::varchar,'NULL')||','||COALESCE(NEW.autoimpresor::varchar,'NULL')||','||COALESCE(''''||NEW.estacion::varchar||'''','NULL')||','||COALESCE(''''||NEW.estado::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecdosific::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||NEW.fecha_reg::varchar||'''','NULL')||','||COALESCE(''''||NEW.feciniemi::varchar||'''','NULL')||','||COALESCE(''''||NEW.feclimemi::varchar||'''','NULL')||','||COALESCE(NEW.final::varchar,'NULL')||','||COALESCE(''''||NEW.glosa_boa::varchar||'''','NULL')||','||COALESCE(''''||NEW.glosa_consumidor::varchar||'''','NULL')||','||COALESCE(''''||NEW.glosa_impuestos::varchar||'''','NULL')||','||COALESCE(NEW.inicial::varchar,'NULL')||','||COALESCE(''''||NEW.llave::varchar||'''','NULL')||','||COALESCE(''''||NEW.nombre_sisfac::varchar||'''','NULL')||','||COALESCE(''''||NEW.notificado::varchar||'''','NULL')||','||COALESCE(NEW.nroaut::varchar,'NULL')||','||COALESCE(''''||NEW.nro_resolucion::varchar||'''','NULL')||','||COALESCE(NEW.nro_tramite::varchar,'NULL')||','||COALESCE(''''||NEW.pais::varchar||'''','NULL')||','||COALESCE(NEW.sucursal::varchar,'NULL')||','||COALESCE(''''||NEW.tipo::varchar||'''','NULL')||','||COALESCE(''''||NEW.tipo_autoimpresor::varchar||'''','NULL')||','||COALESCE(''''||NEW.usr_mod::varchar||'''','NULL')||','||COALESCE(''''||NEW.usr_reg::varchar||'''','NULL')||') as res';				  
+		  ELSE 
+		      v_consulta =  ' SELECT migracion.f_trans_tif_dosificacion_tdosificacion (
+		              '''||TG_OP::varchar||''','||OLD.id_dosificacion||',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL) as res';
+		       
+		   END IF;
+		   --------------------------------------
+		   -- PARA PROBAR SI FUNCIONA LA FUNCION DE TRANFROMACION, HABILITAR EXECUTE
+		   ------------------------------------------
+		     --EXECUTE (v_consulta);
+		   
+		   
+		    INSERT INTO 
+		                      migracion.tmig_migracion
+		                    (
+		                      verificado,
+		                      consulta,
+		                      operacion
+		                    ) 
+		                    VALUES (
+		                      'no',
+		                       v_consulta,
+		                       TG_OP::varchar
+		                       
+		                    );
+		
+		  RETURN NULL;
+		
+		END;
+		$BODY$LANGUAGE 'plpgsql'
+		VOLATILE
+		CALLED ON NULL INPUT
+		SECURITY INVOKER;

@@ -1,7 +1,8 @@
 --------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_a_regionales (
-  p_id_int_comprobante integer
+  p_id_int_comprobante integer,
+  p_id_plan_pago integer
 )
 RETURNS varchar AS
 $body$
@@ -235,16 +236,23 @@ BEGIN
     into 
        v_id_depto_lb
     from tes.tplan_pago pp 
-    where pp.id_int_comprobante = p_id_int_comprobante;
+    where pp.id_plan_pago = p_id_plan_pago;
+    
+    
             
     v_conexion =  migra.f_crear_conexion(v_id_depto_lb,'tes.testacion');
      
+     --raise exception 'sss %', p_id_int_comprobante;
     
+    IF v_conexion is null or v_conexion = '' THEN
+      raise exception 'No se pudo conectar con la base de datos destino';
+      
+    END IF;
     --Ejecuta la fucion que recibe el CBTE en la estacion destino .....
-    perform * from dblink(p_conexion, v_sql, true) as (respuesta varchar);
+    perform * from dblink(v_conexion, v_sql, true) as (respuesta varchar);
     
             
- 
+   select * into v_resp from migra.f_cerrar_conexion(v_conexion,'exito');
     
     
     --Devuelve la respuesta

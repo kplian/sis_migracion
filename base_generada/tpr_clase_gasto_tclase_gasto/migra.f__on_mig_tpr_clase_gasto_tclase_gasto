@@ -1,0 +1,104 @@
+CREATE OR REPLACE FUNCTION migra.f__on_trig_tpr_clase_gasto_tclase_gasto (
+						  v_operacion varchar,p_id_clase_gasto int4,p_codigo varchar,p_estado_reg varchar,p_fecha_mod timestamp,p_fecha_reg timestamp,p_id_usuario_ai int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_nombre varchar,p_usuario_ai varchar)
+						RETURNS text AS
+						$BODY$
+
+/*
+						Function:  Para migracion de la tabla param.tgestion
+						Fecha Creacion:  August 18, 2015, 4:14 pm
+						Autor: autogenerado (GONZALO JOSE SARMIENTO SEJAS)
+						
+						*/
+						
+						DECLARE
+						
+						BEGIN
+						
+						    if(v_operacion = 'INSERT') THEN
+						
+						          INSERT INTO 
+						            PRE.tclase_gasto (
+						id_clase_gasto,
+						codigo,
+						estado_reg,
+						fecha_mod,
+						fecha_reg,
+						id_usuario_ai,
+						id_usuario_mod,
+						id_usuario_reg,
+						nombre,
+						usuario_ai)
+				VALUES (
+						p_id_clase_gasto,
+						p_codigo,
+						p_estado_reg,
+						p_fecha_mod,
+						p_fecha_reg,
+						p_id_usuario_ai,
+						p_id_usuario_mod,
+						p_id_usuario_reg,
+						p_nombre,
+						p_usuario_ai);
+
+                               
+                                ELSEIF  v_operacion = 'UPDATE' THEN
+                                       
+                                       IF  not EXISTS(select 1 
+                                           from PRE.tclase_gasto
+ 
+                                           						 WHERE id_clase_gasto=p_id_clase_gasto) THEN
+                                       
+                                            raise exception 'No existe el registro que  desea modificar';
+                                            
+                                       END IF;
+						               
+						               
+						               UPDATE 
+						                  PRE.tclase_gasto  
+						                SET						 codigo=p_codigo
+						 ,estado_reg=p_estado_reg
+						 ,fecha_mod=p_fecha_mod
+						 ,fecha_reg=p_fecha_reg
+						 ,id_usuario_ai=p_id_usuario_ai
+						 ,id_usuario_mod=p_id_usuario_mod
+						 ,id_usuario_reg=p_id_usuario_reg
+						 ,nombre=p_nombre
+						 ,usuario_ai=p_usuario_ai
+						 WHERE id_clase_gasto=p_id_clase_gasto;
+
+						       
+						       ELSEIF  v_operacion = 'DELETE' THEN
+						       
+						         
+						         IF  not EXISTS(select 1 
+                                           from PRE.tclase_gasto
+						 WHERE id_clase_gasto=p_id_clase_gasto) THEN
+                                       
+                                            raise exception 'No existe el registro que  desea eliminar';
+                                            
+                                END IF;
+						         
+						         
+						         DELETE FROM 
+						              PRE.tclase_gasto
+ 
+						              						 WHERE id_clase_gasto=p_id_clase_gasto;
+
+						       
+						       END IF;  
+						  
+						 return 'true';
+						
+						-- statements;
+						--EXCEPTION
+						--WHEN exception_name THEN
+						--  statements;
+						END;
+						$BODY$
+
+
+						LANGUAGE 'plpgsql'
+						VOLATILE
+						CALLED ON NULL INPUT
+						SECURITY INVOKER
+						COST 100;

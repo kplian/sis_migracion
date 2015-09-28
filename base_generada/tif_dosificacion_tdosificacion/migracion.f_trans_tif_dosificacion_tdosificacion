@@ -1,0 +1,135 @@
+CREATE OR REPLACE FUNCTION migracion.f_trans_tif_dosificacion_tdosificacion (
+			  v_operacion varchar,p_id_dosificacion int4,p_id_actividad_economica int4,p_autoimpresor int4,p_estacion varchar,p_estado varchar,p_fecdosific date,p_fecha_mod timestamp,p_fecha_reg timestamp,p_feciniemi date,p_feclimemi date,p_final numeric,p_glosa_boa text,p_glosa_consumidor text,p_glosa_impuestos text,p_inicial numeric,p_llave varchar,p_nombre_sisfac varchar,p_notificado varchar,p_nroaut numeric,p_nro_resolucion varchar,p_nro_tramite numeric,p_pais varchar,p_sucursal int4,p_tipo varchar,p_tipo_autoimpresor varchar,p_usr_mod varchar,p_usr_reg varchar)
+			RETURNS varchar [] AS
+			$BODY$
+
+DECLARE
+			 
+			g_registros record;
+			v_consulta varchar;
+			v_res_cone  varchar;
+			v_cadena_cnx varchar;
+			v_cadena_con varchar;
+			resp boolean;
+			v_resp varchar;
+			v_respuesta varchar[];
+			
+			g_registros_resp record;
+			v_id_dosificacion int4;
+			v_id_activida_economica int4;
+			v_id_sucursal int4;
+			v_autoimpresor varchar;
+			v_estacion varchar;
+			v_estado_reg varchar;
+			v_fecha_dosificacion date;
+			v_fecha_inicio_emi date;
+			v_fecha_limite date;
+			v_fecha_mod timestamp;
+			v_fecha_reg timestamp;
+			v_final varchar;
+			v_glosa_consumidor varchar;
+			v_glosa_empresa varchar;
+			v_glosa_impuestos varchar;
+			v_id_lugar_pais int4;
+			v_id_usuario_ai int4;
+			v_id_usuario_mod int4;
+			v_id_usuario_reg int4;
+			v_inicial varchar;
+			v_llave varchar;
+			v_nombre_sisfac varchar;
+			v_notificado varchar;
+			v_nroaut varchar;
+			v_nro_resolucion varchar;
+			v_nro_siguiente int4;
+			v_nro_tramite varchar;
+			v_tipo varchar;
+			v_tipo_autoimpresor varchar;
+			v_usuario_ai varchar;
+BEGIN
+			
+			
+			          --funcion para obtener cadena de conexion
+			          v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+			          
+			          
+			           ---------------------------------------
+			           --previamente se tranforman los datos  (descomentar)
+			           ---------------------------------------
+
+			           /*
+			           			v_id_dosificacion=p_id_dosificacion::int4;
+			v_id_activida_economica=p_id_actividad_economica::int4;
+			v_id_sucursal=p_sucursal::int4;
+			v_autoimpresor=convert(p_autoimpresor::varchar, 'LATIN1', 'UTF8');
+			v_estacion=convert(p_estacion::varchar, 'LATIN1', 'UTF8');
+			v_estado_reg=convert(p_::varchar, 'LATIN1', 'UTF8');
+			v_fecha_dosificacion=p_fecdosific::date;
+			v_fecha_inicio_emi=p_feclimemi::date;
+			v_fecha_limite=p_feclimemi::date;
+			v_fecha_mod=p_fecha_mod::timestamp;
+			v_fecha_reg=p_fecha_reg::timestamp;
+			v_final=convert(p_final::varchar, 'LATIN1', 'UTF8');
+			v_glosa_consumidor=convert(p_glosa_consumidor::varchar, 'LATIN1', 'UTF8');
+			v_glosa_empresa=convert(p_glosa_consumidor::varchar, 'LATIN1', 'UTF8');
+			v_glosa_impuestos=convert(p_glosa_impuestos::varchar, 'LATIN1', 'UTF8');
+			v_id_lugar_pais=p_pais::int4;
+			v_id_usuario_ai=p_id_usr_reg::int4;
+			v_id_usuario_mod=p_id_usr_reg::int4;
+			v_id_usuario_reg=p_id_usr_reg::int4;
+			v_inicial=convert(p_inicial::varchar, 'LATIN1', 'UTF8');
+			v_llave=convert(p_llave::varchar, 'LATIN1', 'UTF8');
+			v_nombre_sisfac=convert(p_nombre_sisfac::varchar, 'LATIN1', 'UTF8');
+			v_notificado=convert(p_notificado::varchar, 'LATIN1', 'UTF8');
+			v_nroaut=convert(p_nroaut::varchar, 'LATIN1', 'UTF8');
+			v_nro_resolucion=convert(p_nro_resolucion::varchar, 'LATIN1', 'UTF8');
+			v_nro_siguiente=p_::int4;
+			v_nro_tramite=convert(p_nro_tramite::varchar, 'LATIN1', 'UTF8');
+			v_tipo=convert(p_tipo::varchar, 'LATIN1', 'UTF8');
+			v_tipo_autoimpresor=convert(p_tipo_autoimpresor::varchar, 'LATIN1', 'UTF8');
+			v_usuario_ai=convert(p_usr_reg::varchar, 'LATIN1', 'UTF8');
+ */   
+			    --cadena para la llamada a la funcion de insercion en la base de datos destino
+			      
+			        
+			          v_consulta = 'select migra.f__on_trig_tif_dosificacion_tdosificacion (
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_dosificacion::varchar,'NULL')||','||COALESCE(v_id_activida_economica::varchar,'NULL')||','||COALESCE(v_id_sucursal::varchar,'NULL')||','||COALESCE(''''||v_autoimpresor::varchar||'''','NULL')||','||COALESCE(''''||v_estacion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_dosificacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_inicio_emi::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_limite::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(''''||v_final::varchar||'''','NULL')||','||COALESCE(''''||v_glosa_consumidor::varchar||'''','NULL')||','||COALESCE(''''||v_glosa_empresa::varchar||'''','NULL')||','||COALESCE(''''||v_glosa_impuestos::varchar||'''','NULL')||','||COALESCE(v_id_lugar_pais::varchar,'NULL')||','||COALESCE(v_id_usuario_ai::varchar,'NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_inicial::varchar||'''','NULL')||','||COALESCE(''''||v_llave::varchar||'''','NULL')||','||COALESCE(''''||v_nombre_sisfac::varchar||'''','NULL')||','||COALESCE(''''||v_notificado::varchar||'''','NULL')||','||COALESCE(''''||v_nroaut::varchar||'''','NULL')||','||COALESCE(''''||v_nro_resolucion::varchar||'''','NULL')||','||COALESCE(v_nro_siguiente::varchar,'NULL')||','||COALESCE(''''||v_nro_tramite::varchar||'''','NULL')||','||COALESCE(''''||v_tipo::varchar||'''','NULL')||','||COALESCE(''''||v_tipo_autoimpresor::varchar||'''','NULL')||','||COALESCE(''''||v_usuario_ai::varchar||'''','NULL')||')';
+			          --probar la conexion con dblink
+			          
+					   --probar la conexion con dblink
+			          v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+			            
+			             IF(v_resp!='OK') THEN
+			            
+			             	--modificar bandera de fallo  
+			                 raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+			                 
+			             ELSE
+					  
+			         
+			               PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+			                v_res_cone=(select dblink_disconnect());
+			             END IF;
+			            
+			            v_respuesta[1]='TRUE';
+                       
+			           RETURN v_respuesta;
+			EXCEPTION
+			   WHEN others THEN
+			   
+			    v_res_cone=(select dblink_disconnect());
+			     v_respuesta[1]='FALSE';
+                 v_respuesta[2]=SQLERRM;
+                 v_respuesta[3]=SQLSTATE;
+                 v_respuesta[4]=v_consulta;
+                 
+    
+                 
+                 RETURN v_respuesta;
+			
+			END;
+			$BODY$
+
+LANGUAGE 'plpgsql'
+			VOLATILE
+			CALLED ON NULL INPUT
+			SECURITY INVOKER;

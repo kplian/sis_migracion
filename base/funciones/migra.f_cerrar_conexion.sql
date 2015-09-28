@@ -32,11 +32,7 @@ BEGIN
   
   v_sincronizar=pxp.f_get_variable_global('sincronizar');
 
-   IF v_sincronizar = 'false'  or p_nombre_conexion is null THEN
-     
-     return 'exito';
-     
-   ELSE
+  
    	if(p_tipo = 'exito') then
       v_sql := 'commit;';
       perform dblink_exec(p_nombre_conexion, v_sql, true);
@@ -46,7 +42,7 @@ BEGIN
     end if;   
     perform dblink_disconnect(p_nombre_conexion);
    	return 'exito'; 
-   END IF;
+  
     
    
 EXCEPTION

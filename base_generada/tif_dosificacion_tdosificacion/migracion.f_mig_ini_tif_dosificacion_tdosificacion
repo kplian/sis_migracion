@@ -1,0 +1,129 @@
+CREATE OR REPLACE FUNCTION migracion.f_mig_ini_tif_dosificacion_tdosificacion()
+						RETURNS boolean AS
+						$BODY$
+
+
+						DECLARE
+						 
+						g_registros record;
+						v_consulta varchar;
+						v_res_cone varchar;
+						v_cadena_cnx varchar;
+						v_resp varchar;
+						
+						v_cadena_resp varchar[];
+						
+						BEGIN
+						     --funcion para obtener cadena de conexion
+							 v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+									          
+						  
+						    --quirta llaves foraneas en el destino
+						     v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+									            
+						     IF(v_resp!='OK') THEN
+									            
+						        --modificar bandera de fallo  
+						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+									                 
+						     ELSE
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tdosificacion'',''FAC'',''eliminar'')';                   
+						       raise notice '%',v_consulta;
+						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+						        v_res_cone=(select dblink_disconnect());
+						     END IF;
+						
+						
+						   --consulta los registro de la tabla origen
+						    FOR g_registros in (
+						        SELECT 
+						id_dosificacion,
+						id_actividad_economica,
+						autoimpresor,
+						estacion,
+						estado,
+						fecdosific,
+						fecha_mod,
+						fecha_reg,
+						feciniemi,
+						feclimemi,
+						final,
+						glosa_boa,
+						glosa_consumidor,
+						glosa_impuestos,
+						inicial,
+						llave,
+						nombre_sisfac,
+						notificado,
+						nroaut,
+						nro_resolucion,
+						nro_tramite,
+						pais,
+						sucursal,
+						tipo,
+						tipo_autoimpresor,
+						usr_mod,
+						usr_reg
+FROM 
+						          INFORMIX.tif_dosificacion) LOOP
+						        
+						        -- inserta en el destino
+						      
+						            v_cadena_resp = migracion.f_trans_tif_dosificacion_tdosificacion(
+						            'INSERT',g_registros.id_dosificacion
+					,g_registros.id_actividad_economica
+					,g_registros.autoimpresor
+					,g_registros.estacion
+					,g_registros.estado
+					,g_registros.fecdosific
+					,g_registros.fecha_mod
+					,g_registros.fecha_reg
+					,g_registros.feciniemi
+					,g_registros.feclimemi
+					,g_registros.final
+					,g_registros.glosa_boa
+					,g_registros.glosa_consumidor
+					,g_registros.glosa_impuestos
+					,g_registros.inicial
+					,g_registros.llave
+					,g_registros.nombre_sisfac
+					,g_registros.notificado
+					,g_registros.nroaut
+					,g_registros.nro_resolucion
+					,g_registros.nro_tramite
+					,g_registros.pais
+					,g_registros.sucursal
+					,g_registros.tipo
+					,g_registros.tipo_autoimpresor
+					,g_registros.usr_mod
+					,g_registros.usr_reg
+					);	
+					            IF v_cadena_resp[1] = 'FALSE' THEN
+					              RAISE NOTICE 'ERROR ->>>  (%),(%) - %   ', v_cadena_resp[3], v_cadena_resp[2], v_cadena_resp[4];
+					            END IF; 	
+						 END LOOP;
+						
+						     --reconstruye llaves foraneas
+						     v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+									            
+						     IF(v_resp!='OK') THEN
+									            
+						        --modificar bandera de fallo  
+						         raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+									                 
+						     ELSE
+						       v_consulta = 'select pxp.f_add_remove_foraneas(''tdosificacion'',''FAC'',''insertar'')';                   
+						       raise notice '%',v_consulta;
+						       PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+						        v_res_cone=(select dblink_disconnect());
+						     END IF;
+						
+						RETURN TRUE;
+						END;
+						$BODY$
+
+
+						LANGUAGE 'plpgsql'
+						VOLATILE
+						CALLED ON NULL INPUT
+						SECURITY INVOKER;

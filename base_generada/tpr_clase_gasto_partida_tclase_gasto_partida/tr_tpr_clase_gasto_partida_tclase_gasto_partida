@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tpr_clase_gasto_partida
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_clase_gasto_partida FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_clase_gasto_partida_tclase_gasto_partida();
