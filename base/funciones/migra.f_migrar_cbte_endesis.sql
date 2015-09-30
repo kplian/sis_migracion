@@ -2,7 +2,8 @@
 
 CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_endesis (
   p_id_int_comprobante integer,
-  p_conexion varchar = NULL::character varying
+  p_conexion varchar = NULL::character varying,
+  p_regional_internacional varchar = 'no'::character varying
 )
 RETURNS varchar AS
 $body$
@@ -136,7 +137,7 @@ BEGIN
     
     END IF;
     
-    
+    --TODO si el comprobante es de una moneda  diferente a dolar y boliviano, convetir a boliviano
     
     --Obtiene los datos de la transacción
     v_cont = 1;
@@ -254,7 +255,7 @@ BEGIN
     
    
    
-    --Forma la llamada para enviar los datos del comprobante al servidor destino
+    -- Forma la llamada para enviar los datos del comprobante al servidor destino
     v_sql:='select migracion.f_migrar_cbte_pxp('||
                 v_rec.id_int_comprobante ||','|| --p_id_int_comprobante,
                 v_rec.id_clase_comprobante ||','||
@@ -303,13 +304,16 @@ BEGIN
                 '||COALESCE(('array['|| array_to_string(va_nro_cheque, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
                 '||COALESCE(('array['''|| array_to_string(va_tipo, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
                 '||COALESCE(('array['|| array_to_string(va_id_libro_bancos, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_cuenta_bancaria_endesis, ',')||']::integer[]')::varchar,'NULL::integer[]')||')'; 
+                '||COALESCE(('array['|| array_to_string(va_id_cuenta_bancaria_endesis, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
+                '''||p_regional_internacional||''')';
+                
+                 
                 
                 
                 
-               
+ 	raise notice 'migrar_cbte %', v_sql;              
    
-    
+     
     if (p_conexion is null) then   
             --Obtención de cadana de conexión
             v_cadena_cnx =  migra.f_obtener_cadena_conexion();

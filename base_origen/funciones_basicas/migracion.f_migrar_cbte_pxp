@@ -45,7 +45,8 @@ CREATE OR REPLACE FUNCTION migracion.f_migrar_cbte_pxp (
   p_nro_cheque integer [],
   p_tipo varchar [],
   p_id_libro_bancos integer [],
-  p_id_cuenta_bancaria_endesis integer []
+  p_id_cuenta_bancaria_endesis integer [],
+  p_regional_internacional varchar
 )
 RETURNS varchar AS
 $body$
@@ -180,7 +181,8 @@ BEGIN
             --p_id_orden_trabajo[i]
             public.f_iif((p_id_orden_trabajo[i] != 0), p_id_orden_trabajo[i]::text, NULL )::integer,
             p_id_depto_libro,
-            p_id_depto_conta_pxp
+            p_id_depto_conta_pxp,
+            p_regional_internacional
         );
     
     end loop;
@@ -234,7 +236,8 @@ BEGIN
                   momento_pagado,
                   momento_ejecutado,
                   id_depto_libro,
-                  id_depto_conta_pxp
+                  id_depto_conta_pxp,
+                  regional_internacional
 				FROM 
 				  migracion.tct_comprobante
 				WHERE id_int_comprobante = p_id_int_comprobante
@@ -271,7 +274,8 @@ BEGIN
                   momento_pagado,
                   momento_ejecutado,
                   id_depto_libro,
-                  id_depto_conta_pxp) loop
+                  id_depto_conta_pxp,
+                  regional_internacional) loop
 
 		--Obtencion de parametros
         --id_parametro, momento_cbte, id_periodo_subsis, id_subsistema, id_usuario, id_clase_cbte,id_depto
@@ -365,7 +369,8 @@ BEGIN
               id_int_comprobante,
               nro_tramite,
               id_depto_libro,
-              id_depto_conta_pxp
+              id_depto_conta_pxp,
+              regional_internacional
             ) values(
               v_id_comprobante, 
               v_id_parametro, 
@@ -390,14 +395,16 @@ BEGIN
               v_rec.id_int_comprobante,
               v_rec.nro_tramite,
               v_rec.id_depto_libro,
-              p_id_depto_conta_pxp
+              p_id_depto_conta_pxp,
+              v_rec.regional_internacional
             );
-        end if;
-        
-        insert into sci.tct_cbte_estado(
-        id_comprobante,id_usuario,estado_cbte,fecha_estado,sw_estado
-        ) VALUES(
-        v_id_comprobante,v_rec.id_usuario_reg,2.00,CURRENT_DATE,1.00 );
+            
+            insert into sci.tct_cbte_estado(
+            id_comprobante,id_usuario,estado_cbte,fecha_estado,sw_estado
+            ) VALUES(
+            v_id_comprobante,v_rec.id_usuario_reg,2.00,CURRENT_DATE,1.00 );
+            
+        end if;      
 
         --3. Registro de las transacciones
         v_resp = sci.f_tct_gestionar_transaccion_iud(
@@ -421,31 +428,7 @@ BEGIN
                             v_rec.importe_recurso);--ct_importe_recurso numeric);
                             
         
-		/*v_resp = sci.f_tct_transaccion_iud(
-                v_rec.id_usuario_reg,--pm_id_usuario integer,
-                v_ip_origen,--pm_ip_origen varchar,
-                v_mac_maquina,--pm_mac_maquina text,
-                'CT_REGTRA_INS',--pm_codigo_procedimiento varchar,
-                NULL,--pm_proc_almacenado varchar,
-                NULL,--ct_id_transaccion integer,
-                v_id_comprobante,--ct_id_comprobante integer,
-                NULL,--ct_id_fuente_financiamiento integer,
-                v_rec.id_uo,--ct_id_unidad_organizacional integer,
-                v_rec.id_cuenta,--ct_id_cuenta integer,
-                v_rec.id_partida,--ct_id_partida integer,
-                v_rec.id_auxiliar,--ct_id_auxiliar integer,
-                NULL,--ct_id_orden_trabajo integer,
-                NULL,--ct_id_oec integer,
-                NULL,--ct_concepto_tran varchar,
-                v_rec.id_ep,--g_id_fina_regi_prog_proy_acti integer,
-                v_rec.importe_debe,--ct_importe_debe numeric,
-                v_rec.importe_haber,--ct_importe_haber numeric,
-                v_rec.id_moneda,--ct_id_moneda integer,
-                v_rec.fecha,--ct_fecha_transac date,
-                v_rec.tipo_cambio,--ct_tipo_cambio numeric,
-                'Oficial',--ct_tipo_cambio_origen varchar,
-                v_importe_ejecucion--ct_importe_ejecucion numeric
-        );*/
+		
         
         if substring(v_resp,1,1)!='t' then
         	raise exception 'Error al generar transaccion: %',v_resp;
@@ -466,19 +449,36 @@ BEGIN
                 select id_comprobante, origen into v_id_comprobante, v_origen
                 from sci.tct_comprobante
                 where id_int_comprobante=p_id_int_comprobante;
-                if(v_origen='pxp')then
-                  INSERT INTO sci.tct_comprobante_libro_bancos(id_comprobante,id_libro_bancos_deposito,tipo,id_int_comprobante)
-                  VALUES(v_id_comprobante,v_id_libro_bancos,v_tipo,p_id_int_comprobante);    	
-                else
-                  raise exception 'Este comprobante no viene de pxp, esta mal';
-                end if;
+                -- solo inserta libro de banco si no viene de una regional internacional 
+                 if(  p_regional_internacional = 'no')then
+              
+                    if(v_origen='pxp' )then
+                      INSERT INTO sci.tct_comprobante_libro_bancos(id_comprobante,id_libro_bancos_deposito,tipo,id_int_comprobante)
+                      VALUES(v_id_comprobante,v_id_libro_bancos,v_tipo,p_id_int_comprobante);    	
+                    else
+                      raise exception 'Este comprobante no viene de pxp, esta mal';
+                    end if;
+                    
+                 END IF;
         else
               raise exception 'no existe tipo de transaccion bancaria';
         end if;
     end if;
-  	------------------------
+  	
+    ------------------------
     --GSS-14-02-2014- FIN
     -----------------------
+    
+    
+    
+    --------------------------------------------------------------------------------
+    --  TODO si el cbte viene de una regional internacional p_regional_internacional
+    --  tiene que pasar directamente a validado .....  p_regional_internacional = 'si'
+    --------------------------------------------------------------------------------
+    
+    
+    
+    
 
     --Respuesta
     return 'Comprobante generado!'::varchar;

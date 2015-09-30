@@ -40,3 +40,16 @@ ALTER TABLE actif.taf_activo_fijo
 --FALTA EL ESCRIPT PARA ELIMNAR LAS FOREN KEYS DE LA TABLA DE ACTIVO FIJO PARA
 -- EL PREINGERSO DE ACTIVOS  
   
+ 
+--------------- SQL ---------------
+ 
+  
+--30 /09/2015  para migracion de comproabnate de regioanles internacionales
+
+ALTER TABLE migracion.tct_comprobante
+  ADD COLUMN regional_internacional VARCHAR(4) DEFAULT 'no' NOT NULL;
+  
+
+ALTER TABLE sci.tct_comprobante
+  ADD COLUMN regional_internacional VARCHAR(3) DEFAULT 'no' NOT NULL;
+    
