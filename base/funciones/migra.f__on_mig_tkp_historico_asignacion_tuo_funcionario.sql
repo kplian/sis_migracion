@@ -14,7 +14,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tkp_historico_asignacion_tuo_funcion
   p_nro_documento_asignacion varchar,
   p_fecha_documento_asignacion date,
   p_observaciones_finalizacion varchar,
-  p_id_oficina integer
+  p_id_oficina integer,
+  p_certificacion varchar
 )
 RETURNS text AS
 $body$
@@ -49,7 +50,8 @@ $body$
 						id_cargo,
 						nro_documento_asignacion,
 						fecha_documento_asignacion,
-						observaciones_finalizacion
+						observaciones_finalizacion,
+                        certificacion_presupuestaria
 						)
 				VALUES (
 						p_id_uo_funcionario,
@@ -65,7 +67,8 @@ $body$
 						p_id_cargo,
 						p_nro_documento_asignacion,
 						p_fecha_documento_asignacion,
-						p_observaciones_finalizacion);
+						p_observaciones_finalizacion,
+                        p_certificacion);
                         
                         update orga.tcargo set id_oficina = p_id_oficina
                         where id_cargo = p_id_cargo;
@@ -100,6 +103,7 @@ $body$
 						 ,nro_documento_asignacion = p_nro_documento_asignacion
 						 ,fecha_documento_asignacion = p_fecha_documento_asignacion
 						 ,observaciones_finalizacion = p_observaciones_finalizacion
+                         ,certificacion_presupuestaria = p_certificacion
 						 WHERE id_uo_funcionario=p_id_uo_funcionario;
                          
                          update orga.tcargo set id_oficina = p_id_oficina

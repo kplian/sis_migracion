@@ -1,3 +1,22 @@
+CREATE OR REPLACE FUNCTION migracion.f_trans_tkp_historico_asignacion_tuo_funcionario (
+  v_operacion varchar,
+  p_id_historico_asignacion integer,
+  p_id_empleado integer,
+  p_id_unidad_organizacional integer,
+  p_id_usuario_mod integer,
+  p_id_usuario_reg integer,
+  p_estado varchar,
+  p_fecha_asignacion date,
+  p_fecha_finalizacion date,
+  p_fecha_registro date,
+  p_fecha_ultima_mod timestamp,
+  p_id_item integer,
+  p_nro_resolucion_memo varchar,
+  p_fecha_memo date,
+  p_motivo_retiro varchar
+)
+RETURNS varchar [] AS
+$body$
 DECLARE
 			 
 			g_registros record;
@@ -25,6 +44,7 @@ DECLARE
 			v_fecha_documento_asignacion date;
 			v_observaciones_finalizacion varchar;
             v_id_oficina integer;
+            v_certificacion		 varchar;
 BEGIN
 			
 			
@@ -35,7 +55,9 @@ BEGIN
 			           ---------------------------------------
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
-
+			select ha.certificacion_presupuestaria into v_certificacion
+            from kard.tkp_historico_asignacion ha
+            where ha.id_historico_asignacion = p_id_historico_asignacion;
 			           
 			v_id_uo_funcionario=p_id_historico_asignacion::int4;
 			v_id_funcionario=p_id_empleado::int4;
@@ -44,6 +66,7 @@ BEGIN
 			v_estado_reg=convert(case when p_estado = 'eliminado' then 'inactivo' else 'activo' end::varchar, 'LATIN1', 'UTF8');
 			v_estado_reg=convert(case when p_estado = 'eliminado' then 'inactivo' else 'activo' end::varchar, 'LATIN1', 'UTF8');
 			v_nro_documento_asignacion = convert(p_nro_resolucion_memo::varchar, 'LATIN1', 'UTF8');
+            v_certificacion = convert(v_certificacion::varchar, 'LATIN1', 'UTF8');
 			v_fecha_documento_asignacion = p_fecha_memo::date;
 			v_observaciones_finalizacion = convert(case when p_motivo_retiro = 'RETIRO' then 'retiro'
 														when p_motivo_retiro = 'TRANSFERENCIA' then 'transferencia'
@@ -56,6 +79,8 @@ BEGIN
 			v_id_usuario_mod=p_id_usuario_mod::int4;
 			v_id_usuario_reg=p_id_usuario_reg::int4;
  			
+            
+            
             select id_oficina into v_id_oficina
             from kard.tkp_empleado
             where id_empleado = p_id_empleado;
@@ -64,7 +89,7 @@ BEGIN
 			        
 			          v_consulta = 'select migra.f__on_trig_tkp_historico_asignacion_tuo_funcionario (
 			               '''||v_operacion::varchar||''','||COALESCE(v_id_uo_funcionario::varchar,'NULL')||','||COALESCE(v_id_funcionario::varchar,'NULL')||','||COALESCE(v_id_uo::varchar,'NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_finalizacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(v_id_cargo::varchar,'NULL')||','||COALESCE(''''||v_nro_documento_asignacion::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_documento_asignacion::varchar||'''','NULL')||','||
-                           COALESCE(''''||v_observaciones_finalizacion::varchar||'''','NULL')||','||COALESCE(v_id_oficina::varchar,'NULL')||')';
+                           COALESCE(''''||v_observaciones_finalizacion::varchar||'''','NULL')||','||COALESCE(v_id_oficina::varchar,'NULL')||','||COALESCE(''''||v_certificacion::varchar||'''','NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink
@@ -99,3 +124,9 @@ BEGIN
                  RETURN v_respuesta;
 			
 			END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;
