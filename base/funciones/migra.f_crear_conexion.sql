@@ -66,7 +66,7 @@ BEGIN
           raise exception 'si especifica el codigo de estacion tiene tambien que especificar la tabla de donde salen los datos';
         END IF;
       
-        v_consulta = 'select t.host, t.puerto, t.dbname, t.usuario, t.password from ' || p_tabla || ' t where  lower(codigo)='||  lower(p_codigo_estacion) || '';
+        v_consulta = 'select t.host, t.puerto, t.dbname, t.usuario, t.password from ' || p_tabla || ' t where  lower(codigo)='''||  lower(p_codigo_estacion) || '''';
         
         execute v_consulta into v_instancia;
         
