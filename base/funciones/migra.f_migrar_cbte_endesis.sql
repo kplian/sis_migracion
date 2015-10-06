@@ -51,6 +51,9 @@ DECLARE
     v_glosa2 						varchar;
     v_id_depto_libro  				integer;
     v_id_depto_origen_pxp			integer;
+    v_id_moneda_base 				integer; 
+    v_id_moneda   					integer;
+    v_sw_moneda_base 				varchar;
 
 BEGIN
 
@@ -88,13 +91,33 @@ BEGIN
     cbte.momento_comprometido,
     cbte.momento_ejecutado,
     cbte.momento_pagado,
-    cbte.id_depto_libro
+    cbte.id_depto_libro,
+    cbte.vbregional,
+    cbte.temporal
     into
     v_rec
     from conta.tint_comprobante cbte
     inner join conta.tclase_comprobante cla
 	on cla.id_clase_comprobante = cbte.id_clase_comprobante
     where cbte.id_int_comprobante = p_id_int_comprobante;
+    
+    
+    ---------------------------------------------------
+     -- Determinar moneda de migracion
+     -- Si viene de una regional y la moneda no  es dolar  (dolar ... id_moneda = 2)
+     -- ejecutar moneda base
+     ------------------------------------------------
+     
+     --determinar moneda base
+     v_id_moneda_base = param.f_get_moneda_base();
+     v_id_moneda = v_rec.id_moneda;
+     v_sw_moneda_base = 'no';
+     
+     
+     IF v_rec.vbregional = 'si' and v_rec.id_moneda != 2 THEN
+       v_id_moneda = v_id_moneda_base;
+       v_sw_moneda_base = 'si';
+     END IF;
     
     
     v_id_depto_origen_pxp = v_rec.id_depto;
@@ -123,7 +146,7 @@ BEGIN
     
     IF v_rec.tipo_cambio  is NULL  THEN
     
-          v_tipo_cambio =  param.f_get_tipo_cambio(v_rec.id_moneda, v_rec.fecha::date, 'O');
+          v_tipo_cambio =  param.f_get_tipo_cambio(v_id_moneda, v_rec.fecha::date, 'O');
                     
           IF  v_tipo_cambio is NULL  THEN
                     
@@ -176,7 +199,23 @@ BEGIN
                   on cb.id_cuenta_bancaria_pxp=tra.id_cuenta_bancaria and cb.id_gestion=cta.id_gestion       
                   where tra.id_int_comprobante = p_id_int_comprobante) loop
                   
-    	va_id_int_transaccion[v_cont]=v_dat.id_int_transaccion;
+          --SW para cambio de moneda        
+         IF v_sw_moneda_base = 'si' THEN
+            va_importe_debe[v_cont]=v_dat.importe_debe_mb;
+            va_importe_haber[v_cont]=v_dat.importe_haber_mb;
+            va_importe_recurso[v_cont]=v_dat.importe_recurso_mb;
+            va_importe_gasto[v_cont]=v_dat.importe_gasto_mb;
+         ELSE
+            va_importe_debe[v_cont]=v_dat.importe_debe;
+            va_importe_haber[v_cont]=v_dat.importe_haber;
+            va_importe_recurso[v_cont]=v_dat.importe_recurso;
+            va_importe_gasto[v_cont]=v_dat.importe_gasto;
+         END IF;          
+                  
+    	
+        --verificacion de moneda
+        
+        va_id_int_transaccion[v_cont]=v_dat.id_int_transaccion;
         va_id_cuenta[v_cont]=v_dat.id_cuenta;
         va_id_auxiliar[v_cont]=v_dat.id_auxiliar;
         va_id_centro_costo[v_cont]=v_dat.id_centro_costo;
@@ -184,10 +223,7 @@ BEGIN
         va_id_partida[v_cont]=v_dat.id_partida;
         va_id_partida_ejecucion[v_cont]=v_dat.id_partida_ejecucion;
         va_id_int_transaccion_fk[v_cont]=v_dat.id_int_transaccion_fk;
-        va_importe_debe[v_cont]=v_dat.importe_debe;
-        va_importe_haber[v_cont]=v_dat.importe_haber;
-        va_importe_recurso[v_cont]=v_dat.importe_recurso;
-        va_importe_gasto[v_cont]=v_dat.importe_gasto;
+        
         va_id_uo[v_cont]=v_dat.id_uo;
         va_id_ep[v_cont]=v_dat.id_ep;
         
@@ -264,7 +300,7 @@ BEGIN
                 v_rec.id_depto ||','||
                 coalesce(v_rec.id_depto_libro::varchar,'null')||','||
                 coalesce(v_id_depto_origen_pxp::varchar,'null')||','||
-                v_rec.id_moneda ||','||
+                v_id_moneda ||','||
                 v_rec.id_periodo ||','||
                 ''''||coalesce(v_rec.nro_cbte,'') ||''','||
                 ''''||coalesce(v_rec.momento,'') ||''','||

@@ -52,6 +52,7 @@ v_id_comprobante  integer;
  
  --gvc 29-07-2014
  g_id_partida_ejecucion_devengado integer;
+ g_id_partida_ejecucion_comprometido  integer;
  g_estado_com_eje	numeric;
  
 BEGIN
@@ -130,9 +131,94 @@ FOR v_i IN 1..v_size LOOP
     from presto.tpr_partida_ejecucion pe
     where pe.id_partida_ejecucion = pr_id_partida_ejecucion[v_i];
        
-                                        
-     --si el id_partida_ejecucion es del comprometido y se solicita hacer el pago  
- 	   if(g_estado_com_eje = 1 and pr_sw_momento[v_i] = 4 )then
+    
+    --raise exception ' ...  %, %', pr_id_moneda[v_i], pr_monto_total[v_i];
+     -------------------------------------------------
+     --  Si no tenemos un comprometido y necesitamos  devengar
+     --------------------------------------------------
+     IF   pr_id_partida_ejecucion[v_i] is NULL and pr_sw_momento[v_i] in (3, 4)   THEN
+       
+             -- COMPROMETER
+             v_rescom:= presto.f_i_pr_gestionarpresupuesto(
+                                                      pr_id_presupuesto[v_i],
+                                                      pr_id_partida[v_i],
+                                                      pr_id_moneda[v_i],
+                                                      pr_monto_total[v_i],
+                                                      -- NULL,
+                                                      --now()::date,
+                                                      pr_fecha[v_i]::date,
+                                                      NULL,
+                                                      1,    --MOMENTO COMPROMETIDO
+                                                      pr_id_item[v_i],
+                                                      pr_id_servicio[v_i],
+                                                      pr_id_concepto_ingas[v_i],
+                                                      v_id_cuenta_doc,
+                                                      v_id_devengado,
+                                                      v_id_solicitud_compra,
+                                                      v_id_cuenta_doc_rendicion,                   --id_cuenta_doc_rendicion
+                                                      v_id_comprobante,
+                                                      v_columna_relacion,
+                                                      v_fk_llave
+                                            );
+            -- DEVENGAR
+            
+            g_id_partida_ejecucion_comprometido = v_rescom[1];
+            
+            v_rescom:=presto.f_i_pr_gestionarpresupuesto(
+                                                      pr_id_presupuesto[v_i],
+                                                      pr_id_partida[v_i],
+                                                      pr_id_moneda[v_i],
+                                                      pr_monto_total[v_i],
+                                                     -- NULL,
+                                                       --now()::date,
+                                                      pr_fecha[v_i]::date,
+                                                      g_id_partida_ejecucion_comprometido, --pr_id_partida_ejecucion[v_i],
+                                                      3,  --MOMENTO DEVENGAR
+                                                      pr_id_item[v_i],
+                                                      pr_id_servicio[v_i],
+                                                      pr_id_concepto_ingas[v_i],
+                                                      v_id_cuenta_doc,
+                                                      v_id_devengado,
+                                                      v_id_solicitud_compra,
+                                                      v_id_cuenta_doc_rendicion,                   --id_cuenta_doc_rendicion
+                                                      v_id_comprobante,
+                                                      v_columna_relacion,
+                                                      v_fk_llave
+                                            );
+                                            
+               --   PAGAR ....  solo si el momento es 4                           
+               IF  pr_sw_momento[v_i] = 4   THEN  
+               
+                           g_id_partida_ejecucion_devengado = v_rescom[1];                                
+     
+                           --registramos el pagado
+                           v_rescom:=presto.f_i_pr_gestionarpresupuesto(
+                                                      pr_id_presupuesto[v_i],
+                                                      pr_id_partida[v_i],
+                                                      pr_id_moneda[v_i],
+                                                      pr_monto_total[v_i],
+                                                     -- NULL,
+                                                       --now()::date,
+                                                      pr_fecha[v_i]::date,
+                                                      g_id_partida_ejecucion_devengado, --pr_id_partida_ejecucion[v_i],
+                                                      4, --momento PAGADO
+                                                      pr_id_item[v_i],
+                                                      pr_id_servicio[v_i],
+                                                      pr_id_concepto_ingas[v_i],
+                                                      v_id_cuenta_doc,
+                                                      v_id_devengado,
+                                                      v_id_solicitud_compra,
+                                                      v_id_cuenta_doc_rendicion,                   --id_cuenta_doc_rendicion
+                                                      v_id_comprobante,
+                                                      v_columna_relacion,
+                                                      v_fk_llave
+                                            );
+        
+               END IF;                       
+     -----------------------------------------------------
+     -- SI tenemos un comprometido y necesitamos PAGAR
+     -------------------------------------------------------
+ 	 ELSEIF(g_estado_com_eje = 1 and pr_sw_momento[v_i] = 4 )then
        
            raise notice '>>>>>>  paso %',v_i;
            --registramos el devengado
@@ -229,4 +315,5 @@ $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;

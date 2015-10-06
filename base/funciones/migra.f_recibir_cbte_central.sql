@@ -46,7 +46,8 @@ CREATE OR REPLACE FUNCTION migra.f_recibir_cbte_central (
   p_nro_cheque integer [],
   p_tipo varchar [],
   p_id_libro_bancos integer [],
-  p_id_cuenta_bancaria_endesis integer []
+  p_id_cuenta_bancaria_endesis integer [],
+  p_vbregional varchar = 'no'::character varying
 )
 RETURNS varchar AS
 $body$
@@ -356,7 +357,8 @@ BEGIN
                         usuario_ai,
                         temporal,
                         id_int_comprobante_origen_central,
-                        origen
+                        origen,
+                        vbregional
                                
                       ) 
                       VALUES (
@@ -389,7 +391,8 @@ BEGIN
                         NULL,
                         'no',
                         p_id_int_comprobante,
-                        'central'
+                        'central',
+                        p_vbregional
                       )RETURNING id_int_comprobante into v_id_int_comprobante;
                       
                      

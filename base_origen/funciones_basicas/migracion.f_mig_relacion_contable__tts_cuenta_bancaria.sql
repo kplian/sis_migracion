@@ -7,9 +7,11 @@ CREATE OR REPLACE FUNCTION migracion.f_mig_relacion_contable__tts_cuenta_bancari
   p_id_centro_costo integer,
   p_id_gestion integer,
   p_nro_cuenta_banco varchar,
+  p_denominacion varchar,
+  p_centro varchar,
   p_id_institucion integer
 )
-RETURNS varchar AS
+RETURNS integer AS
 $body$
 /*
 Autor: RCM
@@ -21,6 +23,7 @@ DECLARE
 
 	v_respuesta varchar;
 	v_id_parametro integer;
+    v_id_cuenta_bancaria integer;
 
 BEGIN
 
@@ -29,6 +32,11 @@ BEGIN
     into v_id_parametro
     from tesoro.tts_parametro pa
     where pa.id_gestion = p_id_gestion;
+    
+    select id_cuenta_bancaria into v_id_cuenta_bancaria
+    from tesoro.tts_cuenta_bancaria
+    where nro_cuenta_banco = p_nro_cuenta_banco
+				and id_parametro = v_id_parametro;
 
 	if p_operacion = 'INSERT' then
 		
@@ -60,7 +68,9 @@ BEGIN
 			  nro_cheque,
 			  estado_cuenta,
 			  id_auxiliar,
-			  id_parametro
+			  id_parametro,
+              denominacion,
+              central
 			) values(
 --			  p_id_cuenta_bancaria,
 			  p_id_institucion,
@@ -69,8 +79,10 @@ BEGIN
 			  0,
 			  1,
 			  p_id_auxiliar,
-			  v_id_parametro
-			);
+			  v_id_parametro,
+              p_denominacion,
+              p_centro
+			) returning id_cuenta_bancaria into v_id_cuenta_bancaria ;
 			
 		end if;
 
@@ -82,7 +94,9 @@ BEGIN
     	--Actualiza el registro
 		update tesoro.tts_cuenta_bancaria set
 		id_cuenta = p_id_cuenta,
-		id_auxiliar = p_id_auxiliar
+		id_auxiliar = p_id_auxiliar,
+        denominacion = p_denominacion,
+        central = p_centro
 		WHERE nro_cuenta_banco = p_nro_cuenta_banco
 		and id_parametro = v_id_parametro;
         
@@ -91,7 +105,7 @@ BEGIN
         
     else
     	--Eliminación: se intenta eliminar la cuenta bancaria cuando se borró la relación contable
-    
+    	
     	delete from tesoro.tts_cuenta_bancaria
         where nro_cuenta_banco = p_nro_cuenta_banco
 		and id_parametro = v_id_parametro;
@@ -102,11 +116,12 @@ BEGIN
     end if;
 
 	
-	return v_respuesta;
+	return v_id_cuenta_bancaria;
 
 END;
 $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;

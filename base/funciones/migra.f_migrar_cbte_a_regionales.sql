@@ -9,7 +9,9 @@ $body$
 /*
 Autor: RAC
 Fecha: 02/09/2015
-Descripción: Migrar el comprobante Temporal generado en PXP central a PXP en as estaciones internacionales
+Descripción: 
+
+    Migrar el comprobante Temporal generado en PXP central a PXP en as estaciones internacionales 
 */
 DECLARE
 
