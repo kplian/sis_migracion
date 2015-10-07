@@ -60,6 +60,9 @@ DECLARE
     v_id_moneda_base_reg			integer;
     v_importe_debe_mb				numeric;
     v_importe_haber_mb				numeric;
+    v_sw_mon 						integer;
+    v_id_int_comprobante_reg		integer;
+    v_id_int_transaccion_reg		integer;
 
 BEGIN
 
@@ -109,24 +112,29 @@ BEGIN
     v_sql = 'select 
                      1::integer
                     from param.tmoneda m
-                    where m.id_moneda = p_id_moneda';
+                    where m.id_moneda = '||v_rec.id_moneda;
                     
                     
-    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_resp_dblink;
+    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_sw_mon;
     
-    IF  v_resp_dblink.sw != 1 or v_resp_dblink.sw is  null THEN
+   
+     
+    IF  v_sw_mon != 1 or v_sw_mon is  null THEN
        raise exception 'No se encontro un registro para la moneda en la estación destino';
     END IF;
     
+   
     --recuperamos la moneda base en la estación destino
     
     v_sql = 'select  param.f_get_moneda_base()';
    
-    SELECT * FROM  dblink(v_conexion,v_sql, true) into v_id_moneda_base_reg;
+    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_id_moneda_base_reg;
     
     IF  v_id_moneda_base_reg is null THEN
        raise exception 'No se encontro un registro para la moneda base en la estación destino';
     END IF;
+    
+   
     
     IF v_rec.id_moneda = v_id_moneda_base_reg THEN
         v_tipo_cambio = 1;
@@ -177,9 +185,9 @@ BEGIN
                           cbte_cierre,
                           cbte_apertura,
                           cbte_aitb,
-                          origen,
-                          vbregional,
-                          codigo_estacion_origen,
+                          
+                          
+                          
                           id_int_comprobante_origen_central,
                           funcion_comprobante_validado,
                           funcion_comprobante_eliminado,
@@ -226,26 +234,24 @@ BEGIN
                           COALESCE(''''||v_rec.cbte_cierre::varchar||'''','NULL')||','||
                           COALESCE(''''||v_rec.cbte_apertura::varchar||'''','NULL')||','||
                           COALESCE(''''||v_rec.cbte_aitb::varchar||'''','NULL')||','||
-                          COALESCE(''''||v_rec.origen::varchar||'''','NULL')||','||
-                          '''si'','||
-                          COALESCE(''''||v_conta_codigo_estacion::varchar||'''','NULL')||','||
+                          
                           COALESCE(p_id_int_comprobante::varchar,'NULL')||',
                           ''conta.f_validar_comprobante_central'',
                           ''conta.f_eliminar_comprobante_central'',
                           ''central'','||
                           COALESCE(v_tipo_cambio::varchar,'NULL')||') RETURNING id_int_comprobante'; 
     
-   
+  
     
-    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_comprobante integer) into v_resp_dblink;
+    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_comprobante integer) into v_id_int_comprobante_reg;
     
     
     --almacena el id del comprobante migrado
     update conta.tint_comprobante c set
-     id_int_comprobante_origen_regional = v_resp_dblink.id_int_comprobante
+     id_int_comprobante_origen_regional = v_id_int_comprobante_reg
     where id_int_comprobante = p_id_int_comprobante; 
     
-   
+  
     ----------------------------------------
     -- inserta la trasacciones del cbte
     -------------------------------------
@@ -317,7 +323,7 @@ BEGIN
                                    COALESCE(v_dat.id_usuario_ai::varchar,'NULL')||','||
                                    COALESCE(''''||v_dat.usuario_ai::varchar||'''','NULL')||','||
                                   
-                                   COALESCE(v_resp_dblink.id_int_comprobante::varchar,'NULL')||','||
+                                   COALESCE(v_id_int_comprobante_reg::varchar,'NULL')||','||
                                    COALESCE(v_dat.id_cuenta::varchar,'NULL')||','||
                                    COALESCE(v_dat.id_auxiliar::varchar,'NULL')||','||
                                    COALESCE(v_dat.id_centro_costo::varchar,'NULL')||','||
@@ -355,12 +361,12 @@ BEGIN
                                    COALESCE(v_dat.id_int_transaccion::varchar,'NULL')||') RETURNING id_int_transaccion'; 
                                    
             
-            SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_transaccion integer) into v_resp_dblink_tra;
+            SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_transaccion integer) into v_id_int_transaccion_reg;
           
            -- actualizar en trasaccion destino en el origen
            
            update conta.tint_transaccion t set
-             id_int_transaccion_origen = v_resp_dblink_tra.id_int_transaccion
+             id_int_transaccion_origen = v_id_int_transaccion_reg
            where id_int_transaccion = v_dat.id_int_transaccion;
            
            
@@ -383,25 +389,31 @@ BEGIN
                                       estado_reg,
                                       id_int_transaccion_dev,
                                       id_int_transaccion_pag,
-                                      monto_pago,
-                                      id_partida_ejecucion_pag
+                                      monto_pago
                                     )
                                     VALUES ('||
                                       COALESCE(v_dat_rel.id_usuario_reg::varchar,'NULL')||',
                                       now(),
                                       ''activo'','||
                                       COALESCE(v_dat_rel.id_int_transaccion_origen::varchar,'NULL')||','||
-                                      COALESCE(v_resp_dblink_tra.id_int_transaccion::varchar,'NULL')||','||
+                                      COALESCE(v_id_int_transaccion_reg::varchar,'NULL')||','||
                                       COALESCE(v_dat_rel.monto_pago::varchar,'NULL')||' ) RETURNING id_int_rel_devengado;';
                                       
                                       
-                  SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_transaccion integer) into v_resp_dblink_tra_rel;
+                  SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_rel_devengado integer) into v_resp_dblink_tra_rel;
             
             end loop;
     
              
     
-    END LOOP;    
+    END LOOP;  
+    
+    
+    v_sql = 'select conta.f_int_trans_procesar('||v_id_int_comprobante_reg||' );';
+    --validaciones del comprobante
+     SELECT * FROM  dblink(v_conexion,v_sql, true) as (res varchar) into v_resp_dblink_tra_rel;
+    
+      
     
     
     --si la conexion por  defecto es nula cerramos la conexion que creamos

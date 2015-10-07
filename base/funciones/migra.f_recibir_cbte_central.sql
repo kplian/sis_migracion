@@ -46,8 +46,7 @@ CREATE OR REPLACE FUNCTION migra.f_recibir_cbte_central (
   p_nro_cheque integer [],
   p_tipo varchar [],
   p_id_libro_bancos integer [],
-  p_id_cuenta_bancaria_endesis integer [],
-  p_vbregional varchar = 'no'::character varying
+  p_id_cuenta_bancaria_endesis integer []
 )
 RETURNS varchar AS
 $body$
@@ -112,60 +111,6 @@ BEGIN
     
       raise exception 'No se encontro un registro para la moneda en la estación destino';
     END IF;
-    
-    --crear tabla tamporal
-     CREATE TEMPORARY TABLE ttemp_cbte_central (
-              id_int_comprobante INTEGER NOT NULL,
-              id_clase_comprobante INTEGER,
-              id_int_comprobante_fk INTEGER,
-              id_subsistema INTEGER,
-              id_depto INTEGER,
-              id_moneda INTEGER,
-              id_periodo INTEGER,
-              nro_cbte VARCHAR(30),
-              momento VARCHAR(30),
-              glosa1 VARCHAR(1500),
-              glosa2 VARCHAR(400),
-              beneficiario VARCHAR(500),
-              tipo_cambio NUMERIC(18,2),
-              id_funcionario_firma1 INTEGER,
-              id_funcionario_firma2 INTEGER,
-              id_funcionario_firma3 INTEGER,
-              fecha DATE,
-              nro_tramite VARCHAR(70),
-              id_int_transaccion INTEGER,
-              id_cuenta INTEGER NOT NULL,
-              id_auxiliar INTEGER NOT NULL,
-              id_centro_costo INTEGER NOT NULL,
-              id_partida INTEGER,
-              id_partida_ejecucion INTEGER,
-              glosa VARCHAR(1000),
-              importe_debe NUMERIC(18,2),
-              importe_haber NUMERIC(18,2),
-              importe_recurso NUMERIC(18,2),
-              importe_gasto NUMERIC(18,2),
-              importe_debe_mb NUMERIC(18,2),
-              importe_haber_mb NUMERIC(18,2),
-              importe_recurso_mb NUMERIC(18,2),
-              importe_gasto_mb NUMERIC(18,2),
-              id_usuario_reg INTEGER,
-              codigo_clase_cbte VARCHAR(50),
-              id_uo INTEGER,
-              id_ep INTEGER,
-              momento_comprometido VARCHAR(4) DEFAULT 'no'::character varying,
-              momento_ejecutado VARCHAR(4) DEFAULT 'no'::character varying,
-              momento_pagado VARCHAR(4) DEFAULT 'no'::character varying,
-              id_cuenta_bancaria INTEGER,
-              nombre_cheque VARCHAR(200),
-              nro_cheque INTEGER,
-              tipo VARCHAR(15),
-              id_libro_bancos INTEGER,
-              id_cuenta_bancaria_endesis INTEGER,
-              id_orden_trabajo INTEGER,
-              id_depto_libro INTEGER,
-              id_depto_conta_pxp INTEGER
-            )ON COMMIT DROP;
-    
             
      -- Obtener la moneda base
      v_id_moneda_base = param.f_get_moneda_base();
@@ -209,7 +154,7 @@ BEGIN
         	v_id_cuenta_bancaria_endesis = p_id_cuenta_bancaria_endesis[i];
         end if;
               
-    	insert into ttemp_cbte_central
+    	insert into migra.tcbte_central
         values(
             p_id_int_comprobante, 
             p_id_clase_comprobante, 
@@ -258,7 +203,7 @@ BEGIN
             v_id_libro_bancos,
             v_id_cuenta_bancaria_endesis,
             --p_id_orden_trabajo[i]
-            pxp.f_iif((p_id_orden_trabajo[i] != 0), p_id_orden_trabajo[i]::text, NULL )::integer,
+            public.f_iif((p_id_orden_trabajo[i] != 0), p_id_orden_trabajo[i]::text, NULL )::integer,
             p_id_depto_libro,
             p_id_depto_conta_pxp
         );
@@ -314,7 +259,7 @@ BEGIN
                          momento_ejecutado,
                          id_depto_libro,
                          id_depto_conta_pxp
-                  FROM ttemp_cbte_central
+                  FROM migra.tcbte_central
 				  WHERE id_int_comprobante = p_id_int_comprobante) loop
 
 		
@@ -356,9 +301,7 @@ BEGIN
                         id_usuario_ai,
                         usuario_ai,
                         temporal,
-                        id_int_comprobante_origen_central,
-                        origen,
-                        vbregional
+                        id_int_comprobante_origen_central
                                
                       ) 
                       VALUES (
@@ -375,24 +318,22 @@ BEGIN
                         p_momento_comprometido,
                         p_momento_ejecutado,
                         p_momento_pagado,
-                        NULL, -- p_id_plantilla_comprobante,  la plantilla de cbte no se migra
+                        p_id_plantilla_comprobante,
                         v_rec.glosa1,
                         v_rec.beneficiario,
                         v_tipo_cambio,--v_tipo_cambio,
                         p_fecha,
-                        'conta.f_validar_comprobante_central',    --  v_plantilla.funcion_comprobante_validado,
-                        'conta.f_eliminar_comprobante_central',   --  v_plantilla.funcion_comprobante_eliminado,
+                        NULL,--v_plantilla.funcion_comprobante_validado,
+                        NULL,--TODO v_plantilla.funcion_comprobante_eliminado,
                         v_id_cuenta_bancaria,
                         NULL, --v_this.columna_id_cuenta_bancaria_mov, 
                         v_nro_cheque,
-                        NULL,--v_this.columna_nro_cuenta_bancaria_trans,
+                        NULL,v_this.columna_nro_cuenta_bancaria_trans,
                         p_nro_tramite,
                         NULL,
                         NULL,
                         'no',
-                        p_id_int_comprobante,
-                        'central',
-                        p_vbregional
+                        p_id_int_comprobante
                       )RETURNING id_int_comprobante into v_id_int_comprobante;
                       
                      
@@ -435,7 +376,7 @@ BEGIN
                 'activo',
                 v_rec.id_cuenta,
                 v_rec.glosa,
-                v_id_int_comprobante,
+                v_rec.id_int_comprobante,
                 v_rec.id_auxiliar,
                 v_rec.importe_debe,
                 v_rec.importe_haber,
@@ -453,7 +394,7 @@ BEGIN
 			);
             
      end loop;
-    
+   
     -- procesar las trasaaciones (con diversos propostios, ejm validar  cuentas bancarias)
     IF not conta.f_int_trans_procesar(v_id_int_comprobante) THEN
       raise exception 'Error al procesar transacciones';
@@ -462,7 +403,7 @@ BEGIN
     --Respuesta
     return 'Comprobante generado!'::varchar;
 	
-EXCEPTION
+    EXCEPTION
     
 	WHEN OTHERS THEN
         g_nombre_funcion = 'migra.f_recibir_cbte_central';

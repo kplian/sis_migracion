@@ -283,8 +283,7 @@ BEGIN
                                       estado_reg,
                                       id_int_transaccion_dev,
                                       id_int_transaccion_pag,
-                                      monto_pago,
-                                      id_partida_ejecucion_pag
+                                      monto_pago
                                     )
                                     VALUES ('||
                                       COALESCE(v_dat_rel.id_usuario_reg::varchar,'NULL')||',
