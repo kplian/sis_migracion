@@ -164,8 +164,7 @@ BEGIN
      id_int_comprobante_origen_central = v_resp_dblink.id_int_comprobante
     where id_int_comprobante = p_id_int_comprobante; 
     
-   -- raise exception 'zzzzzzzzz %', v_resp_dblink.id_int_comprobante;
-   
+ 
     ----------------------------------------
     -- inserta la trasacciones del cbte
     -------------------------------------
@@ -304,8 +303,7 @@ BEGIN
     
     END LOOP;     
     
-    -- raise exception 'xxxx    sss % , ...  %', p_conexion, v_resp_dblink.id_int_comprobante; 
-   
+    
     --si la conexion pro defecto es nula cerramso la conexion que creamos
     IF p_conexion is null THEN
     	select * into v_resp from migra.f_cerrar_conexion(v_conexion,'exito');

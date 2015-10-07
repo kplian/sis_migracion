@@ -2,7 +2,8 @@
 
 CREATE OR REPLACE FUNCTION migra.f_migrar_cbte_a_regionales (
   p_id_int_comprobante integer,
-  p_id_plan_pago integer
+  p_id_plan_pago integer,
+  p_conexion varchar = NULL::character varying
 )
 RETURNS varchar AS
 $body$
@@ -21,6 +22,7 @@ DECLARE
     v_sql 					varchar;
     v_rec 					record;
     v_dat 					record;
+    v_dat_rel				record;
     v_cont 					integer;
     v_id_depto_lb			integer;
     
@@ -52,185 +54,26 @@ DECLARE
     v_id_depto_libro  				integer;
     v_id_depto_origen_pxp			integer;
     v_conexion 						varchar;
+    v_resp_dblink 					varchar;
+    v_resp_dblink_tra				varchar;
+    v_resp_dblink_tra_rel 			varchar;
+    v_id_moneda_base_reg			integer;
+    v_importe_debe_mb				numeric;
+    v_importe_haber_mb				numeric;
 
 BEGIN
 
 
    v_nombre_funcion:='migra.f_migrar_cbte_a_regionales';
 
-	--Verificación de existencia de parámetro
+	
+    --Verificación de existencia de parámetro
     if not exists(select 1 from conta.tint_comprobante
     			where id_int_comprobante = p_id_int_comprobante) then
     	raise exception 'Migración de comprobante no realizada: comprobante inexistente';
     end if;
     
-    --Obtiene los datos del comprobante
-    select  
-      cbte.id_int_comprobante, 
-      cbte.id_clase_comprobante, 
-      cbte.id_int_comprobante_fks, 
-      cbte.id_subsistema, 
-      cbte.id_depto, 
-      cbte.id_moneda, 
-      cbte.id_periodo, 
-      cbte.nro_cbte, 
-      cbte.momento, 
-      cbte.glosa1, 
-      cbte.glosa2, 
-      cbte.beneficiario, 
-      cbte.tipo_cambio, 
-      cbte.id_funcionario_firma1, 
-      cbte.id_funcionario_firma2, 
-      cbte.id_funcionario_firma3, 
-      cbte.fecha,
-      cbte.nro_tramite,
-      cbte.id_usuario_reg,
-      cla.codigo as codigo_clase_cbte,
-      cbte.momento_comprometido,
-      cbte.momento_ejecutado,
-      cbte.momento_pagado,
-      cbte.id_depto_libro,
-      cbte.id_usuario_reg,
-      cbte.id_plantilla_comprobante
-    into
-    	v_rec
-    from conta.tint_comprobante cbte
-    inner join conta.tclase_comprobante cla
-	on cla.id_clase_comprobante = cbte.id_clase_comprobante
-    where cbte.id_int_comprobante = p_id_int_comprobante;
     
-    
-    v_id_depto_origen_pxp = v_rec.id_depto;
-    
-   
-       
-    
-    
-    -- Obtiene los datos de la transacción
-    v_cont = 1;
-    for v_dat in (select
-                  tra.id_int_transaccion,
-                  tra.id_cuenta, 
-                  tra.id_auxiliar, 
-                  tra.id_centro_costo,
-                  tra.id_orden_trabajo,
-                  tra.id_partida,
-                  tra.id_partida_ejecucion,
-                  tra.id_int_transaccion_fk, 
-                  tra.glosa,
-                  tra.importe_debe,
-                  tra.importe_haber, 
-                  tra.importe_recurso, 
-                  tra.importe_gasto,
-                  tra.importe_debe_mb, 
-                  tra.importe_haber_mb, 
-                  tra.importe_recurso_mb, 
-                  tra.importe_gasto_mb,
-                  cco.id_uo,
-                  cco.id_ep,
-                  coalesce(tra.id_cuenta_bancaria,-1) as id_cuenta_bancaria,
-                  coalesce(tra.nombre_cheque_trans,'S/N') as nombre_cheque_trans,
-                  coalesce(tra.nro_cheque,-1) as nro_cheque,
-                  tra.forma_pago::varchar as tipo,
-                  coalesce(tra.id_cuenta_bancaria_mov,-1) as id_libro_bancos,
-                  coalesce(cb.id_cuenta_bancaria,-1) as id_cuenta_bancaria_endesis
-                  from conta.tint_transaccion tra
-                  inner join param.tcentro_costo cco
-                  on cco.id_centro_costo = tra.id_centro_costo
-                  inner join conta.tcuenta cta
-                  on cta.id_cuenta=tra.id_cuenta
-      			  left join migra.tts_cuenta_bancaria cb
-                  on cb.id_cuenta_bancaria_pxp=tra.id_cuenta_bancaria and cb.id_gestion=cta.id_gestion       
-                  where tra.id_int_comprobante = p_id_int_comprobante) loop
-                  
-    	va_id_int_transaccion[v_cont]=v_dat.id_int_transaccion;
-        va_id_cuenta[v_cont]=v_dat.id_cuenta;
-        va_id_auxiliar[v_cont]=v_dat.id_auxiliar;
-        va_id_centro_costo[v_cont]=v_dat.id_centro_costo;
-        va_id_orden_trabajo[v_cont]=COALESCE(v_dat.id_orden_trabajo,0);
-        va_id_partida[v_cont]=v_dat.id_partida;
-        va_id_partida_ejecucion[v_cont]=v_dat.id_partida_ejecucion;
-        va_id_int_transaccion_fk[v_cont]=v_dat.id_int_transaccion_fk;
-        va_importe_debe[v_cont]=v_dat.importe_debe;
-        va_importe_haber[v_cont]=v_dat.importe_haber;
-        va_importe_recurso[v_cont]=v_dat.importe_recurso;
-        va_importe_gasto[v_cont]=v_dat.importe_gasto;
-        va_id_uo[v_cont]=v_dat.id_uo;
-        va_id_ep[v_cont]=v_dat.id_ep;
-        
-        va_id_cuenta_bancaria[v_cont]=v_dat.id_cuenta_bancaria;
-        va_nombre_cheque_trans[v_cont]=v_dat.nombre_cheque_trans;
-        va_nro_cheque[v_cont]=v_dat.nro_cheque;
-        va_tipo[v_cont]= COALESCE(v_dat.tipo,'');
-        va_id_libro_bancos[v_cont]=v_dat.id_libro_bancos;
-        va_id_cuenta_bancaria_endesis[v_cont]=v_dat.id_cuenta_bancaria_endesis;
-        va_glosa[v_cont]=COALESCE(v_dat.glosa,'--');
-       
-        
-        v_cont = v_cont + 1;
-   	end loop;
-    
-    
-    
-    
-    v_glosa1 = v_rec.glosa1;
-    v_glosa2 = v_rec.glosa2;
-    
-   
-    --Forma la llamada para enviar los datos del comprobante al servidor destino
-    v_sql:='select migra.f_recibir_cbte_central('||
-                v_rec.id_int_comprobante ||','|| --p_id_int_comprobante,
-                 v_rec.id_plantilla_comprobante ||','|| --p_id_plantilla_comprobante,
-                
-                v_rec.id_clase_comprobante ||','||
-                'null' ||','||
-                v_rec.id_subsistema ||','||
-                v_rec.id_depto ||','||
-                coalesce(v_rec.id_depto_libro::varchar,'null')||','||
-                coalesce(v_id_depto_origen_pxp::varchar,'null')||','||
-                v_rec.id_moneda ||','||
-                v_rec.id_periodo ||','||
-                ''''||coalesce(v_rec.nro_cbte,'') ||''','||
-                ''''||coalesce(v_rec.momento,'') ||''','||
-                ''''||coalesce(trim(v_glosa1),'') ||''','||
-                ''''||coalesce(trim(v_glosa2),'') ||''','||
-                ''''||coalesce(v_rec.beneficiario,'') ||''','||
-                coalesce(v_tipo_cambio,0) ||','||
-                'null' ||','|| --id_funcionario_firma1
-                'null' ||','|| --id_funcionario_firma2
-                'null' ||','|| --id_funcionario_firma3
-                ''''||v_rec.fecha ||''','||
-                ''''||coalesce(v_rec.nro_tramite,'') ||''',
-                '||COALESCE(('array['|| array_to_string(va_id_int_transaccion, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_cuenta, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_auxiliar, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_centro_costo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                
-                '||COALESCE(('array['|| pxp.f_iif(array_to_string(va_id_orden_trabajo, ',')='','null',array_to_string(va_id_orden_trabajo, ','))||']::integer[]')::varchar,'NULL::integer[]')||',
-                
-                '||COALESCE(('array['|| array_to_string(va_id_partida, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
-                '||COALESCE(('array['|| pxp.f_iif(array_to_string(va_id_partida_ejecucion, ',')='','null',array_to_string(va_id_partida_ejecucion, ','))||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['''||array_to_string(va_glosa, ''',''') ||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
-                '||COALESCE(('array['|| array_to_string(va_importe_debe, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',
-                '||COALESCE(('array['|| array_to_string(va_importe_haber, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',
-                '||COALESCE(('array['|| array_to_string(va_importe_recurso, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||',
-                '||COALESCE(('array['|| array_to_string(va_importe_gasto, ',')||']::numeric[]')::varchar,'NULL::numeric[]')||','||
-                v_rec.id_usuario_reg ||','||
-                ''''||coalesce(v_rec.codigo_clase_cbte,'') ||''','||'
-                '||COALESCE(('array['|| array_to_string(va_id_uo, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_ep, ',')||']::integer[]')::varchar,'NULL::integer[]')||','||
-                ''''||coalesce(v_rec.momento_comprometido,'') ||''','||
-                ''''||coalesce(v_rec.momento_ejecutado,'') ||''','||
-                ''''||coalesce(v_rec.momento_pagado,'') ||''','
-                
-                ||COALESCE(('array['|| array_to_string(va_id_cuenta_bancaria, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
-                '||COALESCE(('array['''|| array_to_string(va_nombre_cheque_trans, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
-                '||COALESCE(('array['|| array_to_string(va_nro_cheque, ',')||']::integer[]')::varchar,'NULL::integer[]')||', 
-                '||COALESCE(('array['''|| array_to_string(va_tipo, ''',''')||''']::varchar[]')::varchar,'NULL::varchar[]')||', 
-                '||COALESCE(('array['|| array_to_string(va_id_libro_bancos, ',')||']::integer[]')::varchar,'NULL::integer[]')||',
-                '||COALESCE(('array['|| array_to_string(va_id_cuenta_bancaria_endesis, ',')||']::integer[]')::varchar,'NULL::integer[]')||')'; 
-                
-                
     --recuperar datos de la estacion            
  	
     select 
@@ -240,21 +83,331 @@ BEGIN
     from tes.tplan_pago pp 
     where pp.id_plan_pago = p_id_plan_pago;
     
-    
-            
-    v_conexion =  migra.f_crear_conexion(v_id_depto_lb,'tes.testacion');
-     
-     --raise exception 'sss %', p_id_int_comprobante;
+    --si la conexion por defecto es nula
+    IF  p_conexion is null THEN
+    	v_conexion = migra.f_crear_conexion(v_id_depto_lb,'tes.testacion');
+    ELSE
+        v_conexion = p_conexion;
+    END IF;
     
     IF v_conexion is null or v_conexion = '' THEN
       raise exception 'No se pudo conectar con la base de datos destino';
       
     END IF;
-    --Ejecuta la fucion que recibe el CBTE en la estacion destino .....
-    perform * from dblink(v_conexion, v_sql, true) as (respuesta varchar);
     
+    -- Obtiene los datos del comprobante
+    select  
+      cbte.*
+    into
+    	v_rec
+    from conta.tint_comprobante cbte
+    where cbte.id_int_comprobante = p_id_int_comprobante;
+    
+    
+    -- verificar moneda
+    
+    v_sql = 'select 
+                     1::integer
+                    from param.tmoneda m
+                    where m.id_moneda = p_id_moneda';
+                    
+                    
+    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_resp_dblink;
+    
+    IF  v_resp_dblink.sw != 1 or v_resp_dblink.sw is  null THEN
+       raise exception 'No se encontro un registro para la moneda en la estación destino';
+    END IF;
+    
+    --recuperamos la moneda base en la estación destino
+    
+    v_sql = 'select  param.f_get_moneda_base()';
+   
+    SELECT * FROM  dblink(v_conexion,v_sql, true) into v_id_moneda_base_reg;
+    
+    IF  v_id_moneda_base_reg is null THEN
+       raise exception 'No se encontro un registro para la moneda base en la estación destino';
+    END IF;
+    
+    IF v_rec.id_moneda = v_id_moneda_base_reg THEN
+        v_tipo_cambio = 1;
+    ELSE
+        v_tipo_cambio = NULL;
+    END IF;
+   
+    -------------------------------------------
+    -- Insertar el cbte
+    ----------------------------------------
+    
+    v_sql= 'INSERT INTO  conta.tint_comprobante
+                        (
+                          id_usuario_reg,
+                          id_usuario_mod,
+                          fecha_reg,
+                          fecha_mod,
+                          estado_reg,
+                          id_usuario_ai,
+                          usuario_ai,
+                          id_clase_comprobante,
+                          id_subsistema,
+                          id_depto,
+                          id_moneda,
+                          id_periodo,
+                          nro_cbte,
+                          momento,
+                          glosa1,
+                          glosa2,
+                          beneficiario,
+                          id_funcionario_firma1,
+                          id_funcionario_firma2,
+                          id_funcionario_firma3,
+                          fecha,
+                          nro_tramite,
+                        
+                          momento_comprometido,
+                          momento_ejecutado,
+                          momento_pagado,
+                          id_cuenta_bancaria,
+                          id_cuenta_bancaria_mov,
+                          nro_cheque,
+                          nro_cuenta_bancaria_trans,
+                          manual,
+                          id_int_comprobante_fks,
+                          id_tipo_relacion_comprobante,
+                          id_depto_libro,
+                          cbte_cierre,
+                          cbte_apertura,
+                          cbte_aitb,
+                          origen,
+                          vbregional,
+                          codigo_estacion_origen,
+                          id_int_comprobante_origen_central,
+                          funcion_comprobante_validado,
+                          funcion_comprobante_eliminado,
+                          origen,
+                          tipo_cambio
+                          
+                        )
+                        VALUES ('||
+                          COALESCE(v_rec.id_usuario_reg::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_usuario_mod::varchar,'NULL')||','||
+                          COALESCE(''''||v_rec.fecha_reg::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.fecha_mod::varchar||'''','NULL')||',
+                          ''borrador'','||
+                          COALESCE(v_rec.id_usuario_ai::varchar,'NULL')||','||
+                          COALESCE(''''||v_rec.usuario_ai::varchar||'''','NULL')||','||
+                          COALESCE(v_rec.id_clase_comprobante::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_subsistema::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_depto::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_moneda::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_periodo::varchar,'NULL')||','||
+                          COALESCE(''''||v_rec.nro_cbte::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.momento::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.glosa1::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.glosa2::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.beneficiario::varchar||'''','NULL')||','||
+                          COALESCE(v_rec.id_funcionario_firma1::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_funcionario_firma2::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_funcionario_firma3::varchar,'NULL')||','||
+                          COALESCE(''''||v_rec.fecha::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.nro_tramite::varchar||'''','NULL')||','||
+                          
+                          COALESCE(''''||v_rec.momento_comprometido::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.momento_ejecutado::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.momento_pagado::varchar||'''','NULL')||','||
+                          COALESCE(v_rec.id_cuenta_bancaria::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_cuenta_bancaria_mov::varchar,'NULL')||','||
+                          COALESCE(v_rec.nro_cheque::varchar,'NULL')||','||
+                          COALESCE(''''||v_rec.nro_cuenta_bancaria_trans::varchar||'''','NULL')||','||
+                          
+                          COALESCE(''''||v_rec.manual::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.id_int_comprobante_fks::varchar||'''','NULL')||','||
+                          COALESCE(v_rec.id_tipo_relacion_comprobante::varchar,'NULL')||','||
+                          COALESCE(v_rec.id_depto_libro::varchar,'NULL')||','||
+                          COALESCE(''''||v_rec.cbte_cierre::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.cbte_apertura::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.cbte_aitb::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.origen::varchar||'''','NULL')||','||
+                          '''si'','||
+                          COALESCE(''''||v_conta_codigo_estacion::varchar||'''','NULL')||','||
+                          COALESCE(p_id_int_comprobante::varchar,'NULL')||',
+                          ''conta.f_validar_comprobante_central'',
+                          ''conta.f_eliminar_comprobante_central'',
+                          ''central'','||
+                          COALESCE(v_tipo_cambio::varchar,'NULL')||') RETURNING id_int_comprobante'; 
+    
+   
+    
+    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_comprobante integer) into v_resp_dblink;
+    
+    
+    --almacena el id del comprobante migrado
+    update conta.tint_comprobante c set
+     id_int_comprobante_origen_regional = v_resp_dblink.id_int_comprobante
+    where id_int_comprobante = p_id_int_comprobante; 
+    
+   
+    ----------------------------------------
+    -- inserta la trasacciones del cbte
+    -------------------------------------
+    for v_dat in (select
+                  tra.*
+                  from conta.tint_transaccion tra
+                  where tra.id_int_comprobante = p_id_int_comprobante) loop
+                  
+                  
+           IF v_tipo_cambio = 1 then 
+             v_importe_debe_mb  =  v_rec.importe_debe;
+             v_importe_haber_mb =  v_rec.importe_haber;   
+           END  IF;       
+                  
+    	   --insertar la trasaccion
+           v_sql= 'INSERT INTO 
+                                  conta.tint_transaccion
+                                (
+                                  id_usuario_reg,
+                                  id_usuario_mod,
+                                  fecha_reg,
+                                  fecha_mod,
+                                  estado_reg,
+                                  id_usuario_ai,
+                                  usuario_ai,
+                                 
+                                  id_int_comprobante,
+                                  id_cuenta,
+                                  id_auxiliar,
+                                  id_centro_costo,
+                                  id_partida,
+                                  id_partida_ejecucion,
+                                  id_int_transaccion_fk,
+                                  glosa,
+                                  
+                                  importe_debe,
+                                  importe_haber,
+                                  importe_gasto,
+                                  importe_recurso,
+                                  importe_debe_mb,
+                                  importe_haber_mb,
+                                  importe_gasto_mb,
+                                  importe_recurso_mb,
+                                  
+                                 
+                                  id_detalle_plantilla_comprobante,
+                                  id_partida_ejecucion_dev,
+                                  importe_reversion,
+                                  monto_pagado_revertido,
+                                  id_partida_ejecucion_rev,
+                                  id_cuenta_bancaria,
+                                  id_cuenta_bancaria_mov,
+                                  nro_cheque,
+                                  nro_cuenta_bancaria_trans,
+                                  porc_monto_excento_var,
+                                  nombre_cheque_trans,
+                                  factor_reversion,
+                                  id_orden_trabajo,
+                                  forma_pago,
+                                  banco,
+                                  id_int_transaccion_origen
+                                )
+                                VALUES ('||
+                                   COALESCE(v_dat.id_usuario_reg::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_usuario_mod::varchar,'NULL')||','||
+                                   COALESCE(''''||v_dat.fecha_reg::varchar||'''','NULL')||','||
+                                   COALESCE(''''||v_dat.fecha_mod::varchar||'''','NULL')||','||
+                                   COALESCE(''''||v_dat.estado_reg::varchar||'''','NULL')||','||
+                                   COALESCE(v_dat.id_usuario_ai::varchar,'NULL')||','||
+                                   COALESCE(''''||v_dat.usuario_ai::varchar||'''','NULL')||','||
+                                  
+                                   COALESCE(v_resp_dblink.id_int_comprobante::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_cuenta::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_auxiliar::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_centro_costo::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_partida::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_partida_ejecucion::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_int_transaccion_fk::varchar,'NULL')||','||
+                                   COALESCE(''''||v_dat.glosa::varchar||'''','NULL')||','||
+                                   COALESCE(v_dat.importe_debe::varchar,'NULL')||','||
+                                   COALESCE(v_dat.importe_haber::varchar,'NULL')||','||
+                                   COALESCE(v_dat.importe_gasto::varchar,'NULL')||','||
+                                   COALESCE(v_dat.importe_recurso::varchar,'NULL')||','||
+                                 
+                                   
+                                   COALESCE(v_importe_debe_mb::varchar,'NULL')||','||
+                                   COALESCE(v_importe_haber_mb::varchar,'NULL')||','||
+                                   COALESCE(v_importe_debe_mb::varchar,'NULL')||','||
+                                   COALESCE(v_importe_haber_mb::varchar,'NULL')||','||
+                                 
+                                  
+                                   COALESCE(v_dat.id_detalle_plantilla_comprobante::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_partida_ejecucion_dev::varchar,'NULL')||','||
+                                   COALESCE(v_dat.importe_reversion::varchar,'NULL')||','||
+                                   COALESCE(v_dat.monto_pagado_revertido::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_partida_ejecucion_rev::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_cuenta_bancaria::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_cuenta_bancaria_mov::varchar,'NULL')||','||
+                                   COALESCE(v_dat.nro_cheque::varchar,'NULL')||','||
+                                   COALESCE(''''||v_dat.nro_cuenta_bancaria_trans::varchar||'''','NULL')||','||
+                                   COALESCE(v_dat.porc_monto_excento_var::varchar,'NULL')||','||
+                                   COALESCE(''''||v_dat.nombre_cheque_trans::varchar||'''','NULL')||','||
+                                   COALESCE(v_dat.factor_reversion::varchar,'NULL')||','||
+                                   COALESCE(v_dat.id_orden_trabajo::varchar,'NULL')||','||
+                                   COALESCE(''''||v_dat.forma_pago::varchar||'''','NULL')||','||
+                                   COALESCE(''''||v_dat.banco::varchar||'''','NULL')||','||
+                                   COALESCE(v_dat.id_int_transaccion::varchar,'NULL')||') RETURNING id_int_transaccion'; 
+                                   
             
-   select * into v_resp from migra.f_cerrar_conexion(v_conexion,'exito');
+            SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_transaccion integer) into v_resp_dblink_tra;
+          
+           -- actualizar en trasaccion destino en el origen
+           
+           update conta.tint_transaccion t set
+             id_int_transaccion_origen = v_resp_dblink_tra.id_int_transaccion
+           where id_int_transaccion = v_dat.id_int_transaccion;
+           
+           
+           -- FOR listar las relaciones de pago
+            for v_dat_rel in (
+                           select   
+                             rd.monto_pago,
+                             rd.id_usuario_reg,
+                             it.id_int_transaccion_origen 
+                           from conta.tint_rel_devengado rd
+                           inner join conta.tint_transaccion  it on it.id_int_transaccion = rd.id_int_transaccion_dev 
+                           where rd.id_int_transaccion_pag = v_dat.id_int_transaccion) loop
+                  
+                  --insertar relacion devengado pago 
+                  v_sql = 'INSERT INTO 
+                                      conta.tint_rel_devengado
+                                    (
+                                      id_usuario_reg,
+                                      fecha_reg,
+                                      estado_reg,
+                                      id_int_transaccion_dev,
+                                      id_int_transaccion_pag,
+                                      monto_pago,
+                                      id_partida_ejecucion_pag
+                                    )
+                                    VALUES ('||
+                                      COALESCE(v_dat_rel.id_usuario_reg::varchar,'NULL')||',
+                                      now(),
+                                      ''activo'','||
+                                      COALESCE(v_dat_rel.id_int_transaccion_origen::varchar,'NULL')||','||
+                                      COALESCE(v_resp_dblink_tra.id_int_transaccion::varchar,'NULL')||','||
+                                      COALESCE(v_dat_rel.monto_pago::varchar,'NULL')||' ) RETURNING id_int_rel_devengado;';
+                                      
+                                      
+                  SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_transaccion integer) into v_resp_dblink_tra_rel;
+            
+            end loop;
+    
+             
+    
+    END LOOP;    
+    
+    
+    --si la conexion por  defecto es nula cerramos la conexion que creamos
+    IF p_conexion is null THEN
+    	select * into v_resp from migra.f_cerrar_conexion(v_conexion,'exito');
+    END IF;
     
     
     --Devuelve la respuesta
