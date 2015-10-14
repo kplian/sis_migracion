@@ -192,7 +192,9 @@ BEGIN
                           funcion_comprobante_validado,
                           funcion_comprobante_eliminado,
                           origen,
-                          tipo_cambio
+                          tipo_cambio,
+                          fecha_costo_ini,
+                          fecha_costo_fin
                           
                         )
                         VALUES ('||
@@ -239,7 +241,9 @@ BEGIN
                           ''conta.f_validar_comprobante_central'',
                           ''conta.f_eliminar_comprobante_central'',
                           ''central'','||
-                          COALESCE(v_tipo_cambio::varchar,'NULL')||') RETURNING id_int_comprobante'; 
+                          COALESCE(v_tipo_cambio::varchar,'NULL')||','||
+                          COALESCE(''''||v_rec.fecha_costo_ini::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||') RETURNING id_int_comprobante'; 
     
   
     

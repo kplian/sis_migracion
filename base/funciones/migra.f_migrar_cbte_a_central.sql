@@ -152,7 +152,9 @@ BEGIN
                           COALESCE(''''||v_rec.origen::varchar||'''','NULL')||','||
                           '''si'','||
                           COALESCE(''''||v_conta_codigo_estacion::varchar||'''','NULL')||','||
-                          COALESCE(p_id_int_comprobante::varchar,'NULL')||') RETURNING id_int_comprobante'; 
+                          COALESCE(p_id_int_comprobante::varchar,'NULL')||','|| 
+                          COALESCE(''''||v_rec.fecha_costo_ini::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||') RETURNING id_int_comprobante'; 
     
    
     
