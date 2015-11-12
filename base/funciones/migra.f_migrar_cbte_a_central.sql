@@ -108,7 +108,9 @@ BEGIN
                           origen,
                           vbregional,
                           codigo_estacion_origen,
-                          id_int_comprobante_origen_regional
+                          id_int_comprobante_origen_regional,
+                          fecha_costo_ini,
+                          fecha_costo_fin
                         )
                         VALUES ('||
                           COALESCE(v_rec.id_usuario_reg::varchar,'NULL')||','||
