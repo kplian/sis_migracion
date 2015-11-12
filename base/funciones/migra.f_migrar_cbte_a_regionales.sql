@@ -63,6 +63,7 @@ DECLARE
     v_sw_mon 						integer;
     v_id_int_comprobante_reg		integer;
     v_id_int_transaccion_reg		integer;
+    v_id_moneda_tri_reg				integer;
 
 BEGIN
 
@@ -134,6 +135,15 @@ BEGIN
        raise exception 'No se encontro un registro para la moneda base en la estación destino';
     END IF;
     
+    
+    v_sql = 'select  param.f_get_moneda_triangulacion()';
+   
+    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_id_moneda_tri_reg;
+    
+    IF  v_id_moneda_base_reg is null THEN
+       raise exception 'No se encontro un registro para la moneda de triangulación  en la estación destino';
+    END IF;
+    
    
     
     IF v_rec.id_moneda = v_id_moneda_base_reg THEN
@@ -194,7 +204,8 @@ BEGIN
                           origen,
                           tipo_cambio,
                           fecha_costo_ini,
-                          fecha_costo_fin
+                          fecha_costo_fin,
+                          id_moneda_tri
                           
                         )
                         VALUES ('||
@@ -243,7 +254,8 @@ BEGIN
                           ''central'','||
                           COALESCE(v_tipo_cambio::varchar,'NULL')||','||
                           COALESCE(''''||v_rec.fecha_costo_ini::varchar||'''','NULL')||','||
-                          COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||') RETURNING id_int_comprobante'; 
+                          COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||','||
+                          v_id_moneda_tri_reg::varchar||') RETURNING id_int_comprobante'; 
     
   
     
@@ -295,11 +307,7 @@ BEGIN
                                   importe_haber,
                                   importe_gasto,
                                   importe_recurso,
-                                  importe_debe_mb,
-                                  importe_haber_mb,
-                                  importe_gasto_mb,
-                                  importe_recurso_mb,
-                                  
+                                 
                                  
                                   id_detalle_plantilla_comprobante,
                                   id_partida_ejecucion_dev,
@@ -339,14 +347,6 @@ BEGIN
                                    COALESCE(v_dat.importe_haber::varchar,'NULL')||','||
                                    COALESCE(v_dat.importe_gasto::varchar,'NULL')||','||
                                    COALESCE(v_dat.importe_recurso::varchar,'NULL')||','||
-                                 
-                                   
-                                   COALESCE(v_importe_debe_mb::varchar,'NULL')||','||
-                                   COALESCE(v_importe_haber_mb::varchar,'NULL')||','||
-                                   COALESCE(v_importe_debe_mb::varchar,'NULL')||','||
-                                   COALESCE(v_importe_haber_mb::varchar,'NULL')||','||
-                                 
-                                  
                                    COALESCE(v_dat.id_detalle_plantilla_comprobante::varchar,'NULL')||','||
                                    COALESCE(v_dat.id_partida_ejecucion_dev::varchar,'NULL')||','||
                                    COALESCE(v_dat.importe_reversion::varchar,'NULL')||','||
@@ -414,11 +414,19 @@ BEGIN
     
     
     v_sql = 'select conta.f_int_trans_procesar('||v_id_int_comprobante_reg||' );';
+    
+    
     --validaciones del comprobante
-     SELECT * FROM  dblink(v_conexion,v_sql, true) as (res varchar) into v_resp_dblink_tra_rel;
+    SELECT * FROM  dblink(v_conexion,v_sql, true) as (res varchar) into v_resp_dblink_tra_rel;
     
-      
     
+    
+    --TODO, calula configuracion  cambiaria, tipos de cambio y conversiones en la transacciones en el servidor remoto  
+     
+     
+    v_sql = 'PERFORM conta.f_act_trans_cbte_generados('||v_id_int_comprobante_reg||',''Internacional'');';
+   
+    PERFORM  dblink(v_conexion,v_sql, true);
     
     --si la conexion por  defecto es nula cerramos la conexion que creamos
     IF p_conexion is null THEN
