@@ -412,22 +412,17 @@ BEGIN
     
     END LOOP;  
     
-    
-    v_sql = 'select conta.f_int_trans_procesar('||v_id_int_comprobante_reg||' );';
-    
-    
     --validaciones del comprobante
+    v_sql = 'select conta.f_int_trans_procesar('||v_id_int_comprobante_reg||' );';
     SELECT * FROM  dblink(v_conexion,v_sql, true) as (res varchar) into v_resp_dblink_tra_rel;
     
     
     
-    --TODO, calula configuracion  cambiaria, tipos de cambio y conversiones en la transacciones en el servidor remoto  
-     
-     
-    v_sql = 'PERFORM conta.f_act_trans_cbte_generados('||v_id_int_comprobante_reg||',''Internacional'');';
-   
-    PERFORM  dblink(v_conexion,v_sql, true);
+    --calula configuracion  cambiaria, tipos de cambio y conversiones en la transacciones en el servidor remoto  
+     v_sql = 'select  conta.f_act_trans_cbte_generados('||v_id_int_comprobante_reg||',''Internacional'');';
+     SELECT * FROM  dblink(v_conexion,v_sql, true) as (res varchar) into v_resp_dblink_tra_rel;
     
+   
     --si la conexion por  defecto es nula cerramos la conexion que creamos
     IF p_conexion is null THEN
     	select * into v_resp from migra.f_cerrar_conexion(v_conexion,'exito');
