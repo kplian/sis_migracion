@@ -111,9 +111,10 @@ BEGIN
                           id_int_comprobante_origen_regional,
                           fecha_costo_ini,
                           fecha_costo_fin,
+                          sw_tipo_cambio,
                           localidad,
-                          tipo_cambio,
-                          sw_tipo_cambio
+                          tipo_cambio
+                          
                         )
                         VALUES ('||
                           COALESCE(v_rec.id_usuario_reg::varchar,'NULL')||','||
