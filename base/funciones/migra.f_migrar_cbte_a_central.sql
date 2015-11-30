@@ -113,7 +113,9 @@ BEGIN
                           fecha_costo_fin,
                           sw_tipo_cambio,
                           localidad,
+                          sw_editable,
                           tipo_cambio
+                          
                           
                         )
                         VALUES ('||
@@ -161,9 +163,10 @@ BEGIN
                           COALESCE(p_id_int_comprobante::varchar,'NULL')||','|| 
                           COALESCE(''''||v_rec.fecha_costo_ini::varchar||'''','NULL')||','||
                           COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||','||
-                          COALESCE(''''||v_rec.sw_tipo_cambio::varchar||'''','NULL')||',
-                          ''internacional'','||
-                           COALESCE(v_rec.tipo_cambio::varchar,'NULL')||') RETURNING id_int_comprobante'; 
+                          COALESCE(''''||v_rec.sw_tipo_cambio::varchar||'''','NULL')||','||
+                          '''internacional'','||
+                          '''si'','||
+                           COALESCE(v_rec.tipo_cambio_2::varchar,'NULL')||') RETURNING id_int_comprobante'; 
     
    
     
@@ -283,7 +286,7 @@ BEGIN
                                        COALESCE(v_dat.id_int_transaccion::varchar,'NULL')||','||
                                        COALESCE(v_dat.id_moneda::varchar,'NULL')||','||
                                        COALESCE(v_dat.id_moneda_tri::varchar,'NULL')||','||
-                                       COALESCE(v_dat.tipo_cambio::varchar,'NULL')||'
+                                       COALESCE(v_dat.tipo_cambio_2::varchar,'NULL')||'
                                        
                                        ) RETURNING id_int_transaccion'; 
                                        
