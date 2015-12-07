@@ -165,7 +165,7 @@ BEGIN
                           COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||','||
                           COALESCE(''''||v_rec.sw_tipo_cambio::varchar||'''','NULL')||','||
                           '''internacional'','||
-                          '''si'','||
+                          '''no'','||
                            COALESCE(v_rec.tipo_cambio_2::varchar,'NULL')||') RETURNING id_int_comprobante'; 
     
    

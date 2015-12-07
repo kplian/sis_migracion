@@ -71,7 +71,7 @@ BEGIN
    v_nombre_funcion:='migra.f_migrar_cbte_a_regionales';
 
 	
-    --Verificación de existencia de parámetro
+    --Verificación la existencia del parámetro
     if not exists(select 1 from conta.tint_comprobante
     			where id_int_comprobante = p_id_int_comprobante) then
     	raise exception 'Migración de comprobante no realizada: comprobante inexistente';
