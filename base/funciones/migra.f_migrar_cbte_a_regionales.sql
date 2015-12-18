@@ -205,6 +205,7 @@ BEGIN
                           tipo_cambio,
                           fecha_costo_ini,
                           fecha_costo_fin,
+                          sw_editable,
                           id_moneda_tri
                           
                         )
@@ -254,7 +255,8 @@ BEGIN
                           ''central'','||
                           COALESCE(v_tipo_cambio::varchar,'NULL')||','||
                           COALESCE(''''||v_rec.fecha_costo_ini::varchar||'''','NULL')||','||
-                          COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||','||
+                          COALESCE(''''||v_rec.fecha_costo_fin::varchar||'''','NULL')||',
+                          ''no'','||
                           v_id_moneda_tri_reg::varchar||') RETURNING id_int_comprobante'; 
     
   

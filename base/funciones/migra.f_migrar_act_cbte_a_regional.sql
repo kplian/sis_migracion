@@ -97,7 +97,7 @@ BEGIN
       where t.estado_reg = 'activo' and 
             t.id_int_comprobante_bk = v_rec.id_int_comprobante_bk;
     
-    IF v_sum_debe_bk != v_sum_debe  or v_sum_haber_bk  = v_sum_haber  THEN    
+    IF v_sum_debe_bk != v_sum_debe  or v_sum_haber_bk  != v_sum_haber  THEN    
        raise exception 'los montos totales no pueden variar con respecto al original  (debe: %, haber %) !=  BK(debe: %, haber %)' ,v_sum_debe, v_sum_haber, v_sum_debe_bk, v_sum_haber_bk ;   
     END IF;
     
@@ -131,7 +131,7 @@ BEGIN
                     fecha_costo_fin = '''||   v_rec.fecha_costo_fin::varchar||'''
                   where id_int_comprobante = '||v_rec.id_int_comprobante_origen_regional::varchar; 
                             
-     PERFORM  dblink(v_nombre_conexion, v_sql, true);
+     PERFORM  dblink(v_conexion, v_sql, true);
     
    
     -------------------------------------------------
@@ -143,21 +143,21 @@ BEGIN
                pxp.list(t.id_int_transaccion::varchar)  as lista
              from conta.tint_transaccion t
              where t.id_int_comprobante = '||v_rec.id_int_comprobante_origen_regional::varchar ||'
-                   and t.id_estado_reg = ''activo''';
-           
-    select * FROM dblink(v_nombre_conexion, v_sql,TRUE)AS t1(contador integer) into v_resp_dblink_tra;
+                   and t.estado_reg = ''activo''';
+                  
+    select * FROM dblink(v_conexion, v_sql,TRUE)AS t1(lista varchar) into v_resp_dblink_tra;
    
     --borrar relacion con las transacciones 
-    
     v_sql = ' DELETE FROM 
                 conta.tint_rel_devengado 
               WHERE 
                    id_int_transaccion_dev in ('||v_resp_dblink_tra.lista::varchar||')
                 or id_int_transaccion_pag in ('||v_resp_dblink_tra.lista::varchar||')';
                 
-    PERFORM dblink(v_nombre_conexion,v_sql, true);
+              
+    PERFORM dblink(v_conexion,v_sql, true);
     
-  
+    
     -------------------------------------------------
     -- eliminar las transaciones en el cbte internacional 
     -- que no esten el el cbte de la central
@@ -169,17 +169,19 @@ BEGIN
        v_tran_ori  
      from conta.tint_transaccion t
      where t.id_int_comprobante = p_id_int_comprobante
-           and t.id_estado_reg = 'activo'
+           and t.estado_reg = 'activo'
            and ( t.importe_debe_mt > 0 or  t.importe_haber_mt > 0);
    
    
    
    --borrar transacciones 
     v_sql = 'delete from conta.tint_transaccion 
-             where id_int_transaccion not in ( '||v_tran_ori||')';
+             where id_int_transaccion not in ( '|| COALESCE(v_tran_ori,'0')||')
+             and  id_int_comprobante = ' ||v_rec.id_int_comprobante_origen_regional::varchar;
                 
-    PERFORM dblink(v_nombre_conexion,v_consulta, true);
+    PERFORM dblink(v_conexion,v_sql, true);
    
+  
    
     --------------------------------------------------------------------
     --  ACTUALIZAR  
@@ -191,7 +193,7 @@ BEGIN
                                   t.*
                                from conta.tint_transaccion t
                                where t.id_int_comprobante = p_id_int_comprobante
-                                     and t.id_estado_reg = 'activo'
+                                     and t.estado_reg = 'activo'
                                      and ( t.importe_debe_mt > 0 or  t.importe_haber_mt > 0)
                               ) LOOP
     
@@ -200,11 +202,13 @@ BEGIN
                           from conta.tint_transaccion 
                           where id_int_transaccion = '||v_registros_tran.id_int_transaccion_origen::varchar ;
                 
-               select * FROM dblink(v_nombre_conexion, v_sql,TRUE)AS t1(contador integer) into v_resp_dblink_tra;
+               select * FROM dblink(v_conexion, v_sql,TRUE)AS t1(contador integer) into v_resp_dblink_tra;
               
                -- si la transaccion exite en el destino ->  modificar transacion con equivalente en la central
                
                IF v_resp_dblink_tra.contador = 1 THEN
+               
+               
                
                    v_sql = 'update conta.tint_transaccion set
                                    id_moneda_tri =  '||COALESCE(v_registros_tran.id_moneda_tri::varchar,'NULL')||',
@@ -227,8 +231,9 @@ BEGIN
                                    
                                  where id_int_transaccion = '||v_registros_tran.id_int_transaccion_origen::varchar ;
                   
-                   
-                   PERFORM dblink(v_nombre_conexion,v_consulta, true);
+               
+                
+                   PERFORM dblink(v_conexion,v_sql, true);
                
                
                ELSE
@@ -283,12 +288,12 @@ BEGIN
                                             VALUES ('||
                                                COALESCE(v_registros_tran.id_usuario_reg::varchar,'NULL')||','||
                                                COALESCE(v_registros_tran.id_usuario_mod::varchar,'NULL')||','||
-                                               COALESCE(''''||v_dat.fecha_reg::varchar||'''','NULL')||','||
-                                               COALESCE(''''||v_dat.fecha_mod::varchar||'''','NULL')||','||
-                                               COALESCE(''''||v_dat.estado_reg::varchar||'''','NULL')||','||
+                                               COALESCE(''''||v_registros_tran.fecha_reg::varchar||'''','NULL')||','||
+                                               COALESCE(''''||v_registros_tran.fecha_mod::varchar||'''','NULL')||','||
+                                               COALESCE(''''||v_registros_tran.estado_reg::varchar||'''','NULL')||','||
                                                COALESCE(v_registros_tran.id_usuario_ai::varchar,'NULL')||','||
-                                               COALESCE(''''||v_dat.usuario_ai::varchar||'''','NULL')||','||                                              
-                                               COALESCE(v_registros_tran.id_int_comprobante_origen_regional::varchar,'NULL')||','||
+                                               COALESCE(''''||v_registros_tran.usuario_ai::varchar||'''','NULL')||','||                                              
+                                               COALESCE(v_rec.id_int_comprobante_origen_regional::varchar,'NULL')||','||
                                                COALESCE(v_registros_tran.id_cuenta::varchar,'NULL')||','||
                                                COALESCE(v_registros_tran.id_auxiliar::varchar,'NULL')||','||
                                                COALESCE(v_registros_tran.id_centro_costo::varchar,'NULL')||','||
@@ -403,7 +408,7 @@ BEGIN
     --  (por si existiera diferencias por redondeo o tipo de cambio)
     ------------------------------------------------------------------
     
-     v_sql = 'SELECT * FROM conta.f_igualar_cbte('||v_rec.id_int_comprobante_origen_regional::varchar||','||p_id_usuario ||')'; 
+     v_sql = 'SELECT * FROM conta.f_igualar_cbte('||v_rec.id_int_comprobante_origen_regional::varchar||','||p_id_usuario ||',false)'; 
                             
      SELECT * FROM dblink(v_conexion,v_sql,TRUE)AS t1(resp boolean) into v_resp_dblink_tra;
      
