@@ -114,7 +114,8 @@ BEGIN
                           sw_tipo_cambio,
                           localidad,
                           sw_editable,
-                          tipo_cambio
+                          tipo_cambio,
+                          id_ajuste
                           
                           
                         )
@@ -166,7 +167,8 @@ BEGIN
                           COALESCE(''''||v_rec.sw_tipo_cambio::varchar||'''','NULL')||','||
                           '''internacional'','||
                           '''no'','||
-                           COALESCE(v_rec.tipo_cambio_2::varchar,'NULL')||') RETURNING id_int_comprobante'; 
+                           COALESCE(v_rec.tipo_cambio_2::varchar,'NULL')||','||
+                           COALESCE(''''||v_rec.id_ajuste::varchar||'''','NULL')||') RETURNING id_int_comprobante'; 
     
    
     
