@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tpr_organismo_fin
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_organismo_fin FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_organismo_fin_tcp_organismo_fin();

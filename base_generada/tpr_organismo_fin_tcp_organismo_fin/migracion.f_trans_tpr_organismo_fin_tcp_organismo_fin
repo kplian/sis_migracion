@@ -1,5 +1,5 @@
-CREATE OR REPLACE FUNCTION migracion.f_trans_tpr_categoria_prog_tcategoria_programatica (
-			  v_operacion varchar,p_id_categoria_prog int4,p_id_actividad int4,p_id_fuente_financiamiento int4,p_id_organismo_fin int4,p_id_parametro int4,p_id_programa int4,p_id_proyecto int4,p_id_usuario_mod int4,p_id_usuario_reg int4,p_descripcion varchar,p_estado varchar,p_fecha_mod timestamp,p_fecha_reg timestamp)
+CREATE OR REPLACE FUNCTION migracion.f_trans_tpr_organismo_fin_tcp_organismo_fin (
+			  v_operacion varchar,p_id_organismo_fin int4,p_id_usuario_reg int4,p_codigo varchar,p_descripcion varchar,p_fecha_reg timestamp,p_sigla varchar)
 			RETURNS varchar [] AS
 			$BODY$
 
@@ -15,18 +15,12 @@ DECLARE
 			v_respuesta varchar[];
 			
 			g_registros_resp record;
-			v_id_categoria_programatica int4;
-			v_descripcion text;
-			v_estado_reg varchar;
-			v_fecha_mod timestamp;
-			v_fecha_reg timestamp;
-			v_id_cp_actividad int4;
-			v_id_cp_fuente_fin int4;
 			v_id_cp_organismo_fin int4;
-			v_id_cp_programa int4;
-			v_id_cp_proyecto int4;
+			v_codigo varchar;
+			v_descripcion varchar;
+			v_estado_reg varchar;
+			v_fecha_reg timestamp;
 			v_id_gestion int4;
-			v_id_usuario_mod int4;
 			v_id_usuario_reg int4;
 BEGIN
 			
@@ -40,25 +34,19 @@ BEGIN
 			           ---------------------------------------
 
 			           /*
-			           			v_id_categoria_programatica=p_id_categoria_prog::int4;
-			v_descripcion=convert(p_descripcion::text, 'LATIN1', 'UTF8');
+			           			v_id_cp_organismo_fin=p_id_organismo_fin::int4;
+			v_codigo=convert(p_codigo::varchar, 'LATIN1', 'UTF8');
+			v_descripcion=convert(p_descripcion::varchar, 'LATIN1', 'UTF8');
 			v_estado_reg=convert(p_::varchar, 'LATIN1', 'UTF8');
-			v_fecha_mod=p_fecha_mod::timestamp;
 			v_fecha_reg=p_fecha_reg::timestamp;
-			v_id_cp_actividad=p_id_actividad::int4;
-			v_id_cp_fuente_fin=p_id_fuente_financiamiento::int4;
-			v_id_cp_organismo_fin=p_id_organismo_fin::int4;
-			v_id_cp_programa=p_id_programa::int4;
-			v_id_cp_proyecto=p_id_proyecto::int4;
 			v_id_gestion=p_::int4;
-			v_id_usuario_mod=p_id_usuario_mod::int4;
 			v_id_usuario_reg=p_id_usuario_reg::int4;
  */   
 			    --cadena para la llamada a la funcion de insercion en la base de datos destino
 			      
 			        
-			          v_consulta = 'select migra.f__on_trig_tpr_categoria_prog_tcategoria_programatica (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_categoria_programatica::varchar,'NULL')||','||COALESCE(''''||v_descripcion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_cp_actividad::varchar,'NULL')||','||COALESCE(v_id_cp_fuente_fin::varchar,'NULL')||','||COALESCE(v_id_cp_organismo_fin::varchar,'NULL')||','||COALESCE(v_id_cp_programa::varchar,'NULL')||','||COALESCE(v_id_cp_proyecto::varchar,'NULL')||','||COALESCE(v_id_gestion::varchar,'NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||')';
+			          v_consulta = 'select migra.f__on_trig_tpr_organismo_fin_tcp_organismo_fin (
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_cp_organismo_fin::varchar,'NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_descripcion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_gestion::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||')';
 			          --probar la conexion con dblink
 			          
 					   --probar la conexion con dblink

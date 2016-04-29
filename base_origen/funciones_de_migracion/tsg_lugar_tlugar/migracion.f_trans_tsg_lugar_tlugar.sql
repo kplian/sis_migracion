@@ -36,6 +36,7 @@ DECLARE
 			v_sw_impuesto varchar;
 			v_sw_municipio varchar;
 			v_tipo varchar;
+            v_es_regional varchar;
 BEGIN
 			
 			
@@ -47,9 +48,14 @@ BEGIN
 			           --previamente se tranforman los datos  (descomentar)
 			           ---------------------------------------
 
-			           
+			select es_regional into v_es_regional
+            from sss.tsg_lugar
+            where id_lugar = p_id_lugar; 
+            
+                      
 			v_id_lugar=p_id_lugar::int4;
 			v_id_lugar_fk=p_fk_id_lugar::int4;
+            v_es_regional = convert(v_es_regional::varchar, 'LATIN1', 'UTF8');
 			v_codigo=convert(p_codigo::varchar, 'LATIN1', 'UTF8');
 			v_codigo_largo=NULL::varchar;
 			v_estado_reg=convert('activo'::varchar, 'LATIN1', 'UTF8');
@@ -76,9 +82,9 @@ BEGIN
 			      
 			        
 			          v_consulta = 'select migra.f__on_trig_tsg_lugar_tlugar (
-			               '''||v_operacion::varchar||''','||COALESCE(v_id_lugar::varchar,'NULL')||','||COALESCE(v_id_lugar_fk::varchar,'NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_codigo_largo::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')||','||COALESCE(''''||v_sw_impuesto::varchar||'''','NULL')||','||COALESCE(''''||v_sw_municipio::varchar||'''','NULL')||','||COALESCE(''''||v_tipo::varchar||'''','NULL')||')';
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_lugar::varchar,'NULL')||','||COALESCE(v_id_lugar_fk::varchar,'NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_codigo_largo::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_mod::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_usuario_mod::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||','||COALESCE(''''||v_nombre::varchar||'''','NULL')||','||COALESCE(''''||v_sw_impuesto::varchar||'''','NULL')||','||COALESCE(''''||v_sw_municipio::varchar||'''','NULL')||','||COALESCE(''''||v_tipo::varchar||'''','NULL')||','||COALESCE(''''||v_es_regional::varchar||'''','NULL')||')';
 			          --probar la conexion con dblink
-	
+						
 					   --probar la conexion con dblink
 			          v_resp =  (SELECT dblink_connect(v_cadena_cnx));
 			            
@@ -115,4 +121,5 @@ $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;

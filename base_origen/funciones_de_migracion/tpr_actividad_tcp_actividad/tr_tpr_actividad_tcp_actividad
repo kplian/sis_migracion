@@ -1,0 +1,5 @@
+ 
+		CREATE TRIGGER tr_tpr_actividad
+  		AFTER INSERT OR UPDATE OR DELETE 
+  		ON PRESTO.tpr_actividad FOR EACH ROW 
+  		EXECUTE PROCEDURE migracion.f_tri_tpr_actividad_tcp_actividad();

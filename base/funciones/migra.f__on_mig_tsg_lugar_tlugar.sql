@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_lugar_tlugar (
   v_operacion varchar,
   p_id_lugar integer,
@@ -14,7 +12,8 @@ CREATE OR REPLACE FUNCTION migra.f__on_trig_tsg_lugar_tlugar (
   p_nombre varchar,
   p_sw_impuesto varchar,
   p_sw_municipio varchar,
-  p_tipo varchar
+  p_tipo varchar,
+  p_es_regional varchar
 )
 RETURNS text AS
 $body$
@@ -49,7 +48,8 @@ $body$
 						nombre,
 						sw_impuesto,
 						sw_municipio,
-						tipo)
+						tipo,
+                        es_regional)
 				VALUES (
 						p_id_lugar,
 						p_id_lugar_fk,
@@ -63,7 +63,8 @@ $body$
 						p_nombre,
 						p_sw_impuesto,
 						p_sw_municipio,
-						p_tipo);
+						p_tipo,
+                        p_es_regional);
 						
 						create temp table codigos(
                         	  id_lugar int4,
@@ -123,6 +124,7 @@ $body$
                                              ,sw_impuesto=p_sw_impuesto
                                              ,sw_municipio=p_sw_municipio
                                              ,tipo=p_tipo
+                                             ,es_regional = p_es_regional
                                              WHERE id_lugar=p_id_lugar;
                          
                          create temp table codigos(

@@ -1,0 +1,108 @@
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION migracion.f_trans_tpr_proyecto_tcp_proyecto (
+  v_operacion varchar,
+  p_id_proyecto integer,
+  p_codigo varchar,
+  p_codigo_sisin varchar,
+  p_descripcion varchar,
+  p_fecha_reg timestamp,
+  p_id_usuario_reg integer,
+  p_sigla varchar
+)
+RETURNS varchar [] AS
+$body$
+DECLARE
+			 
+			g_registros record;
+			v_consulta varchar;
+			v_res_cone  varchar;
+			v_cadena_cnx varchar;
+			v_cadena_con varchar;
+			resp boolean;
+			v_resp varchar;
+			v_respuesta varchar[];
+			
+			g_registros_resp record;
+			v_id_cp_proyecto int4;
+			v_codigo varchar;
+			v_codigo_sisin varchar;
+			v_descripcion varchar;
+			v_estado_reg varchar;
+			v_fecha_reg timestamp;
+			v_id_gestion int4;
+			v_id_usuario_reg int4;
+BEGIN
+			
+			
+             
+			           -- funcion para obtener cadena de conexion
+			           v_cadena_cnx =  migracion.f_obtener_cadena_con_dblink();
+			          
+			         
+			           ---------------------------------------
+			           -- previamente se tranforman los datos  (descomentar)
+			           ---------------------------------------
+                        
+                        
+                        
+                        select id_gestion into v_id_gestion 
+                        from presto.tpr_parametro  p
+                        order by  p.gestion_pres DESC
+                        offset 0 limit 1;
+			         
+			           	v_id_cp_proyecto=p_id_proyecto::int4;
+                        v_codigo=convert(p_codigo::varchar, 'LATIN1', 'UTF8');
+                        v_codigo_sisin=COALESCE(convert(p_codigo_sisin::varchar, 'LATIN1', 'UTF8'),'0');
+                        v_descripcion=convert(p_descripcion::varchar, 'LATIN1', 'UTF8');
+                        v_estado_reg=convert('activo'::varchar, 'LATIN1', 'UTF8');
+                        v_fecha_reg=now()::timestamp;
+                        v_id_usuario_reg = 1::int4;
+ 
+			    --cadena para la llamada a la funcion de insercion en la base de datos destino
+			      
+			        
+			          v_consulta = 'select migra.f__on_trig_tpr_proyecto_tcp_proyecto (
+			               '''||v_operacion::varchar||''','||COALESCE(v_id_cp_proyecto::varchar,'NULL')||','||COALESCE(''''||v_codigo::varchar||'''','NULL')||','||COALESCE(''''||v_codigo_sisin::varchar||'''','NULL')||','||COALESCE(''''||v_descripcion::varchar||'''','NULL')||','||COALESCE(''''||v_estado_reg::varchar||'''','NULL')||','||COALESCE(''''||v_fecha_reg::varchar||'''','NULL')||','||COALESCE(v_id_gestion::varchar,'NULL')||','||COALESCE(v_id_usuario_reg::varchar,'NULL')||')';
+			          --probar la conexion con dblink
+			          
+					  
+                       raise notice '.... %',v_consulta;
+                       --probar la conexion con dblink
+			          v_resp =  (SELECT dblink_connect(v_cadena_cnx));
+			            
+			             IF(v_resp!='OK') THEN
+			            
+			             	--modificar bandera de fallo  
+			                 raise exception 'FALLA CONEXION A LA BASE DE DATOS CON DBLINK';
+			                 
+			             ELSE
+					  
+			         
+			               PERFORM * FROM dblink(v_consulta,true) AS ( xx varchar);
+			                v_res_cone=(select dblink_disconnect());
+			             END IF;
+			            
+			            v_respuesta[1]='TRUE';
+                       
+			           RETURN v_respuesta;
+			EXCEPTION
+			   WHEN others THEN
+			   
+			    v_res_cone=(select dblink_disconnect());
+			     v_respuesta[1]='FALSE';
+                 v_respuesta[2]=SQLERRM;
+                 v_respuesta[3]=SQLSTATE;
+                 v_respuesta[4]=v_consulta;
+                 
+    
+                 
+                 RETURN v_respuesta;
+			
+			END;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;
