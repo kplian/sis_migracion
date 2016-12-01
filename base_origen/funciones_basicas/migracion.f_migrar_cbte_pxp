@@ -60,11 +60,18 @@ DECLARE
 	v_rec record;
     v_rec_mon record;
     v_sql varchar;
+    g_id_gestion		integer;
     v_id_comprobante integer;
     v_id_transaccion integer;
+    g_periodo INTEGER;
+    g_id_documento		integer;
+    g_codigo varchar;
     v_id_parametro integer;
     v_momento_cbte integer;
     v_id_periodo_subsis integer;
+    g_nombre_corto			varchar;
+    g_id_empresa	integer;
+    
     v_id_subsistema integer;
     v_id_clase_cbte integer;
     v_id_depto integer;
@@ -74,20 +81,23 @@ DECLARE
     v_ip_origen varchar;
     v_mac_maquina varchar;
     v_importe_ejecucion numeric;
+     g_id_subsistema_nro_cbte INTEGER;
     v_cadena_cnx varchar;
-    v_con varchar;
-    v_size integer;
+    v_con								 varchar;
+    v_size								 integer;
     
-    v_id_cuenta_bancaria integer;
-    v_nombre_cheque varchar;
-    v_nro_cheque integer;
-    v_tipo varchar;
-    v_id_libro_bancos integer;
-    v_id_cuenta_bancaria_endesis integer;
-    v_nro_cuenta_banco varchar;
+    v_id_cuenta_bancaria				 integer;
+    v_nombre_cheque						 varchar;
+    v_nro_cheque						 integer;
+    v_tipo								 varchar;
+    v_id_libro_bancos					 integer;
+    v_id_cuenta_bancaria_endesis		 integer;
+    v_nro_cuenta_banco					 varchar;
     
-    g_nombre_funcion varchar;
-    v_insertar_libro_bancos  varchar;
+    g_nombre_funcion					 varchar;
+    v_insertar_libro_bancos		 		 varchar;
+    g_nro_cbte	 						INTEGER;
+    g_id_periodo						integer;
 
 BEGIN
 	
@@ -129,7 +139,7 @@ BEGIN
         else
         	v_id_cuenta_bancaria_endesis = p_id_cuenta_bancaria_endesis[i];
         end if;
-              
+
     	insert into migracion.tct_comprobante
         values(
             p_id_int_comprobante, 
@@ -188,7 +198,7 @@ BEGIN
     end loop;
    
     
-   
+
     
 	--1. Recorrer la tabla temporal de comprobantes
     /*for v_rec in (select * from migracion.tct_comprobante
@@ -279,14 +289,14 @@ BEGIN
 
 		--Obtencion de parametros
         --id_parametro, momento_cbte, id_periodo_subsis, id_subsistema, id_usuario, id_clase_cbte,id_depto
- 
+
         --Obtener id_parametro
         select id_parametro
         into v_id_parametro
         from sci.tct_parametro
         where gestion_conta::varchar = to_char(v_rec.fecha,'yyyy');
     
-    
+
     --raise exception 'tesxxxxt..';
     
     
@@ -306,7 +316,7 @@ BEGIN
         if v_id_periodo_subsis is null then
         	v_mensaje_verif = v_mensaje_verif || 'Periodo subsistema no encontrado.\n';
         end if;
-        
+
         --Clase comprobante
         select id_clase_cbte
         into v_id_clase_cbte
@@ -340,7 +350,7 @@ BEGIN
 		if v_mensaje_verif != '' then        
         	raise exception 'No se pudo replicar el Comprobante en ENDESIS: %',v_mensaje_verif;
         end if;
-                
+    
     	--2. Registro de la cabecera del comprobante
         if v_id_comprobante = -1 then 
             v_id_comprobante = nextval('sci.tct_comprobante_id_comprobante_seq'::regclass);
@@ -427,16 +437,16 @@ BEGIN
                             v_rec.importe_gasto,--ct_importe_gasto numeric, 
                             v_rec.importe_recurso);--ct_importe_recurso numeric);
                             
-        
+
 		
-        
+
         if substring(v_resp,1,1)!='t' then
         	raise exception 'Error al generar transaccion: %',v_resp;
         end if;
         
     
     end loop;
-   
+
     ------------------------
     --GSS-14-02-2014- Insercion en tabla intermedia -Inicio
     -----------------------
@@ -476,9 +486,85 @@ BEGIN
     --  tiene que pasar directamente a validado .....  p_regional_internacional = 'si'
     --------------------------------------------------------------------------------
     
+    IF p_regional_internacional = 'si' THEN
     
+             --generar correlativo del comprobante
+             /*
+            select origen , regional_internacional,  fk_comprobante ,momento_cbte,id_subsistema,id_clase_cbte ,id_periodo_subsis ,id_parametro ,id_depto, fecha_cbte,tipo_relacion
+            INTO g_origen , g_reg_inter, g_fk_comprobante ,g_momento_cbte, g_id_subsistema_cbte, g_id_clase_cbte,g_id_periodo_subsis, g_id_parametro,g_id_depto, g_fecha_cbte,g_tipo_relacion
+            from sci.tct_comprobante c 
+            where id_comprobante =ct_id_comprobante;
+            */
+            
+             --recupera la gestion
+            select id_gestion   
+            INTO  g_id_gestion
+            from sci.tct_parametro 
+            where id_parametro=v_id_parametro;
+            
+            
+            --recupera la empresa
+            select id_empresa  
+            into g_id_empresa
+            from param.tpm_gestion 
+            where id_gestion =g_id_gestion; 
+       
+             select nro_cbte 
+            into g_nro_cbte
+            from sci.tct_comprobante   
+            where  id_comprobante=v_id_comprobante;
+            
+            g_id_subsistema_nro_cbte=9;
+            --recupera el nombre corto de sci
+            select nombre_corto 
+            into g_nombre_corto
+            from sss.tsg_subsistema 
+            where id_subsistema=g_id_subsistema_nro_cbte;
+            
+            --recupera el documento 
+            select id_documento 
+            into  g_id_documento
+            from sci.tct_cbte_clase 
+            where id_clase_cbte= v_id_clase_cbte;
+                    
+            --recupera el codigo del documento
+            select codigo 
+            into g_codigo                 
+            from param.tpm_documento 
+            where id_documento=g_id_documento;
+            
+            --recupera el periodo
+            select id_periodo 
+            into   g_id_periodo
+            from param.tpm_periodo_subsistema 
+            where id_periodo_subsistema=v_id_periodo_subsis;
+                  
+             select   periodo*10000   
+               into g_periodo
+            from param.tpm_periodo 
+            where id_periodo=g_id_periodo;     
+            
+            g_nro_cbte=param.f_pm_get_num_dep_gral(g_nombre_corto,g_codigo,g_id_periodo,g_id_empresa,v_rec.id_depto);
+            g_nro_cbte=g_nro_cbte+ g_periodo;  
+                  
+            UPDATE sci.tct_comprobante  SET 
+              nro_cbte= g_nro_cbte              
+            WHERE sci.tct_comprobante.id_comprobante= v_id_comprobante; 
+            
+            UPDATE sci.tct_cbte_estado set 
+                 estado_cbte=2,
+                 sw_estado = 2.00
+            where id_comprobante= v_id_comprobante and  sw_estado=1;
+            
+             
+            --  cambiar a estado validado el cbte              
+            insert into sci.tct_cbte_estado(id_comprobante,id_usuario,estado_cbte,fecha_estado,sw_estado) 
+            VALUES( v_id_comprobante,v_rec.id_usuario_reg,1.00,CURRENT_DATE,1.00 ); 
+                  
+                  
+      
     
-    
+    END IF;
 
     --Respuesta
     return 'Comprobante generado!'::varchar;

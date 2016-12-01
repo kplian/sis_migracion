@@ -29,6 +29,8 @@ DECLARE
     v_resp_dblink			record;
     v_resp_dblink_tra		record;
     v_resp_dblink_tra_rel	record;
+    
+    v_id_gestion				integer;
 
 BEGIN
 
@@ -60,6 +62,14 @@ BEGIN
     	v_rec
     from conta.tint_comprobante cbte
     where cbte.id_int_comprobante = p_id_int_comprobante;
+    
+    -- recupera la gestion
+    select 
+         p.id_gestion
+   	 into
+        v_id_gestion
+	from param.tperiodo p 
+    where p.id_periodo = v_rec.id_periodo;
     
     -------------------------------------------
     -- Insertar el cbte
@@ -178,10 +188,19 @@ BEGIN
     --almacena el id del comprobante migrado
     update conta.tint_comprobante c set
      id_int_comprobante_origen_central = v_resp_dblink.id_int_comprobante
-    where id_int_comprobante = p_id_int_comprobante; 
+    where id_int_comprobante = p_id_int_comprobante;
+    
+    ------------------------------------------------------------
+    -- disparar inicio de tramite en WF de estacion
+    -------------------------------------------------------------
+    
+     -- validaciones del comprobante
+     v_sql = 'SELECT * FROM conta.f_inicia_tramite_wf_cbte('||COALESCE(v_rec.id_usuario_reg::varchar,'NULL')||', '||COALESCE(v_rec.id_usuario_ai::varchar,'NULL')||', '||COALESCE(''''||v_rec.usuario_ai::varchar||'''','NULL')||', '||v_resp_dblink.id_int_comprobante::varchar||', '||v_id_gestion::varchar||', '||v_rec.id_depto::varchar||')'; 
+     SELECT * FROM  dblink(v_conexion,v_sql, true) as (res varchar) into v_resp_dblink_tra_rel;
+    
     
  
-    ----------------------------------------
+    --------------------------------------
     -- inserta la trasacciones del cbte
     -------------------------------------
     for v_dat in (select

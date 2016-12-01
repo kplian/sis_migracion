@@ -64,94 +64,102 @@ DECLARE
     v_id_int_comprobante_reg		integer;
     v_id_int_transaccion_reg		integer;
     v_id_moneda_tri_reg				integer;
+    v_id_gestion					integer;
 
 BEGIN
 
 
-   v_nombre_funcion:='migra.f_migrar_cbte_a_regionales';
+      v_nombre_funcion:='migra.f_migrar_cbte_a_regionales';
 
-	
-    --Verificación la existencia del parámetro
-    if not exists(select 1 from conta.tint_comprobante
-    			where id_int_comprobante = p_id_int_comprobante) then
-    	raise exception 'Migración de comprobante no realizada: comprobante inexistente';
-    end if;
-    
-    
-    --recuperar datos de la estacion            
- 	
-    select 
-       pp.id_depto_lb
-    into 
-       v_id_depto_lb
-    from tes.tplan_pago pp 
-    where pp.id_plan_pago = p_id_plan_pago;
-    
-    --si la conexion por defecto es nula
-    IF  p_conexion is null THEN
-    	v_conexion = migra.f_crear_conexion(v_id_depto_lb,'tes.testacion');
-    ELSE
-        v_conexion = p_conexion;
-    END IF;
-    
-    IF v_conexion is null or v_conexion = '' THEN
-      raise exception 'No se pudo conectar con la base de datos destino';
+  	
+      -- Verificación la existencia del parámetro
+      if not exists(select 1 from conta.tint_comprobante
+                  where id_int_comprobante = p_id_int_comprobante) then
+          raise exception 'Migración de comprobante no realizada: comprobante inexistente';
+      end if;
       
-    END IF;
-    
-    -- Obtiene los datos del comprobante
-    select  
-      cbte.*
-    into
-    	v_rec
-    from conta.tint_comprobante cbte
-    where cbte.id_int_comprobante = p_id_int_comprobante;
-    
-    
-    -- verificar moneda
-    
-    v_sql = 'select 
-                     1::integer
-                    from param.tmoneda m
-                    where m.id_moneda = '||v_rec.id_moneda;
-                    
-                    
-    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_sw_mon;
-    
-   
+      -- recuperar datos de la estacion            
+   	  select 
+         pp.id_depto_lb
+      into 
+         v_id_depto_lb
+      from tes.tplan_pago pp 
+      where pp.id_plan_pago = p_id_plan_pago;
+      
+      --  si la conexion por defecto es nula
+      IF  p_conexion is null THEN
+          v_conexion = migra.f_crear_conexion(v_id_depto_lb,'tes.testacion');
+      ELSE
+          v_conexion = p_conexion;
+      END IF;
+      
+      IF v_conexion is null or v_conexion = '' THEN
+        raise exception 'No se pudo conectar con la base de datos destino';
+      END IF;
+      
+      -- Obtiene los datos del comprobante
+      select  
+          cbte.*
+      into
+          v_rec
+      from conta.tint_comprobante cbte
+      where cbte.id_int_comprobante = p_id_int_comprobante;
+      
+      
+      --recupera la gestion
+      select 
+         p.id_gestion
+      into
+        v_id_gestion
+      from param.tperiodo p 
+      where p.id_periodo = v_rec.id_periodo;
+      
+      
+      -- verificar moneda
+      
+      v_sql = 'select 
+                       1::integer
+                      from param.tmoneda m
+                      where m.id_moneda = '||v_rec.id_moneda;
+                      
+                      
+      SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_sw_mon;
+      
      
-    IF  v_sw_mon != 1 or v_sw_mon is  null THEN
-       raise exception 'No se encontro un registro para la moneda en la estación destino';
-    END IF;
-    
-   
-    --recuperamos la moneda base en la estación destino
-    
-    v_sql = 'select  param.f_get_moneda_base()';
-   
-    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_id_moneda_base_reg;
-    
-    IF  v_id_moneda_base_reg is null THEN
-       raise exception 'No se encontro un registro para la moneda base en la estación destino';
-    END IF;
-    
-    
-    v_sql = 'select  param.f_get_moneda_triangulacion()';
-   
-    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_id_moneda_tri_reg;
-    
-    IF  v_id_moneda_base_reg is null THEN
-       raise exception 'No se encontro un registro para la moneda de triangulación  en la estación destino';
-    END IF;
-    
-   
-    
-    IF v_rec.id_moneda = v_id_moneda_base_reg THEN
-        v_tipo_cambio = 1;
-    ELSE
-        v_tipo_cambio = NULL;
-    END IF;
-   
+       
+      IF  v_sw_mon != 1 or v_sw_mon is  null THEN
+         raise exception 'No se encontro un registro para la moneda en la estación destino';
+      END IF;
+      
+     
+      --recuperamos la moneda base en la estación destino
+      
+      v_sql = 'select  param.f_get_moneda_base()';
+     
+      SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_id_moneda_base_reg;
+      
+      IF  v_id_moneda_base_reg is null THEN
+         raise exception 'No se encontro un registro para la moneda base en la estación destino';
+      END IF;
+      
+      
+      v_sql = 'select  param.f_get_moneda_triangulacion()';
+     
+      SELECT * FROM  dblink(v_conexion,v_sql, true) AS (sw integer) into v_id_moneda_tri_reg;
+      
+      IF  v_id_moneda_base_reg is null THEN
+         raise exception 'No se encontro un registro para la moneda de triangulación  en la estación destino';
+      END IF;
+      
+     
+      
+      IF v_rec.id_moneda = v_id_moneda_base_reg THEN
+          v_tipo_cambio = 1;
+      ELSE
+          v_tipo_cambio = NULL;
+      END IF;
+      
+     
     -------------------------------------------
     -- Insertar el cbte
     ----------------------------------------
@@ -195,9 +203,6 @@ BEGIN
                           cbte_cierre,
                           cbte_apertura,
                           cbte_aitb,
-                          
-                          
-                          
                           id_int_comprobante_origen_central,
                           funcion_comprobante_validado,
                           funcion_comprobante_eliminado,
@@ -206,8 +211,7 @@ BEGIN
                           fecha_costo_ini,
                           fecha_costo_fin,
                           sw_editable,
-                          id_moneda_tri
-                          
+                          id_moneda_tri                          
                         )
                         VALUES ('||
                           COALESCE(v_rec.id_usuario_reg::varchar,'NULL')||','||
@@ -231,16 +235,14 @@ BEGIN
                           COALESCE(v_rec.id_funcionario_firma2::varchar,'NULL')||','||
                           COALESCE(v_rec.id_funcionario_firma3::varchar,'NULL')||','||
                           COALESCE(''''||v_rec.fecha::varchar||'''','NULL')||','||
-                          COALESCE(''''||v_rec.nro_tramite::varchar||'''','NULL')||','||
-                          
+                          COALESCE(''''||v_rec.nro_tramite::varchar||'''','NULL')||','||                          
                           COALESCE(''''||v_rec.momento_comprometido::varchar||'''','NULL')||','||
                           COALESCE(''''||v_rec.momento_ejecutado::varchar||'''','NULL')||','||
                           COALESCE(''''||v_rec.momento_pagado::varchar||'''','NULL')||','||
                           COALESCE(v_rec.id_cuenta_bancaria::varchar,'NULL')||','||
                           COALESCE(v_rec.id_cuenta_bancaria_mov::varchar,'NULL')||','||
                           COALESCE(v_rec.nro_cheque::varchar,'NULL')||','||
-                          COALESCE(''''||v_rec.nro_cuenta_bancaria_trans::varchar||'''','NULL')||','||
-                          
+                          COALESCE(''''||v_rec.nro_cuenta_bancaria_trans::varchar||'''','NULL')||','||                          
                           COALESCE(''''||v_rec.manual::varchar||'''','NULL')||','||
                           COALESCE(''''||v_rec.id_int_comprobante_fks::varchar||'''','NULL')||','||
                           COALESCE(v_rec.id_tipo_relacion_comprobante::varchar,'NULL')||','||
@@ -261,13 +263,22 @@ BEGIN
     
   
     
-    SELECT * FROM  dblink(v_conexion,v_sql, true) AS (id_int_comprobante integer) into v_id_int_comprobante_reg;
+    SELECT * FROM  dblink(v_conexion, v_sql, true) AS (id_int_comprobante integer) into v_id_int_comprobante_reg;
     
     
-    --almacena el id del comprobante migrado
+    --  almacena el id del comprobante migrado
     update conta.tint_comprobante c set
      id_int_comprobante_origen_regional = v_id_int_comprobante_reg
     where id_int_comprobante = p_id_int_comprobante; 
+    
+     
+    ------------------------------------------------------------
+    -- disparar inicio de tramite en WF de estacion
+    -------------------------------------------------------------
+    
+     -- validaciones del comprobante
+     v_sql = 'SELECT * FROM conta.f_inicia_tramite_wf_cbte('||COALESCE(v_rec.id_usuario_reg::varchar,'NULL')||', '||COALESCE(v_rec.id_usuario_ai::varchar,'NULL')||', '||COALESCE(''''||v_rec.usuario_ai::varchar||'''','NULL')||', '||v_id_int_comprobante_reg::varchar||', '||v_id_gestion::varchar||', '||v_rec.id_depto::varchar||')'; 
+     SELECT * FROM  dblink(v_conexion,v_sql, true) as (res varchar) into v_resp_dblink_tra_rel;
     
   
     ----------------------------------------
