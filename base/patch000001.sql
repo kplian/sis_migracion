@@ -91,80 +91,6 @@ CREATE TABLE migra.tts_cuenta_bancaria (
 ) WITHOUT OIDS;
 
 
-CREATE TABLE migra.tts_libro_bancos (
-  id_libro_bancos SERIAL, 
-  id_cuenta_bancaria INTEGER NOT NULL, 
-  fecha DATE NOT NULL, 
-  a_favor VARCHAR(100) NOT NULL, 
-  detalle TEXT NOT NULL, 
-  observaciones TEXT, 
-  nro_liquidacion VARCHAR(20), 
-  nro_comprobante VARCHAR(20), 
-  nro_cheque INTEGER, 
-  tipo VARCHAR(20) NOT NULL, 
-  importe_deposito NUMERIC(20,2) NOT NULL, 
-  importe_cheque NUMERIC(20,2) NOT NULL, 
-  origen VARCHAR(20), 
-  estado VARCHAR(20) DEFAULT 'borrador'::character varying NOT NULL, 
-  id_libro_bancos_fk INTEGER, 
-  indice NUMERIC(20,2), 
-  CONSTRAINT tts_libro_bancos_idx UNIQUE(id_cuenta_bancaria, nro_cheque), 
-  CONSTRAINT tts_libro_bancos_pkey PRIMARY KEY(id_libro_bancos)
-) INHERITS (pxp.tbase)
-WITHOUT OIDS;
-
-
-COMMENT ON TABLE migra.tts_libro_bancos
-IS 'sistema=TESORO&codigo=LBRBAN&prefijo=TS&titulo=Libro Bancos&desc=Libro Bancos';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.id_libro_bancos
-IS 'nombre=id_libro_bancos&label=id_libro_bancos&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=id_libro_bancos';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.id_cuenta_bancaria
-IS 'nombre=id_cuenta_bancaria&label=id_cuenta_bancaria&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=id_cuenta_bancaria';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.fecha
-IS 'nombre=fecha&label=fecha&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=fecha';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.a_favor
-IS 'nombre=a_favor&label=a_favor&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=a_favor';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.detalle
-IS 'nombre=detalle&label=detalle&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=detalle';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.observaciones
-IS 'nombre=observaciones&label=observaciones&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=observaciones';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.nro_liquidacion
-IS 'nombre=nro_liquidacion&label=nro_liquidacion&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=nro_liquidacion';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.nro_comprobante
-IS 'nombre=nro_comprobante&label=nro_comprobante&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=nro_comprobante';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.nro_cheque
-IS 'nombre=nro_cheque&label=nro_cheque&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=nro_cheque';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.tipo
-IS 'nombre=tipo&label=tipo&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=tipo
-
-cheque
-deposito';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.importe_deposito
-IS 'nombre=importe_deposito&label=importe_deposito&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=importe_deposito';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.importe_cheque
-IS 'nombre=importe_cheque&label=importe_cheque&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=importe_cheque';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.origen
-IS 'nombre=origen&label=origen&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=origen';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.estado
-IS 'nombre=estado&label=estado&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=estado';
-
-COMMENT ON COLUMN migra.tts_libro_bancos.id_libro_bancos_fk
-IS 'nombre=fk_libro_bancos&label=fk_libro_bancos&grid_visible=si&grid_editable=no&disabled=no&width_grid=100&width=100%&filtro=si&defecto=&desc=fk_libro_bancos';
-
 /***********************************F-SCP-RCM-MIGRA-1-03/12/2013****************************************/
 
 
@@ -192,13 +118,6 @@ IS 'Identifica si es de la regional central o no. Viene por la integracionde cue
 
 /***********************************F-SCP-RAC-MIGRA-2-03/02/2014****************************************/
 
-/***********************************I-SCP-JRR-MIGRA-0-07/02/2014****************************************/
-
-ALTER TABLE migra.tts_libro_bancos
-  DROP CONSTRAINT tts_libro_bancos_idx RESTRICT;
-  
-/***********************************F-SCP-JRR-MIGRA-0-07/02/2014****************************************/
-
 /***********************************I-SCP-JRR-MIGRA-0-14/02/2014****************************************/
 
 CREATE TABLE migra.tconcepto_ids (
@@ -218,49 +137,6 @@ CREATE SEQUENCE orga.tescala_salarial_migracion_seq
   CACHE 1;
 /***********************************F-SCP-JRR-MIGRA-0-21/10/2014****************************************/
 
-
-/***********************************I-SCP-GSS-MIGRA-0-24/11/2014****************************************/
-
-ALTER TABLE migra.tts_libro_bancos
-  ADD COLUMN notificado VARCHAR(2);
-
-COMMENT ON COLUMN migra.tts_libro_bancos.notificado
-IS 'bandera con valores si o no que indica si la transaccion bancaria fue notificada';
-
-ALTER TABLE migra.tts_libro_bancos
-  ADD COLUMN id_finalidad INTEGER;
-
-COMMENT ON COLUMN migra.tts_libro_bancos.id_finalidad
-IS 'id de la tabla finalidad al cual corresponde la transaccion bancaria';
-
-ALTER TABLE migra.tts_libro_bancos
-  ADD COLUMN id_estado_wf INTEGER;
-
-COMMENT ON COLUMN migra.tts_libro_bancos.id_estado_wf
-IS 'relacion con la tabla estado_wf';
-
-ALTER TABLE migra.tts_libro_bancos
-  ADD COLUMN id_proceso_wf INTEGER;
-
-COMMENT ON COLUMN migra.tts_libro_bancos.id_proceso_wf
-IS 'relacion con la tabla proceso_wf';
-
-ALTER TABLE migra.tts_libro_bancos
-  ADD COLUMN num_tramite VARCHAR(200);
-
-COMMENT ON COLUMN migra.tts_libro_bancos.num_tramite
-IS 'numero de tramite de la transaccion bancaria';
-
-ALTER TABLE migra.tts_libro_bancos
-  ADD COLUMN id_depto INTEGER;
-
-COMMENT ON COLUMN migra.tts_libro_bancos.id_depto
-IS 'relacion con la tabla departamento';
-
-ALTER TABLE migra.tts_libro_bancos
-SET SCHEMA tes;
-
-/***********************************F-SCP-GSS-MIGRA-0-24/11/2014****************************************/
 
 
 /***********************************I-SCP-GSS-MIGRA-0-02/09/2015****************************************/

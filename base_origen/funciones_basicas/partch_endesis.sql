@@ -150,4 +150,13 @@ ALTER TABLE sci.tct_comprobante
   ADD COLUMN id_depto_conta_pxp INTEGER;
 
 COMMENT ON COLUMN sci.tct_comprobante.id_depto_conta_pxp
+
+
+
+--------------- SQL ---------------
+
+ALTER TABLE presto.tpr_partida_ejecucion
+  ADD COLUMN id_rendicion_det INTEGER;
+  
+  
 IS 'id del departamento de conta sin traducir';
