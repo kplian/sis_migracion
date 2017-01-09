@@ -58,7 +58,7 @@ v_id_comprobante  integer;
 BEGIN
 
 --determinar el comprobante correspondiente al intermediario
-
+                            
 IF pr_id_int_comprobante is NOT NULL THEN
 
   select 
@@ -137,7 +137,7 @@ FOR v_i IN 1..v_size LOOP
      --  Si no tenemos un comprometido y necesitamos  devengar
      --------------------------------------------------
      IF   pr_id_partida_ejecucion[v_i] is NULL and pr_sw_momento[v_i] in (3, 4)   THEN
-       
+
              -- COMPROMETER
              v_rescom:= presto.f_i_pr_gestionarpresupuesto(
                                                       pr_id_presupuesto[v_i],
@@ -161,7 +161,7 @@ FOR v_i IN 1..v_size LOOP
                                                       v_fk_llave
                                             );
             -- DEVENGAR
-            
+
             g_id_partida_ejecucion_comprometido = v_rescom[1];
             
             v_rescom:=presto.f_i_pr_gestionarpresupuesto(

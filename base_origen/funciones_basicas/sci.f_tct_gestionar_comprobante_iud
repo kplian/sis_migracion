@@ -1092,6 +1092,12 @@ RAC  18/11/2013   Verificacion de ejecucion del comprobante
                                   NULL,NULL,NULL)', true) as (xxx varchar) into v_resp;                               
                                   
                             else
+                            	g_respuesta='select * from pxp.f_intermediario_ime('''||pm_id_usuario||''',NULL,NULL::varchar,''pcmj93pgdljcgur451h7ocgih2'',3896,'''||pm_ip_origen||''',''00:19:d1:09:22:7e'',''tes.ft_ts_libro_bancos_ime'',''TES_LBAN_INS'',NULL,''no'',NULL,
+                                  array[''filtro'',''ordenacion'',''dir_ordenacion'',''puntero'',''cantidad'',''_id_usuario_ai'',''_nombre_usuario_ai'',''id_cuenta_bancaria'',''id_depto'',''fecha'',''a_favor'',''nro_cheque'',''importe_deposito'',''nro_liquidacion'',''detalle'',''origen'',''observaciones'',''importe_cheque'',''id_libro_bancos_fk'',''nro_comprobante'',''tipo'',''id_finalidad'',''sistema_origen''],
+                                  array['' 0 = 0 '','''','''','''','''',''NULL'',''NULL'','''||g_comprobante_libro_bancos.id_cuenta_bancaria::varchar||''',''6'','''||now()::date||''','''||convert(g_comprobante_libro_bancos.nombre_cheque::varchar, 'LATIN1', 'UTF8')||''','''||g_comprobante_libro_bancos.nro_cheque||''',''0'','''','''||convert(g_comprobante_libro_bancos.motivo::varchar, 'LATIN1', 'UTF8')||''','''||g_comprobante_libro_bancos.origen::varchar||''','''||convert(g_comprobante_libro_bancos.observaciones::varchar, 'LATIN1', 'UTF8')||''','''||g_comprobante_libro_bancos.importe||''','''||g_comprobante_libro_bancos.id_libro_bancos_deposito::int4||''','''||g_comprobante_libro_bancos.nro_cbte::VARCHAR||''',''cheque'','''||g_id_finalidad||''',''FONDOS_AVANCE''],
+                                  array[''varchar'',''varchar'',''varchar'',''integer'',''integer'',''int4'',''varchar'',''int4'',''int4'',''date'',''varchar'',''int4'',''numeric'',''varchar'',''text'',''varchar'',''text'',''numeric'',''int4'',''varchar'',''varchar'',''int4'',''varchar''],
+                                  NULL,NULL,NULL)';
+                                  raise notice 'g_respuesta %', g_respuesta;
                               select *
                                 from dblink('select * from pxp.f_intermediario_ime('''||pm_id_usuario||''',NULL,NULL::varchar,''pcmj93pgdljcgur451h7ocgih2'',3896,'''||pm_ip_origen||''',''00:19:d1:09:22:7e'',''tes.ft_ts_libro_bancos_ime'',''TES_LBAN_INS'',NULL,''no'',NULL,
                                   array[''filtro'',''ordenacion'',''dir_ordenacion'',''puntero'',''cantidad'',''_id_usuario_ai'',''_nombre_usuario_ai'',''id_cuenta_bancaria'',''id_depto'',''fecha'',''a_favor'',''nro_cheque'',''importe_deposito'',''nro_liquidacion'',''detalle'',''origen'',''observaciones'',''importe_cheque'',''id_libro_bancos_fk'',''nro_comprobante'',''tipo'',''id_finalidad'',''sistema_origen''],
@@ -1259,7 +1265,7 @@ where id_comprobante = ct_id_comprobante;
                     END IF;                                            
                   END IF;--fin validacion anterior al 10-02-2014
 
- --GONZALO 17-02-2014
+ --| 17-02-2014
                   --verifica el comprobante es por solicitud de fondo en avance
                   
                   SELECT ctap.id_cuenta_doc into g_id_cuenta_doc

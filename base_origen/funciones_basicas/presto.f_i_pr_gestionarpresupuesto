@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION presto.f_i_pr_gestionarpresupuesto (
   pr_id_presupuesto integer,
   pr_id_partida integer,
@@ -108,6 +110,8 @@ g_id_solicitud_compra INTEGER;
 g_estado_com_eje NUMERIC;
 g_fecha_com_eje date;
 g_consulta text;
+g_nombre_funcion varchar;
+
 BEGIN
 
   raise notice '%','dddddddddddddddddddddddddddddddd';
@@ -126,7 +130,7 @@ END IF;
 
 IF (pr_id_partida_ejecucion is not null and pr_id_comprobante is null and pr_sw_momento in (3,4)) and pr_columna_relacion != 'id_int_comprobante' and pr_columna_relacion!= 'id_int_transaccion'  then
 
-    raise exception '%','(f_i_pr_gestionarpresupuesto); El registro no hace referencia a ningun comprobante, momento(%)',pr_sw_momento;
+    raise exception '(f_i_pr_gestionarpresupuesto); El registro no hace referencia a ningun comprobante, momento(%)',pr_sw_momento;
 
 END IF;
  
@@ -314,7 +318,8 @@ END IF;
 ELSE 
 	--raise exception 'estacorriendo sin problemas';
 	--raise exception 'g_id_partida_ejecucion: % g_id_partida_presupuesto:% pr_id_moneda:%,pr_monto_total:%,pr_fecha: %,pr_sw_momento: %, g_id_item: %,g_id_servicio:%,pr_id_partida_ejecucion: %,g_id_concepto_ingas: %,pr_id_cuenta_doc:%,pr_id_devengado: %,pr_id_solicitud_compra: %,pr_id_cuenta_doc_rendicion:%,pr_columna_relacion%' ,g_id_partida_ejecucion,g_id_partida_presupuesto,pr_id_moneda,pr_monto_total,pr_fecha,pr_sw_momento,g_id_item,g_id_servicio,pr_id_partida_ejecucion,g_id_concepto_ingas,pr_id_cuenta_doc,pr_id_devengado,pr_id_solicitud_compra,pr_id_cuenta_doc_rendicion, pr_fk_llave;
-	g_consulta='INSERT INTO presto.tpr_partida_ejecucion(id_partida_ejecucion    , id_partida_presupuesto     , id_moneda, 
+	
+    g_consulta='INSERT INTO presto.tpr_partida_ejecucion(id_partida_ejecucion    , id_partida_presupuesto     , id_moneda, 
                                             importe_com_eje             , fecha_com_eje                , estado_com_eje,         
                                             id_item                    , id_servicio                , cantidad_com_eje,
                                              fk_partida_ejecucion    ,id_concepto_ingas            , fecha_reg,
@@ -328,8 +333,9 @@ ELSE
                                             '||coalesce(g_id_cuenta_doc_rendicion||' ','null')||' ,'||coalesce(pr_id_comprobante||' ','null')||' '||coalesce(', '||pr_fk_llave, '')||' );
 	';
 
- 		raise notice '%',g_consulta;
+ 		
 		EXECUTE(g_consulta);
+        
 		/*INSERT INTO presto.tpr_partida_ejecucion(id_partida_ejecucion    , id_partida_presupuesto     , id_moneda, 
                                             importe_com_eje             , fecha_com_eje                , estado_com_eje,         
                                             id_item                    , id_servicio                , cantidad_com_eje,
@@ -342,7 +348,7 @@ ELSE
                                             pr_id_partida_ejecucion ,g_id_concepto_ingas , CURRENT_TIMESTAMP, 
                                             g_id_cuenta_doc , g_id_devengado , g_id_solicitud_compra, g_id_cuenta_doc_rendicion ,pr_id_comprobante );*/
                 
-                                               
+                                             
                     --recupera el id de la partida ejecucion para insertar en los registros de en las monedas restantes
                    FOR g_monedas in EXECUTE('    SELECT id_moneda 
                                                    FROM param.tpm_moneda 
@@ -406,7 +412,11 @@ end if;*/
 
  RETURN g_resul;   
          
-
+EXCEPTION
+    
+	WHEN OTHERS THEN
+        g_nombre_funcion = 'presto.f_i_pr_gestionarpresupuesto';
+        raise exception ' % - (%)',SQLERRM,g_nombre_funcion ;
 
  
  
@@ -415,4 +425,5 @@ $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;
